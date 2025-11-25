@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\SalesOrderController;
+use App\Http\Controllers\SalesOrderSubmissionController;
 
 Route::get('/', function () {
     return view('home');
@@ -15,10 +16,23 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Public customer order form routes (no auth required)
+Route::get('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'showForm'])->name('order.form');
+Route::post('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'submit'])->name('order.submit');
+Route::get('/invoice/{id}', [SalesOrderSubmissionController::class, 'showInvoice'])->name('invoice.show');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
     
-    Route::resource('purchase-orders', PurchaseOrderController::class);
+    Route::resource('sales-orders', SalesOrderController::class);
+    Route::get('/receiving-report', [SalesOrderSubmissionController::class, 'index'])->name('receiving-report');
+    Route::post('/receiving-report/{id}/confirm', [\App\Http\Controllers\AccountReceivableController::class, 'confirmOrder'])->name('receiving-report.confirm');
+    
+    Route::get('/account-receivables', [\App\Http\Controllers\AccountReceivableController::class, 'index'])->name('account-receivables.index');
+    Route::post('/account-receivables/{id}/payment', [\App\Http\Controllers\AccountReceivableController::class, 'recordPayment'])->name('account-receivables.payment');
+    
+    Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.update-status');
 });

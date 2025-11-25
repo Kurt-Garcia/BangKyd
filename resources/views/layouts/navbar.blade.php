@@ -78,7 +78,9 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-semibold" href="{{ route('dashboard') }}">BangKyd ERP</a>
+            <a class="navbar-brand py-0" href="{{ route('dashboard') }}">
+                <img src="{{ asset('img/BangKydLogo.png') }}" alt="BangKyd Logo" style="height: 82px; margin-top: -16px; margin-bottom: -19px;">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -113,8 +115,23 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}" href="{{ route('purchase-orders.index') }}">
-                        <i class="bi bi-cart-check"></i> Purchase Order
+                    <a class="nav-link {{ request()->routeIs('sales-orders.*') ? 'active' : '' }}" href="{{ route('sales-orders.index') }}">
+                        <i class="bi bi-cart-check"></i> Sales Order
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('receiving-report') ? 'active' : '' }}" href="{{ route('receiving-report') }}">
+                        <i class="bi bi-inbox"></i> Receiving Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('account-receivables.*') ? 'active' : '' }}" href="{{ route('account-receivables.index') }}">
+                        <i class="bi bi-cash-coin"></i> Accounts Receivable
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') }}">
+                        <i class="bi bi-bag-check"></i> Orders
                     </a>
                 </li>
             </ul>
