@@ -12,12 +12,12 @@ class PurchaseOrderController extends Controller
         // Later you'll replace this with actual database queries
         $purchaseOrders = collect([]);
         
-        return view('purchase_orders.index', compact('purchaseOrders'));
+        return view('purchase_orders.PO_page', compact('purchaseOrders'));
     }
 
     public function create()
     {
-        return view('purchase_orders.create');
+        return view('purchase_orders.PO_page');
     }
 
     public function store(Request $request)

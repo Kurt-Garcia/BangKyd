@@ -18,7 +18,7 @@
             top: 0;
             bottom: 0;
             left: 0;
-            z-index: 100;
+            z-index: 99;
             padding: 56px 0 0;
             box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
             width: 250px;
@@ -85,12 +85,12 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i> {{ auth()->user()->username ?? auth()->user()->name }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST" action="{{ route('logout') }}" class="d-inline">
                                     @csrf
                                     <button class="dropdown-item" type="submit">
                                         <i class="bi bi-box-arrow-right"></i> Logout
@@ -140,7 +140,7 @@
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+kbeLJwWJknhk+aoCA8DmF5asJ5AZt0pOEtpJR/YWZLxE+1WVP" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     @stack('scripts')
 </body>
 </html>
