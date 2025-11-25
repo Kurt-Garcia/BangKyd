@@ -12,7 +12,7 @@ class AccountReceivableController extends Controller
     public function index()
     {
         $accountReceivables = AccountReceivable::with(['submission.salesOrder'])->latest()->get();
-        return view('account_receivables.index', compact('accountReceivables'));
+        return view('account_receivables.AR_page', compact('accountReceivables'));
     }
 
     public function confirmOrder(Request $request, $submissionId)
@@ -38,7 +38,6 @@ class AccountReceivableController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'payment_type' => 'required|in:down_payment,partial,full',
             'notes' => 'nullable|string',
         ]);
 
@@ -49,11 +48,14 @@ class AccountReceivableController extends Controller
             return redirect()->back()->with('error', 'Payment amount cannot exceed balance.');
         }
 
+        // Auto-detect payment type based on amount
+        $paymentType = ($request->amount >= $ar->balance) ? 'full' : 'partial';
+
         // Record payment
         ARPayment::create([
             'account_receivable_id' => $ar->id,
             'amount' => $request->amount,
-            'payment_type' => $request->payment_type,
+            'payment_type' => $paymentType,
             'notes' => $request->notes,
             'paid_at' => now(),
         ]);
@@ -70,9 +72,30 @@ class AccountReceivableController extends Controller
                 'status' => 'ongoing',
                 'started_at' => now(),
             ]);
+            // Reload the order relationship
+            $ar->load('order');
+        }
+        
+        // If fully paid and order exists, check if ready_for_delivery and complete it
+        if ($ar->status === 'paid') {
+            // Reload order to get fresh status
+            $ar->load('order');
+            
+            if ($ar->order && $ar->order->status === 'ready_for_delivery') {
+                $order = $ar->order;
+                $order->status = 'completed';
+                $order->completed_at = now();
+                $order->save();
+            }
         }
 
-        return redirect()->route('account-receivables.index')
-            ->with('success', 'Payment recorded successfully! Order has been moved to production.');
+        $message = 'Payment recorded successfully!';
+        if ($ar->status === 'paid' && $ar->order && $ar->order->status === 'completed') {
+            $message .= ' Order completed and ready for claiming.';
+        } else {
+            $message .= ' Order in production.';
+        }
+
+        return redirect()->route('account-receivables.index')->with('success', $message);
     }
 }

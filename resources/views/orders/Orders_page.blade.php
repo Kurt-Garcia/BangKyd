@@ -13,8 +13,8 @@
     <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm border-start border-4 
             @if($order->status === 'ongoing') border-primary
-            @elseif($order->status === 'ready') border-success
-            @elseif($order->status === 'completed') border-info
+            @elseif($order->status === 'ready_for_delivery') border-warning
+            @elseif($order->status === 'completed') border-success
             @else border-secondary
             @endif
         " style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#orderModal{{ $order->id }}">
@@ -24,14 +24,24 @@
                         <h5 class="card-title mb-1">{{ $order->order_number }}</h5>
                         <p class="text-muted small mb-0">{{ $order->accountReceivable->submission->salesOrder->so_number }}</p>
                     </div>
-                    @if($order->status === 'ongoing')
-                        <span class="badge bg-primary">Ongoing</span>
-                    @elseif($order->status === 'ready')
-                        <span class="badge bg-success">Ready</span>
-                    @elseif($order->status === 'completed')
-                        <span class="badge bg-info">Completed</span>
-                    @else
+                    @if($order->status === 'completed')
+                        <span class="badge bg-success">Completed</span>
+                    @elseif($order->status === 'claimed')
                         <span class="badge bg-secondary">Claimed</span>
+                    @elseif($order->progress)
+                        @if($order->progress->current_stage === 'printing')
+                            <span class="badge bg-primary">Ongoing - Printing</span>
+                        @elseif($order->progress->current_stage === 'press')
+                            <span class="badge bg-primary">Ongoing - Press</span>
+                        @elseif($order->progress->current_stage === 'tailoring')
+                            <span class="badge bg-primary">Ongoing - Tailoring</span>
+                        @elseif($order->progress->current_stage === 'completed')
+                            <span class="badge bg-warning">Ready for Delivery</span>
+                        @endif
+                    @elseif($order->status === 'ongoing')
+                        <span class="badge bg-primary">Ongoing</span>
+                    @elseif($order->status === 'ready_for_delivery')
+                        <span class="badge bg-warning">Ready for Delivery</span>
                     @endif
                 </div>
 
@@ -77,8 +87,8 @@
             <div class="modal-content">
                 <div class="modal-header 
                     @if($order->status === 'ongoing') bg-primary
-                    @elseif($order->status === 'ready') bg-success
-                    @elseif($order->status === 'completed') bg-info
+                    @elseif($order->status === 'ready_for_delivery') bg-warning
+                    @elseif($order->status === 'completed') bg-success
                     @else bg-secondary
                     @endif
                     text-white">
@@ -106,14 +116,24 @@
                             @endif
                             <p class="mb-0">
                                 <strong>Status:</strong>
-                                @if($order->status === 'ongoing')
-                                    <span class="badge bg-primary">Ongoing</span>
-                                @elseif($order->status === 'ready')
-                                    <span class="badge bg-success">Ready</span>
-                                @elseif($order->status === 'completed')
-                                    <span class="badge bg-info">Completed</span>
-                                @else
+                                @if($order->status === 'completed')
+                                    <span class="badge bg-success">Completed</span>
+                                @elseif($order->status === 'claimed')
                                     <span class="badge bg-secondary">Claimed</span>
+                                @elseif($order->progress)
+                                    @if($order->progress->current_stage === 'printing')
+                                        <span class="badge bg-primary">Ongoing - Printing</span>
+                                    @elseif($order->progress->current_stage === 'press')
+                                        <span class="badge bg-primary">Ongoing - Press</span>
+                                    @elseif($order->progress->current_stage === 'tailoring')
+                                        <span class="badge bg-primary">Ongoing - Tailoring</span>
+                                    @elseif($order->progress->current_stage === 'completed')
+                                        <span class="badge bg-warning">Ready for Delivery</span>
+                                    @endif
+                                @elseif($order->status === 'ongoing')
+                                    <span class="badge bg-primary">Ongoing</span>
+                                @elseif($order->status === 'ready_for_delivery')
+                                    <span class="badge bg-warning">Ready for Delivery</span>
                                 @endif
                             </p>
                         </div>
@@ -128,6 +148,61 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Production Progress (if exists) -->
+                    @if($order->progress)
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2"><i class="bi bi-graph-up"></i> Production Progress</h6>
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <i class="bi bi-printer-fill fs-3 text-primary"></i>
+                                        <div class="mt-2"><small class="text-muted">Printing</small></div>
+                                        <div class="fw-bold fs-5">{{ $order->progress->printing_done }}/{{ $order->progress->total_quantity }}</div>
+                                        @if($order->progress->printing_completed_at)
+                                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Done</small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <i class="bi bi-layers-fill fs-3 text-warning"></i>
+                                        <div class="mt-2"><small class="text-muted">Press</small></div>
+                                        <div class="fw-bold fs-5">{{ $order->progress->press_done }}/{{ $order->progress->total_quantity }}</div>
+                                        @if($order->progress->press_completed_at)
+                                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Done</small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <i class="bi bi-scissors fs-3 text-info"></i>
+                                        <div class="mt-2"><small class="text-muted">Tailoring</small></div>
+                                        <div class="fw-bold fs-5">{{ $order->progress->tailoring_done }}/{{ $order->progress->total_quantity }}</div>
+                                        @if($order->progress->tailoring_completed_at)
+                                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Done</small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-gradient" style="width: {{ $order->progress->getProgressPercentage() }}%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
+                                {{ $order->progress->getProgressPercentage() }}% Complete
+                            </div>
+                        </div>
+                        @if($order->progress->notes)
+                        <div class="alert alert-info mt-3">
+                            <strong>Partner Notes:</strong> {{ $order->progress->notes }}
+                        </div>
+                        @endif
+                    </div>
+                    @endif
 
                     <!-- Design Images -->
                     @if($order->accountReceivable->submission->images && count($order->accountReceivable->submission->images) > 0)
@@ -182,11 +257,47 @@
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#updateStatusModal{{ $order->id }}">
+                    @if(!$order->progress && $order->status === 'ongoing')
+                    <form action="{{ route('orders.generate-link', $order->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-link-45deg"></i> Generate Partner Link
+                        </button>
+                    </form>
+                    @elseif($order->progress)
+                    <button type="button" class="btn btn-info" onclick="copyProgressLink{{ $order->id }}()">
+                        <i class="bi bi-clipboard"></i> Copy Partner Link
+                    </button>
+                    <script>
+                    function copyProgressLink{{ $order->id }}() {
+                        const link = "{{ url('/progress/' . ($order->progress->unique_link ?? '')) }}";
+                        navigator.clipboard.writeText(link).then(() => {
+                            alert('Link copied to clipboard!\n\n' + link);
+                        });
+                    }
+                    </script>
+                    @endif
+                    
+                    <button type="button" class="btn btn-primary" onclick="switchToUpdateStatusModal{{ $order->id }}()">
                         <i class="bi bi-arrow-repeat"></i> Update Status
                     </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
+                
+                <script>
+                function switchToUpdateStatusModal{{ $order->id }}() {
+                    const detailModal = bootstrap.Modal.getInstance(document.getElementById('orderModal{{ $order->id }}'));
+                    if (detailModal) {
+                        detailModal.hide();
+                    }
+                    
+                    document.getElementById('orderModal{{ $order->id }}').addEventListener('hidden.bs.modal', function openUpdate() {
+                        const updateModal = new bootstrap.Modal(document.getElementById('updateStatusModal{{ $order->id }}'));
+                        updateModal.show();
+                        document.getElementById('orderModal{{ $order->id }}').removeEventListener('hidden.bs.modal', openUpdate);
+                    }, { once: true });
+                }
+                </script>
             </div>
         </div>
     </div>
@@ -206,7 +317,7 @@
                             <label for="status{{ $order->id }}" class="form-label">Order Status <span class="text-danger">*</span></label>
                             <select class="form-select" id="status{{ $order->id }}" name="status" required>
                                 <option value="ongoing" {{ $order->status === 'ongoing' ? 'selected' : '' }}>Ongoing - In Production</option>
-                                <option value="ready" {{ $order->status === 'ready' ? 'selected' : '' }}>Ready - Ready for Pickup</option>
+                                <option value="ready_for_delivery" {{ $order->status === 'ready_for_delivery' ? 'selected' : '' }}>Ready for Delivery</option>
                                 <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>Completed - Picked Up</option>
                                 <option value="claimed" {{ $order->status === 'claimed' ? 'selected' : '' }}>Claimed - Fully Claimed</option>
                             </select>

@@ -51,8 +51,14 @@
                                 </button>
                             </td>
                         </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-                        <!-- View AR Modal -->
+            <!-- Modals (outside table) -->
+            @foreach($accountReceivables as $ar)
+            <!-- View AR Modal -->
                         <div class="modal fade" id="viewARModal{{ $ar->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-xl">
                                 <div class="modal-content">
@@ -155,7 +161,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         @if($ar->balance > 0)
-                                            <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#paymentModal{{ $ar->id }}">
+                                            <button type="button" class="btn btn-success" onclick="switchToPaymentModal{{ $ar->id }}()">
                                                 <i class="bi bi-credit-card"></i> Record Payment
                                             </button>
                                         @endif
@@ -181,19 +187,13 @@
                                             </div>
 
                                             <div class="mb-3">
-                                                <label for="payment_type{{ $ar->id }}" class="form-label">Payment Type <span class="text-danger">*</span></label>
-                                                <select class="form-select" id="payment_type{{ $ar->id }}" name="payment_type" required onchange="updatePaymentAmount{{ $ar->id }}(this.value)">
-                                                    <option value="">Select Payment Type</option>
-                                                    <option value="partial">Partial Payment</option>
-                                                    <option value="full">Full Payment</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="amount{{ $ar->id }}" class="form-label">Amount (₱) <span class="text-danger">*</span></label>
+                                                <label for="amount{{ $ar->id }}" class="form-label">Payment Amount (₱) <span class="text-danger">*</span></label>
                                                 <input type="number" class="form-control" id="amount{{ $ar->id }}" name="amount" 
-                                                       step="0.01" min="0.01" max="{{ $ar->balance }}" required>
+                                                       step="0.01" min="0.01" max="{{ $ar->balance }}" required 
+                                                       value="{{ $ar->paid_amount == 0 ? number_format($ar->balance * 0.5, 2, '.', '') : '' }}"
+                                                       oninput="validatePaymentAmount{{ $ar->id }}(this.value)">
                                                 <small class="text-muted">Maximum: ₱{{ number_format($ar->balance, 2) }}</small>
+                                                <div id="paymentTypeIndicator{{ $ar->id }}" class="mt-2"></div>
                                             </div>
 
                                             <div class="mb-3">
@@ -213,20 +213,54 @@
                         </div>
 
                         <script>
-                        function updatePaymentAmount{{ $ar->id }}(type) {
-                            const amountField = document.getElementById('amount{{ $ar->id }}');
-                            if (type === 'full') {
-                                amountField.value = {{ $ar->balance }};
-                            } else {
-                                amountField.value = '';
+                        function switchToPaymentModal{{ $ar->id }}() {
+                            // Get the view modal element
+                            const viewModalElement = document.getElementById('viewARModal{{ $ar->id }}');
+                            const paymentModalElement = document.getElementById('paymentModal{{ $ar->id }}');
+                            
+                            // Get or create modal instance
+                            let viewModal = bootstrap.Modal.getInstance(viewModalElement);
+                            if (!viewModal) {
+                                viewModal = new bootstrap.Modal(viewModalElement);
+                            }
+                            
+                            // Hide the view modal
+                            viewModal.hide();
+                            
+                            // Wait for the modal to be fully hidden before opening payment modal
+                            viewModalElement.addEventListener('hidden.bs.modal', function openPayment() {
+                                const paymentModal = new bootstrap.Modal(paymentModalElement);
+                                paymentModal.show();
+                                // Remove the event listener to prevent multiple triggers
+                                viewModalElement.removeEventListener('hidden.bs.modal', openPayment);
+                            }, { once: true });
+                        }
+
+                        function validatePaymentAmount{{ $ar->id }}(amount) {
+                            const balance = {{ $ar->balance }};
+                            const indicator = document.getElementById('paymentTypeIndicator{{ $ar->id }}');
+                            const amountNum = parseFloat(amount);
+                            
+                            if (!amount || isNaN(amountNum)) {
+                                indicator.innerHTML = '';
+                                return;
+                            }
+                            
+                            if (amountNum > balance) {
+                                indicator.innerHTML = '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Amount exceeds balance</span>';
+                                document.getElementById('amount{{ $ar->id }}').value = balance;
+                                return;
+                            }
+                            
+                            if (amountNum === balance) {
+                                indicator.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Full Payment</span>';
+                            } else if (amountNum < balance) {
+                                indicator.innerHTML = '<span class="badge bg-warning"><i class="bi bi-dash-circle"></i> Partial Payment</span>';
                             }
                         }
                         </script>
+            @endforeach
 
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
         @else
             <div class="text-center py-5">
                 <i class="bi bi-cash-coin text-muted" style="font-size: 3rem;"></i>

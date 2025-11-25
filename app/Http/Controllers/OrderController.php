@@ -9,17 +9,17 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['accountReceivable.submission.salesOrder'])
+        $orders = Order::with(['accountReceivable.submission.salesOrder', 'progress'])
             ->latest()
             ->get();
         
-        return view('orders.index', compact('orders'));
+        return view('orders.Orders_page', compact('orders'));
     }
 
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:ongoing,ready,completed,claimed',
+            'status' => 'required|in:ongoing,ready_for_delivery,completed,claimed',
             'production_notes' => 'nullable|string',
         ]);
 
@@ -31,7 +31,7 @@ class OrderController extends Controller
         }
 
         // Update timestamps based on status
-        if ($request->status === 'ready' && !$order->completed_at) {
+        if ($request->status === 'completed' && !$order->completed_at) {
             $order->completed_at = now();
         } elseif ($request->status === 'claimed' && !$order->claimed_at) {
             $order->claimed_at = now();

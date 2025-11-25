@@ -27,6 +27,27 @@ class Order extends Model
         return $this->belongsTo(AccountReceivable::class);
     }
 
+    public function progress()
+    {
+        return $this->hasOne(OrderProgress::class);
+    }
+
+    public function getDetailedStatus()
+    {
+        if ($this->progress) {
+            return $this->progress->getDetailedStatus();
+        }
+        
+        $statuses = [
+            'ongoing' => 'Ongoing',
+            'ready_for_delivery' => 'Ready for Delivery',
+            'completed' => 'Completed',
+            'claimed' => 'Claimed'
+        ];
+        
+        return $statuses[$this->status] ?? 'Ongoing';
+    }
+
     public static function generateOrderNumber()
     {
         $year = date('Y');

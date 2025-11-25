@@ -21,6 +21,10 @@ Route::get('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'showF
 Route::post('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'submit'])->name('order.submit');
 Route::get('/invoice/{id}', [SalesOrderSubmissionController::class, 'showInvoice'])->name('invoice.show');
 
+// Public partner progress routes (no auth required)
+Route::get('/progress/{uniqueLink}', [\App\Http\Controllers\OrderProgressController::class, 'showProgress'])->name('progress.show');
+Route::post('/progress/{uniqueLink}', [\App\Http\Controllers\OrderProgressController::class, 'updateProgress'])->name('progress.update');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -35,4 +39,5 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::post('/orders/{id}/generate-link', [\App\Http\Controllers\OrderProgressController::class, 'generateLink'])->name('orders.generate-link');
 });
