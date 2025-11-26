@@ -24,6 +24,11 @@ class SalesOrder extends Model
         return $this->hasOne(SalesOrderSubmission::class);
     }
 
+    public function submissions()
+    {
+        return $this->hasMany(SalesOrderSubmission::class);
+    }
+
     public static function generateSONumber()
     {
         $year = date('Y');

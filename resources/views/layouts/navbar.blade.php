@@ -130,6 +130,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('accounts-payable.*') ? 'active' : '' }}" href="{{ route('accounts-payable.index') }}">
+                        <i class="bi bi-wallet2"></i> Accounts Payable
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="{{ route('orders.index') }}">
                         <i class="bi bi-bag-check"></i> Orders
                     </a>

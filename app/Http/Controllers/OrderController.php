@@ -9,7 +9,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['accountReceivable.submission.salesOrder', 'progress'])
+        $orders = Order::with(['accountReceivable.submission.salesOrder', 'progress', 'accountsPayable'])
             ->latest()
             ->get();
         

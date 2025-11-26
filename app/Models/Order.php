@@ -32,6 +32,11 @@ class Order extends Model
         return $this->hasOne(OrderProgress::class);
     }
 
+    public function accountsPayable()
+    {
+        return $this->hasMany(AccountPayable::class);
+    }
+
     public function getDetailedStatus()
     {
         if ($this->progress) {

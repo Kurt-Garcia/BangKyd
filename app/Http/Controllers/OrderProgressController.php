@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderProgress;
+use App\Models\AccountPayable;
 use Illuminate\Http\Request;
 
 class OrderProgressController extends Controller
@@ -26,6 +27,28 @@ class OrderProgressController extends Controller
             'current_stage' => 'printing',
             'total_quantity' => $order->accountReceivable->submission->total_quantity,
             'printing_started_at' => now(),
+        ]);
+        
+        // Determine partner pricing based on customer price
+        // If customer price > 200, assume upper jersey (150 total for print & press)
+        // If customer price <= 200, assume lower jersey (160 total for print & press)
+        $customerPrice = $order->accountReceivable->submission->salesOrder->price_per_pcs;
+        $partnerPrice = $customerPrice > 200 ? 150 : 160;
+        $quantity = $order->accountReceivable->submission->total_quantity;
+        
+        // Create single AP for Print & Press (one partner handles both)
+        AccountPayable::create([
+            'ap_number' => AccountPayable::generateAPNumber(),
+            'order_id' => $order->id,
+            'vendor_type' => 'printing',
+            'quantity' => $quantity,
+            'price_per_pcs' => $partnerPrice,
+            'total_amount' => $quantity * $partnerPrice,
+            'paid_amount' => 0,
+            'balance' => $quantity * $partnerPrice,
+            'status' => 'pending',
+            'due_date' => now()->addDays(14), // Payment due in 14 days
+            'notes' => 'Price includes both printing and press work',
         ]);
         
         // Update order status

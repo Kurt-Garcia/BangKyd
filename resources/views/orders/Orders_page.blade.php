@@ -204,6 +204,57 @@
                     </div>
                     @endif
 
+                    <!-- Partner Payables (AP) -->
+                    @if($order->accountsPayable->count() > 0)
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2"><i class="bi bi-wallet2"></i> Partner Payables</h6>
+                        <div class="row text-center">
+                            @foreach($order->accountsPayable as $ap)
+                            <div class="col-6">
+                                <div class="card {{ $ap->status === 'paid' ? 'bg-light' : ($ap->status === 'partial' ? 'border-warning' : 'border-danger') }}">
+                                    <div class="card-body">
+                                        @if($ap->vendor_type === 'printing')
+                                            <i class="bi bi-printer-fill fs-3 text-primary"></i>
+                                            <div class="mt-2"><small class="text-muted">Print & Press Partner</small></div>
+                                        @else
+                                            <i class="bi bi-layers-fill fs-3 text-warning"></i>
+                                            <div class="mt-2"><small class="text-muted">Press Partner</small></div>
+                                        @endif
+                                        <div class="fw-bold text-primary fs-5 mt-2">₱{{ number_format($ap->total_amount, 2) }}</div>
+                                        <div class="small">
+                                            <span class="text-success">Paid: ₱{{ number_format($ap->paid_amount, 2) }}</span><br>
+                                            <span class="text-danger">Balance: ₱{{ number_format($ap->balance, 2) }}</span>
+                                        </div>
+                                        <div class="mt-2">
+                                            @if($ap->status === 'paid')
+                                                <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Paid</span>
+                                            @elseif($ap->status === 'partial')
+                                                <span class="badge bg-warning"><i class="bi bi-clock-fill"></i> Partial</span>
+                                            @else
+                                                <span class="badge bg-danger"><i class="bi bi-exclamation-triangle-fill"></i> Pending</span>
+                                            @endif
+                                        </div>
+                                        @if($ap->due_date)
+                                        <div class="small text-muted mt-1">Due: {{ $ap->due_date->format('M d, Y') }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="alert alert-secondary mt-3 mb-0">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <strong>Total Payable:</strong> ₱{{ number_format($order->accountsPayable->sum('total_amount'), 2) }}
+                                </div>
+                                <div class="col-6">
+                                    <strong>Total Outstanding:</strong> <span class="text-danger">₱{{ number_format($order->accountsPayable->sum('balance'), 2) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Design Images -->
                     @if($order->accountReceivable->submission->images && count($order->accountReceivable->submission->images) > 0)
                     <div class="mb-4">
@@ -278,26 +329,8 @@
                     </script>
                     @endif
                     
-                    <button type="button" class="btn btn-primary" onclick="switchToUpdateStatusModal{{ $order->id }}()">
-                        <i class="bi bi-arrow-repeat"></i> Update Status
-                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
-                
-                <script>
-                function switchToUpdateStatusModal{{ $order->id }}() {
-                    const detailModal = bootstrap.Modal.getInstance(document.getElementById('orderModal{{ $order->id }}'));
-                    if (detailModal) {
-                        detailModal.hide();
-                    }
-                    
-                    document.getElementById('orderModal{{ $order->id }}').addEventListener('hidden.bs.modal', function openUpdate() {
-                        const updateModal = new bootstrap.Modal(document.getElementById('updateStatusModal{{ $order->id }}'));
-                        updateModal.show();
-                        document.getElementById('orderModal{{ $order->id }}').removeEventListener('hidden.bs.modal', openUpdate);
-                    }, { once: true });
-                }
-                </script>
             </div>
         </div>
     </div>

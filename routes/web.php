@@ -26,9 +26,7 @@ Route::get('/progress/{uniqueLink}', [\App\Http\Controllers\OrderProgressControl
 Route::post('/progress/{uniqueLink}', [\App\Http\Controllers\OrderProgressController::class, 'updateProgress'])->name('progress.update');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     
     Route::resource('sales-orders', SalesOrderController::class);
     Route::get('/receiving-report', [SalesOrderSubmissionController::class, 'index'])->name('receiving-report');
@@ -36,6 +34,9 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/account-receivables', [\App\Http\Controllers\AccountReceivableController::class, 'index'])->name('account-receivables.index');
     Route::post('/account-receivables/{id}/payment', [\App\Http\Controllers\AccountReceivableController::class, 'recordPayment'])->name('account-receivables.payment');
+    
+    Route::get('/accounts-payable', [\App\Http\Controllers\AccountPayableController::class, 'index'])->name('accounts-payable.index');
+    Route::post('/accounts-payable/{id}/payment', [\App\Http\Controllers\AccountPayableController::class, 'recordPayment'])->name('accounts-payable.payment');
     
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.update-status');
