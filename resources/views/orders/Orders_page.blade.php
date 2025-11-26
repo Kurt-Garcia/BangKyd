@@ -8,6 +8,46 @@
     <span class="badge bg-primary">{{ $orders->count() }} Total Orders</span>
 </div>
 
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ route('orders.index') }}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-search"></i> Search</label>
+                    <input type="text" class="form-control" name="search" placeholder="SO Number or Customer" value="{{ request('search') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-filter"></i> Status</label>
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="in_production" {{ request('status') == 'in_production' ? 'selected' : '' }}>In Production</option>
+                        <option value="ready_for_delivery" {{ request('status') == 'ready_for_delivery' ? 'selected' : '' }}>Ready</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-calendar"></i> From Date</label>
+                    <input type="date" class="form-control" name="date_from" value="{{ request('date_from') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-calendar"></i> To Date</label>
+                    <input type="date" class="form-control" name="date_to" value="{{ request('date_to') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
+                            <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="row">
     @forelse($orders as $order)
     <div class="col-md-4 mb-4">

@@ -8,11 +8,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
         }
         .success-card {
             max-width: 500px;
@@ -34,8 +47,9 @@
                 
                 @if(isset($submission))
                 <div class="mt-4">
-                    <a href="{{ route('invoice.show', $submission->id) }}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-file-earmark-text"></i> View Invoice
+                    <a href="{{ route('invoice.show', $submission->id) }}" class="btn btn-lg text-white" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative; overflow: hidden;">
+                        <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></span>
+                        <span style="position: relative; z-index: 1;"><i class="bi bi-file-earmark-text"></i> View Invoice</span>
                     </a>
                 </div>
                 @endif

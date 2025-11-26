@@ -12,11 +12,13 @@ class SalesOrder extends Model
         'so_name',
         'price_per_pcs',
         'unique_link',
-        'is_submitted'
+        'is_submitted',
+        'draft_data'
     ];
 
     protected $casts = [
         'is_submitted' => 'boolean',
+        'draft_data' => 'array',
     ];
 
     public function submission()

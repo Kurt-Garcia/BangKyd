@@ -9,9 +9,36 @@ use Illuminate\Http\Request;
 
 class AccountReceivableController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $accountReceivables = AccountReceivable::with(['submission.salesOrder'])->latest()->get();
+        $query = AccountReceivable::with(['submission.salesOrder']);
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('ar_number', 'like', "%{$search}%")
+                  ->orWhereHas('submission.salesOrder', function($subQ) use ($search) {
+                      $subQ->where('so_number', 'like', "%{$search}%")
+                           ->orWhere('so_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('confirmed_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('confirmed_at', '<=', $request->date_to);
+        }
+
+        $accountReceivables = $query->latest()->get();
         return view('account_receivables.AR_page', compact('accountReceivables'));
     }
 

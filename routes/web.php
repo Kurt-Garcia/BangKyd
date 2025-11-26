@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('sales-orders', SalesOrderController::class);
     Route::get('/receiving-report', [SalesOrderSubmissionController::class, 'index'])->name('receiving-report');
     Route::post('/receiving-report/{id}/confirm', [\App\Http\Controllers\AccountReceivableController::class, 'confirmOrder'])->name('receiving-report.confirm');
+    Route::post('/receiving-report/{id}/allow-resubmission', [SalesOrderSubmissionController::class, 'allowResubmission'])->name('receiving-report.allow-resubmission');
     
     Route::get('/account-receivables', [\App\Http\Controllers\AccountReceivableController::class, 'index'])->name('account-receivables.index');
     Route::post('/account-receivables/{id}/payment', [\App\Http\Controllers\AccountReceivableController::class, 'recordPayment'])->name('account-receivables.payment');
@@ -41,4 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::post('/orders/{id}/generate-link', [\App\Http\Controllers\OrderProgressController::class, 'generateLink'])->name('orders.generate-link');
+    
+    Route::get('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'index'])->name('system-settings.index');
+    Route::put('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'update'])->name('system-settings.update');
 });

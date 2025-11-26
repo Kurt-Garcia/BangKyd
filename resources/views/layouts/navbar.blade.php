@@ -259,6 +259,11 @@
                         <i class="bi bi-bag-check"></i> <span>Orders</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('system-settings.*') ? 'active' : '' }}" href="{{ route('system-settings.index') }}">
+                        <i class="bi bi-gear"></i> <span>Settings</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

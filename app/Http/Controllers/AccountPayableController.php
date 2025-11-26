@@ -8,11 +8,37 @@ use Illuminate\Http\Request;
 
 class AccountPayableController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $accountsPayable = AccountPayable::with(['order.accountReceivable.submission.salesOrder', 'payments'])
-            ->latest()
-            ->get();
+        $query = AccountPayable::with(['order.accountReceivable.submission.salesOrder', 'payments']);
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('ap_number', 'like', "%{$search}%")
+                  ->orWhereHas('order.accountReceivable.submission.salesOrder', function($subQ) use ($search) {
+                      $subQ->where('so_number', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Vendor type filter
+        if ($request->filled('vendor_type')) {
+            $query->where('vendor_type', $request->vendor_type);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        $accountsPayable = $query->latest()->get();
         
         return view('accounts_payable.AP_page', compact('accountsPayable'));
     }

@@ -8,9 +8,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
             min-height: 100vh;
             padding: 1.5rem 0;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
         }
         .invoice-container {
             max-width: 600px;
@@ -24,7 +37,7 @@
             font-size: 0.9rem;
         }
         .invoice-header {
-            border-bottom: 2px solid #0d6efd;
+            border-bottom: 2px solid #fa709a;
             padding-bottom: 0.75rem;
             margin-bottom: 1.25rem;
         }
@@ -37,7 +50,7 @@
         .total-amount {
             font-size: 1.25rem;
             font-weight: bold;
-            color: #0d6efd;
+            color: #fa709a;
         }
         .down-payment {
             font-size: 1.1rem;
@@ -61,7 +74,19 @@
             <div class="invoice-header">
                 <div class="row align-items-center">
                     <div class="col-6">
-                        <img src="{{ asset('img/BangKydLogo.png') }}" alt="BangKyd Logo" height="45">
+                        <img src="{{ asset('img/BangKydLogo.png') }}" alt="BangKyd Logo" height="80">
+                        <div class="mt-2">
+                            <p class="mb-0 small"><strong>{{ \App\Models\SystemSetting::get('business_name', 'BangKyd ERP') }}</strong></p>
+                            @if(\App\Models\SystemSetting::get('business_address'))
+                                <p class="mb-0 small">{{ \App\Models\SystemSetting::get('business_address') }}</p>
+                            @endif
+                            @if(\App\Models\SystemSetting::get('business_phone'))
+                                <p class="mb-0 small"><i class="bi bi-telephone"></i> {{ \App\Models\SystemSetting::get('business_phone') }}</p>
+                            @endif
+                            @if(\App\Models\SystemSetting::get('business_email'))
+                                <p class="mb-0 small"><i class="bi bi-envelope"></i> {{ \App\Models\SystemSetting::get('business_email') }}</p>
+                            @endif
+                        </div>
                     </div>
                     <div class="col-6 text-end">
                         <h4 class="mb-0">INVOICE</h4>
@@ -142,21 +167,26 @@
                         <div class="card bg-white border-0 mt-2">
                             <div class="card-body p-2">
                                 <p class="mb-1 small"><strong><i class="bi bi-phone"></i> GCash Payment Details:</strong></p>
-                                <p class="mb-0 small"><strong>Number:</strong> 09176461305</p>
-                                <p class="mb-0 small"><strong>Name:</strong> Kurt Gwapo</p>
+                                <p class="mb-0 small"><strong>Number:</strong> {{ \App\Models\SystemSetting::get('gcash_number', '09176461305') }}</p>
+                                <p class="mb-0 small"><strong>Name:</strong> {{ \App\Models\SystemSetting::get('gcash_name', 'Kurt Gwapo') }}</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-5 text-center">
                         <p class="small mb-1"><strong>Scan to Pay</strong></p>
-                        <img src="{{ asset('img/Sample QR.svg') }}" alt="GCash QR Code" class="img-fluid" style="max-width: 150px; border: 2px solid #ddd; border-radius: 8px; padding: 5px; background: white;">
+                        @php
+                            $qrPath = \App\Models\SystemSetting::get('gcash_qr_image', 'img/Sample QR.svg');
+                            $qrUrl = str_starts_with($qrPath, 'img/') ? asset($qrPath) : asset('storage/' . $qrPath);
+                        @endphp
+                        <img src="{{ $qrUrl }}" alt="GCash QR Code" class="img-fluid" style="max-width: 150px; border: 2px solid #ddd; border-radius: 8px; padding: 5px; background: white;">
                     </div>
                 </div>
             </div>
 
             <div class="text-center mt-3 no-print">
-                <button class="btn btn-primary me-2" onclick="window.print()">
-                    <i class="bi bi-printer"></i> Print
+                <button class="btn text-white me-2" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative; overflow: hidden;" onclick="window.print()">
+                    <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></span>
+                    <span style="position: relative; z-index: 1;"><i class="bi bi-printer"></i> Print</span>
                 </button>
                 <button class="btn btn-secondary" onclick="if(window.opener){window.close()}else{window.history.back()}">
                     <i class="bi bi-x-circle"></i> Close
@@ -165,7 +195,20 @@
 
             <div class="text-center mt-3 pt-3 border-top">
                 <p class="text-muted mb-0"><small>Thank you for your business!</small></p>
-                <p class="text-muted mb-0"><small>For inquiries, please contact BangKyd ERP</small></p>
+                <p class="text-muted mb-0"><small>For inquiries, please contact {{ \App\Models\SystemSetting::get('business_name', 'BangKyd ERP') }}</small></p>
+                @if(\App\Models\SystemSetting::get('business_phone') || \App\Models\SystemSetting::get('business_email'))
+                    <p class="text-muted mb-0"><small>
+                        @if(\App\Models\SystemSetting::get('business_phone'))
+                            {{ \App\Models\SystemSetting::get('business_phone') }}
+                        @endif
+                        @if(\App\Models\SystemSetting::get('business_phone') && \App\Models\SystemSetting::get('business_email'))
+                            |
+                        @endif
+                        @if(\App\Models\SystemSetting::get('business_email'))
+                            {{ \App\Models\SystemSetting::get('business_email') }}
+                        @endif
+                    </small></p>
+                @endif
             </div>
         </div>
     </div>

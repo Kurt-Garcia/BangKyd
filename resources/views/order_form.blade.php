@@ -83,6 +83,12 @@
                     </div>
                 @endif
 
+                @if($salesOrder->draft_data)
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle"></i> <strong>Resubmission Requested:</strong> You can edit your previous submission below. Please review and make any necessary corrections.
+                    </div>
+                @endif
+
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i> <strong>Price:</strong> ₱{{ number_format($salesOrder->price_per_pcs, 2) }} per jersey | <strong>Down Payment:</strong> 50% upon order confirmation
                 </div>
@@ -97,8 +103,13 @@
                             <label class="image-upload-box" for="image{{ $i }}">
                                 <input type="file" class="d-none" id="image{{ $i }}" name="images[]" accept="image/*" onchange="previewImage(this, {{ $i }})">
                                 <div id="preview{{ $i }}">
-                                    <i class="bi bi-cloud-upload fs-1 text-muted"></i>
-                                    <p class="mb-0 text-muted">Click to upload<br><small>Image {{ $i }}</small></p>
+                                    @if($salesOrder->draft_data && isset($salesOrder->draft_data['images'][$i-1]))
+                                        <img src="{{ asset('storage/' . $salesOrder->draft_data['images'][$i-1]) }}" class="image-preview" alt="Previous Upload">
+                                        <p class="mb-0 text-muted mt-2"><small>Click to change</small></p>
+                                    @else
+                                        <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                                        <p class="mb-0 text-muted">Click to upload<br><small>Image {{ $i }}</small></p>
+                                    @endif
                                 </div>
                             </label>
                             @error('images.' . ($i-1))
@@ -166,7 +177,21 @@
             </div>
         </div>
         <div class="text-center mt-3">
-            <small class="text-white">Powered by BangKyd ERP</small>
+            <small class="text-white">{{ \App\Models\SystemSetting::get('business_name', 'BangKyd ERP') }}</small>
+            @if(\App\Models\SystemSetting::get('business_phone') || \App\Models\SystemSetting::get('business_email'))
+                <br>
+                <small class="text-white">
+                    @if(\App\Models\SystemSetting::get('business_phone'))
+                        <i class="bi bi-telephone"></i> {{ \App\Models\SystemSetting::get('business_phone') }}
+                    @endif
+                    @if(\App\Models\SystemSetting::get('business_phone') && \App\Models\SystemSetting::get('business_email'))
+                        |
+                    @endif
+                    @if(\App\Models\SystemSetting::get('business_email'))
+                        <i class="bi bi-envelope"></i> {{ \App\Models\SystemSetting::get('business_email') }}
+                    @endif
+                </small>
+            @endif
         </div>
     </div>
 
@@ -234,6 +259,13 @@
     <script>
         let playerCount = 1;
         const pricePerPcs = {{ $salesOrder->price_per_pcs }};
+        
+        // Load draft data if exists
+        @if($salesOrder->draft_data && isset($salesOrder->draft_data['players']))
+        const draftPlayers = @json($salesOrder->draft_data['players']);
+        @else
+        const draftPlayers = null;
+        @endif
 
         function previewImage(input, index) {
             const preview = document.getElementById('preview' + index);
@@ -354,6 +386,61 @@
         function submitForm() {
             document.getElementById('orderForm').submit();
         }
+
+        // Load draft data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (draftPlayers && draftPlayers.length > 0) {
+                const container = document.getElementById('playersContainer');
+                
+                // Clear the default empty player card
+                container.innerHTML = '';
+                
+                // Add player cards from draft data
+                draftPlayers.forEach((player, index) => {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = 'player-card';
+                    playerCard.setAttribute('data-player', index + 1);
+                    playerCard.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Player ${index + 1}</h6>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removePlayer(${index + 1})" ${index === 0 ? 'style="display: none;"' : ''}>
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="players[${index}][full_name]" value="${player.full_name || ''}" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="players[${index}][jersey_name]" value="${player.jersey_name || ''}" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="players[${index}][jersey_number]" value="${player.jersey_number || ''}" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
+                                <select class="form-select" name="players[${index}][jersey_size]" required>
+                                    <option value="">Select Size</option>
+                                    <option value="XS" ${player.jersey_size === 'XS' ? 'selected' : ''}>XS</option>
+                                    <option value="S" ${player.jersey_size === 'S' ? 'selected' : ''}>S</option>
+                                    <option value="M" ${player.jersey_size === 'M' ? 'selected' : ''}>M</option>
+                                    <option value="L" ${player.jersey_size === 'L' ? 'selected' : ''}>L</option>
+                                    <option value="XL" ${player.jersey_size === 'XL' ? 'selected' : ''}>XL</option>
+                                    <option value="2XL" ${player.jersey_size === '2XL' ? 'selected' : ''}>2XL</option>
+                                    <option value="3XL" ${player.jersey_size === '3XL' ? 'selected' : ''}>3XL</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(playerCard);
+                });
+                
+                playerCount = draftPlayers.length;
+            }
+        });
     </script>
 </body>
 </html>

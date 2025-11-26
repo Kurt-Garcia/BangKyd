@@ -7,11 +7,33 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['accountReceivable.submission.salesOrder', 'progress', 'accountsPayable'])
-            ->latest()
-            ->get();
+        $query = Order::with(['accountReceivable.submission.salesOrder', 'progress', 'accountsPayable']);
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('accountReceivable.submission.salesOrder', function($q) use ($search) {
+                $q->where('so_number', 'like', "%{$search}%")
+                  ->orWhere('so_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $orders = $query->latest()->get();
         
         return view('orders.Orders_page', compact('orders'));
     }

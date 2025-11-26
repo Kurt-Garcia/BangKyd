@@ -11,6 +11,50 @@
     </div>
 </div>
 
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ route('accounts-payable.index') }}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-search"></i> Search</label>
+                    <input type="text" class="form-control" name="search" placeholder="AP/SO Number" value="{{ request('search') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-filter"></i> Vendor Type</label>
+                    <select class="form-select" name="vendor_type">
+                        <option value="">All Vendors</option>
+                        <option value="printing" {{ request('vendor_type') == 'printing' ? 'selected' : '' }}>Printing</option>
+                        <option value="press" {{ request('vendor_type') == 'press' ? 'selected' : '' }}>Press</option>
+                        <option value="tailoring" {{ request('vendor_type') == 'tailoring' ? 'selected' : '' }}>Tailoring</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-filter"></i> Status</label>
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                        <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-calendar"></i> From Date</label>
+                    <input type="date" class="form-control" name="date_from" value="{{ request('date_from') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        @if(request()->hasAny(['search', 'vendor_type', 'status', 'date_from']))
+                            <a href="{{ route('accounts-payable.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         @if($accountsPayable->count() > 0)

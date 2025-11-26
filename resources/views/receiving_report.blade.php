@@ -8,6 +8,36 @@
     <span class="badge bg-primary">{{ $submissions->count() }} Total Submissions</span>
 </div>
 
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ route('receiving-report') }}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-search"></i> Search</label>
+                    <input type="text" class="form-control" name="search" placeholder="SO Number or Customer Name" value="{{ request('search') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-calendar"></i> From Date</label>
+                    <input type="date" class="form-control" name="date_from" value="{{ request('date_from') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-calendar"></i> To Date</label>
+                    <input type="date" class="form-control" name="date_to" value="{{ request('date_to') }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        @if(request()->hasAny(['search', 'date_from', 'date_to']))
+                            <a href="{{ route('receiving-report') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="row">
     @forelse($submissions as $submission)
     <div class="col-md-4 mb-4">
@@ -138,11 +168,48 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#allowResubmissionModal{{ $submission->id }}">
+                        <i class="bi bi-arrow-clockwise"></i> Allow Resubmission
+                    </button>
                     <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#confirmPaymentModal{{ $submission->id }}">
                         <i class="bi bi-check-circle"></i> Confirm Order
                     </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Allow Resubmission Modal -->
+    <div class="modal fade" id="allowResubmissionModal{{ $submission->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Allow Customer to Resubmit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('receiving-report.allow-resubmission', $submission->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <strong>This will allow the customer to resubmit their order.</strong>
+                        </div>
+                        <p><strong>SO Number:</strong> {{ $submission->salesOrder->so_number }}</p>
+                        <p><strong>Customer:</strong> {{ $submission->salesOrder->so_name }}</p>
+                        <hr>
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Reason for resubmission (optional):</strong></label>
+                            <textarea class="form-control" name="reason" rows="3" placeholder="e.g., Missing player information, incorrect jersey sizes, etc."></textarea>
+                        </div>
+                        <p class="text-muted small"><i class="bi bi-info-circle"></i> This will unlock the order form link and delete the current submission. The customer can then submit a corrected version.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-arrow-clockwise"></i> Allow Resubmission
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
