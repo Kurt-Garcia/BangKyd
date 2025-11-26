@@ -22,12 +22,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
             position: relative;
             overflow: hidden;
         }
 
-        /* Animated Background */
+        /* Dark overlay for better glass effect visibility */
         body::before {
             content: '';
             position: absolute;
@@ -35,13 +36,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            animation: moveBackground 20s linear infinite;
-        }
-
-        @keyframes moveBackground {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(60px, 60px); }
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
         }
 
         /* Floating shapes */
@@ -88,7 +84,7 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 480px;
+            max-width: 420px;
             padding: 20px;
         }
 
@@ -97,10 +93,10 @@
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-radius: 30px;
+            border-radius: 25px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            padding: 50px 40px;
+            padding: 35px 30px;
             transition: all 0.3s ease;
         }
 
@@ -112,41 +108,35 @@
         /* Logo section */
         .logo-section {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .logo-icon {
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            width: 90px;
+            height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 15px;
+            margin: 0 auto 15px;
         }
 
         .logo-icon img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            filter: brightness(0) invert(1);
         }
 
         .logo-title {
             color: white;
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
         .logo-subtitle {
             color: rgba(255, 255, 255, 0.9);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 400;
         }
 
@@ -154,8 +144,8 @@
         .form-label {
             color: white;
             font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -164,10 +154,10 @@
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 15px;
-            padding: 15px 20px;
+            border-radius: 12px;
+            padding: 12px 18px;
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
         }
 
@@ -215,13 +205,13 @@
         /* Button */
         .glass-button {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: white;
-            color: #667eea;
+            color: #fa709a;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             cursor: pointer;
@@ -254,13 +244,13 @@
         /* Back to home link */
         .back-home {
             text-align: center;
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         .back-home a {
             color: white;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
@@ -279,16 +269,16 @@
 
         .input-group-glass .input-icon {
             position: absolute;
-            left: 20px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
             color: rgba(255, 255, 255, 0.6);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             pointer-events: none;
         }
 
         .input-group-glass .glass-input {
-            padding-left: 50px;
+            padding-left: 45px;
         }
 
         @media (max-width: 576px) {
@@ -379,11 +369,7 @@
                 </button>
             </form>
 
-            <div class="back-home">
-                <a href="{{ url('/') }}">
-                    <i class="bi bi-arrow-left"></i> Back to Home
-                </a>
-            </div>
+
         </div>
     </div>
 

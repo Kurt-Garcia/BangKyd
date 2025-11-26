@@ -6,7 +6,7 @@ use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SalesOrderSubmissionController;
 
 Route::get('/', function () {
-    return view('home');
+    return redirect()->route('login');
 });
 
 Route::middleware('guest')->group(function () {

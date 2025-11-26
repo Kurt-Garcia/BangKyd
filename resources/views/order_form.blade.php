@@ -8,9 +8,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
             min-height: 100vh;
             padding: 2rem 0;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
         }
         .form-container {
             max-width: 800px;
@@ -28,8 +41,8 @@
             transition: all 0.3s;
         }
         .image-upload-box:hover {
-            border-color: #0d6efd;
-            background-color: #f8f9fa;
+            border-color: #f04826;
+            background-color: #fff5f3;
         }
         .image-preview {
             max-width: 100%;
@@ -49,8 +62,9 @@
 <body>
     <div class="container form-container">
         <div class="card">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="card-header text-white" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);"></div>
+                <div class="d-flex justify-content-between align-items-center" style="position: relative; z-index: 1;">
                     <div>
                         <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Order Form</h4>
                         <small>{{ $salesOrder->so_name }} ({{ $salesOrder->so_number }})</small>
@@ -98,8 +112,9 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0"><i class="bi bi-people"></i> Player Information</h5>
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addPlayer()">
-                            <i class="bi bi-plus-circle"></i> Add Player
+                        <button type="button" class="btn btn-sm text-white" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative; overflow: hidden;" onclick="addPlayer()">
+                            <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></span>
+                            <span style="position: relative; z-index: 1;"><i class="bi bi-plus-circle"></i> Add Player</span>
                         </button>
                     </div>
 
@@ -142,8 +157,9 @@
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
-                        <button type="button" class="btn btn-primary btn-lg" onclick="showConfirmation()">
-                            <i class="bi bi-check-circle"></i> Review & Submit Order
+                        <button type="button" class="btn btn-lg text-white" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative; overflow: hidden;" onclick="showConfirmation()">
+                            <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></span>
+                            <span style="position: relative; z-index: 1;"><i class="bi bi-check-circle"></i> Review & Submit Order</span>
                         </button>
                     </div>
                 </form>

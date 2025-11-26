@@ -24,9 +24,9 @@ class OrderProgressController extends Controller
         $progress = OrderProgress::create([
             'order_id' => $order->id,
             'unique_link' => OrderProgress::generateUniqueLink(),
-            'current_stage' => 'printing',
+            'current_stage' => 'print_press',
             'total_quantity' => $order->accountReceivable->submission->total_quantity,
-            'printing_started_at' => now(),
+            'print_press_started_at' => now(),
         ]);
         
         // Determine partner pricing based on customer price
@@ -75,36 +75,26 @@ class OrderProgressController extends Controller
         $progress = OrderProgress::where('unique_link', $uniqueLink)->firstOrFail();
         
         $request->validate([
-            'stage' => 'required|in:printing,press,tailoring',
-            'quantity_done' => 'required|integer|min:0|max:' . $progress->total_quantity,
+            'stage' => 'required|in:print_press,tailoring',
             'notes' => 'nullable|string',
         ]);
         
         $stage = $request->stage;
-        $quantityDone = $request->quantity_done;
         
-        // Update the specific stage progress
-        $progress->{$stage . '_done'} = $quantityDone;
+        // Mark stage as completed
+        $progress->{$stage . '_completed_at'} = now();
         
-        // Check if current stage is completed
-        if ($quantityDone >= $progress->total_quantity) {
-            $progress->{$stage . '_completed_at'} = now();
+        // Move to next stage
+        if ($stage === 'print_press') {
+            $progress->current_stage = 'tailoring';
+            $progress->tailoring_started_at = now();
+        } elseif ($stage === 'tailoring') {
+            $progress->current_stage = 'completed';
             
-            // Move to next stage
-            if ($stage === 'printing') {
-                $progress->current_stage = 'press';
-                $progress->press_started_at = now();
-            } elseif ($stage === 'press') {
-                $progress->current_stage = 'tailoring';
-                $progress->tailoring_started_at = now();
-            } elseif ($stage === 'tailoring') {
-                $progress->current_stage = 'completed';
-                
-                // Update main order status to ready_for_delivery
-                $order = $progress->order;
-                $order->status = 'ready_for_delivery';
-                $order->save();
-            }
+            // Update main order status to ready_for_delivery
+            $order = $progress->order;
+            $order->status = 'ready_for_delivery';
+            $order->save();
         }
         
         if ($request->notes) {
@@ -113,6 +103,6 @@ class OrderProgressController extends Controller
         
         $progress->save();
         
-        return redirect()->back()->with('success', 'Progress updated successfully!');
+        return redirect()->back()->with('success', 'Stage marked as completed!');
     }
 }

@@ -13,23 +13,16 @@ class OrderProgress extends Model
         'unique_link',
         'current_stage',
         'total_quantity',
-        'printing_done',
-        'press_done',
-        'tailoring_done',
-        'printing_started_at',
-        'printing_completed_at',
-        'press_started_at',
-        'press_completed_at',
+        'print_press_started_at',
+        'print_press_completed_at',
         'tailoring_started_at',
         'tailoring_completed_at',
         'notes',
     ];
 
     protected $casts = [
-        'printing_started_at' => 'datetime',
-        'printing_completed_at' => 'datetime',
-        'press_started_at' => 'datetime',
-        'press_completed_at' => 'datetime',
+        'print_press_started_at' => 'datetime',
+        'print_press_completed_at' => 'datetime',
         'tailoring_started_at' => 'datetime',
         'tailoring_completed_at' => 'datetime',
     ];
@@ -46,10 +39,16 @@ class OrderProgress extends Model
 
     public function getProgressPercentage()
     {
-        if ($this->total_quantity == 0) return 0;
+        $totalSteps = 2; // 2 stages: print_press and tailoring
+        $completedSteps = 0;
         
-        $totalSteps = $this->total_quantity * 3; // 3 stages
-        $completedSteps = $this->printing_done + $this->press_done + $this->tailoring_done;
+        if ($this->print_press_completed_at) {
+            $completedSteps++;
+        }
+        
+        if ($this->tailoring_completed_at) {
+            $completedSteps++;
+        }
         
         return round(($completedSteps / $totalSteps) * 100, 2);
     }
@@ -61,8 +60,7 @@ class OrderProgress extends Model
         }
         
         $stages = [
-            'printing' => 'Printing',
-            'press' => 'Press',
+            'print_press' => 'Print & Press',
             'tailoring' => 'Tailoring'
         ];
         

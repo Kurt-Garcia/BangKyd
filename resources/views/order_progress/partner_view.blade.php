@@ -8,9 +8,25 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
             min-height: 100vh;
             padding: 2rem 0;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+        .progress-container {
+            position: relative;
+            z-index: 1;
         }
         .progress-container {
             max-width: 900px;
@@ -29,7 +45,7 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
         .stage-card.active {
-            border: 3px solid #667eea;
+            border: 3px solid #fa709a;
             background: linear-gradient(135deg, #f5f7fa 0%, #e8ebf2 100%);
         }
         .stage-card.completed {
@@ -48,7 +64,7 @@
             transition: all 0.3s ease;
         }
         .stage-card.active .stage-icon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             color: white;
             animation: pulse 2s infinite;
         }
@@ -67,7 +83,7 @@
         .progress-bar-custom {
             height: 30px;
             border-radius: 15px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
         .order-header {
@@ -78,7 +94,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         .btn-gradient {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             border: none;
             color: white;
             padding: 0.75rem 2rem;
@@ -94,7 +110,7 @@
         .quantity-input {
             font-size: 1.5rem;
             text-align: center;
-            border: 3px solid #667eea;
+            border: 3px solid #fa709a;
             border-radius: 15px;
             padding: 1rem;
         }
@@ -158,39 +174,35 @@
             </div>
         </div>
 
-        <!-- Stage 1: Printing -->
-        <div class="stage-card {{ $progress->current_stage === 'printing' ? 'active' : ($progress->printing_completed_at ? 'completed' : 'pending') }}">
+        <!-- Stage 1: Print & Press -->
+        <div class="stage-card {{ $progress->current_stage === 'print_press' ? 'active' : ($progress->print_press_completed_at ? 'completed' : 'pending') }}">
             <div class="stage-icon">
-                @if($progress->printing_completed_at)
+                @if($progress->print_press_completed_at)
                     <i class="bi bi-check-circle-fill"></i>
                 @else
                     <i class="bi bi-printer-fill"></i>
                 @endif
             </div>
             <h3 class="stage-title text-center">
-                <i class="bi bi-printer"></i> Stage 1: Printing
-                @if($progress->printing_completed_at)
+                <i class="bi bi-printer"></i> Stage 1: Print & Press
+                @if($progress->print_press_completed_at)
                     <span class="badge bg-success">Completed</span>
-                @elseif($progress->current_stage === 'printing')
+                @elseif($progress->current_stage === 'print_press')
                     <span class="badge bg-primary">In Progress</span>
                 @else
                     <span class="badge bg-secondary">Pending</span>
                 @endif
             </h3>
             
-            @if($progress->current_stage === 'printing' || !$progress->printing_completed_at)
+            @if($progress->current_stage === 'print_press')
             <form action="{{ route('progress.update', $progress->unique_link) }}" method="POST">
                 @csrf
-                <input type="hidden" name="stage" value="printing">
+                <input type="hidden" name="stage" value="print_press">
                 
-                <div class="row mb-3">
-                    <div class="col-md-6 mx-auto">
-                        <label class="form-label fw-bold">Jerseys Completed</label>
-                        <input type="number" name="quantity_done" class="form-control quantity-input" 
-                               min="0" max="{{ $progress->total_quantity }}" 
-                               value="{{ $progress->printing_done }}" required>
-                        <small class="text-muted">Out of {{ $progress->total_quantity }} total</small>
-                    </div>
+                <div class="mb-3">
+                    <p class="text-center lead">
+                        <strong>{{ $progress->total_quantity }} jerseys</strong> to be printed and pressed
+                    </p>
                 </div>
                 
                 <div class="mb-3">
@@ -201,78 +213,19 @@
                 
                 <div class="text-center">
                     <button type="submit" class="btn btn-gradient btn-lg">
-                        <i class="bi bi-save"></i> Update Printing Progress
+                        <i class="bi bi-check-circle"></i> Mark Print & Press as Done
                     </button>
                 </div>
             </form>
             @else
             <div class="alert alert-success text-center">
-                <i class="bi bi-check-circle-fill"></i> Printing completed on {{ $progress->printing_completed_at->format('M d, Y h:i A') }}
-                <div class="mt-2 fw-bold">{{ $progress->printing_done }} / {{ $progress->total_quantity }} jerseys</div>
+                <i class="bi bi-check-circle-fill"></i> Print & Press completed on {{ $progress->print_press_completed_at->format('M d, Y h:i A') }}
+                <div class="mt-2 fw-bold">{{ $progress->total_quantity }} jerseys completed</div>
             </div>
             @endif
         </div>
 
-        <!-- Stage 2: Press -->
-        <div class="stage-card {{ $progress->current_stage === 'press' ? 'active' : ($progress->press_completed_at ? 'completed' : 'pending') }}">
-            <div class="stage-icon">
-                @if($progress->press_completed_at)
-                    <i class="bi bi-check-circle-fill"></i>
-                @else
-                    <i class="bi bi-layers-fill"></i>
-                @endif
-            </div>
-            <h3 class="stage-title text-center">
-                <i class="bi bi-layers"></i> Stage 2: Press
-                @if($progress->press_completed_at)
-                    <span class="badge bg-success">Completed</span>
-                @elseif($progress->current_stage === 'press')
-                    <span class="badge bg-primary">In Progress</span>
-                @else
-                    <span class="badge bg-secondary">Pending</span>
-                @endif
-            </h3>
-            
-            @if($progress->current_stage === 'press')
-            <form action="{{ route('progress.update', $progress->unique_link) }}" method="POST">
-                @csrf
-                <input type="hidden" name="stage" value="press">
-                
-                <div class="row mb-3">
-                    <div class="col-md-6 mx-auto">
-                        <label class="form-label fw-bold">Jerseys Completed</label>
-                        <input type="number" name="quantity_done" class="form-control quantity-input" 
-                               min="0" max="{{ $progress->total_quantity }}" 
-                               value="{{ $progress->press_done }}" required>
-                        <small class="text-muted">Out of {{ $progress->total_quantity }} total</small>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Notes (Optional)</label>
-                    <textarea name="notes" class="form-control notes-textarea" rows="3" 
-                              placeholder="Add any notes or remarks...">{{ $progress->notes }}</textarea>
-                </div>
-                
-                <div class="text-center">
-                    <button type="submit" class="btn btn-gradient btn-lg">
-                        <i class="bi bi-save"></i> Update Press Progress
-                    </button>
-                </div>
-            </form>
-            @elseif($progress->press_completed_at)
-            <div class="alert alert-success text-center">
-                <i class="bi bi-check-circle-fill"></i> Press completed on {{ $progress->press_completed_at->format('M d, Y h:i A') }}
-                <div class="mt-2 fw-bold">{{ $progress->press_done }} / {{ $progress->total_quantity }} jerseys</div>
-            </div>
-            @else
-            <div class="alert alert-secondary text-center">
-                <i class="bi bi-hourglass-split"></i> Waiting for printing to complete
-            </div>
-            @endif
-        </div>
-
-        <!-- Stage 3: Tailoring -->
+        <!-- Stage 2: Tailoring -->
         <div class="stage-card {{ $progress->current_stage === 'tailoring' ? 'active' : ($progress->tailoring_completed_at ? 'completed' : 'pending') }}">
             <div class="stage-icon">
                 @if($progress->tailoring_completed_at)
@@ -282,7 +235,7 @@
                 @endif
             </div>
             <h3 class="stage-title text-center">
-                <i class="bi bi-scissors"></i> Stage 3: Tailoring
+                <i class="bi bi-scissors"></i> Stage 2: Tailoring
                 @if($progress->tailoring_completed_at)
                     <span class="badge bg-success">Completed</span>
                 @elseif($progress->current_stage === 'tailoring')
@@ -297,14 +250,10 @@
                 @csrf
                 <input type="hidden" name="stage" value="tailoring">
                 
-                <div class="row mb-3">
-                    <div class="col-md-6 mx-auto">
-                        <label class="form-label fw-bold">Jerseys Completed</label>
-                        <input type="number" name="quantity_done" class="form-control quantity-input" 
-                               min="0" max="{{ $progress->total_quantity }}" 
-                               value="{{ $progress->tailoring_done }}" required>
-                        <small class="text-muted">Out of {{ $progress->total_quantity }} total</small>
-                    </div>
+                <div class="mb-3">
+                    <p class="text-center lead">
+                        <strong>{{ $progress->total_quantity }} jerseys</strong> to be tailored
+                    </p>
                 </div>
                 
                 <div class="mb-3">
@@ -315,18 +264,18 @@
                 
                 <div class="text-center">
                     <button type="submit" class="btn btn-gradient btn-lg">
-                        <i class="bi bi-save"></i> Update Tailoring Progress
+                        <i class="bi bi-check-circle"></i> Mark Tailoring as Done
                     </button>
                 </div>
             </form>
             @elseif($progress->tailoring_completed_at)
             <div class="alert alert-success text-center">
                 <i class="bi bi-check-circle-fill"></i> Tailoring completed on {{ $progress->tailoring_completed_at->format('M d, Y h:i A') }}
-                <div class="mt-2 fw-bold">{{ $progress->tailoring_done }} / {{ $progress->total_quantity }} jerseys</div>
+                <div class="mt-2 fw-bold">{{ $progress->total_quantity }} jerseys completed</div>
             </div>
             @else
             <div class="alert alert-secondary text-center">
-                <i class="bi bi-hourglass-split"></i> Waiting for press to complete
+                <i class="bi bi-hourglass-split"></i> Waiting for print & press to complete
             </div>
             @endif
         </div>

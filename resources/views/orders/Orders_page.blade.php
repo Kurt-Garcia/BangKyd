@@ -29,10 +29,8 @@
                     @elseif($order->status === 'claimed')
                         <span class="badge bg-secondary">Claimed</span>
                     @elseif($order->progress)
-                        @if($order->progress->current_stage === 'printing')
-                            <span class="badge bg-primary">Ongoing - Printing</span>
-                        @elseif($order->progress->current_stage === 'press')
-                            <span class="badge bg-primary">Ongoing - Press</span>
+                        @if($order->progress->current_stage === 'print_press')
+                            <span class="badge bg-primary">Ongoing - Print & Press</span>
                         @elseif($order->progress->current_stage === 'tailoring')
                             <span class="badge bg-primary">Ongoing - Tailoring</span>
                         @elseif($order->progress->current_stage === 'completed')
@@ -121,10 +119,8 @@
                                 @elseif($order->status === 'claimed')
                                     <span class="badge bg-secondary">Claimed</span>
                                 @elseif($order->progress)
-                                    @if($order->progress->current_stage === 'printing')
-                                        <span class="badge bg-primary">Ongoing - Printing</span>
-                                    @elseif($order->progress->current_stage === 'press')
-                                        <span class="badge bg-primary">Ongoing - Press</span>
+                                    @if($order->progress->current_stage === 'print_press')
+                                        <span class="badge bg-primary">Ongoing - Print & Press</span>
                                     @elseif($order->progress->current_stage === 'tailoring')
                                         <span class="badge bg-primary">Ongoing - Tailoring</span>
                                     @elseif($order->progress->current_stage === 'completed')
@@ -154,45 +150,39 @@
                     <div class="mb-4">
                         <h6 class="border-bottom pb-2"><i class="bi bi-graph-up"></i> Production Progress</h6>
                         <div class="row text-center mb-3">
-                            <div class="col-4">
+                            <div class="col-6">
                                 <div class="card">
                                     <div class="card-body">
                                         <i class="bi bi-printer-fill fs-3 text-primary"></i>
-                                        <div class="mt-2"><small class="text-muted">Printing</small></div>
-                                        <div class="fw-bold fs-5">{{ $order->progress->printing_done }}/{{ $order->progress->total_quantity }}</div>
-                                        @if($order->progress->printing_completed_at)
+                                        <div class="mt-2"><small class="text-muted">Print & Press</small></div>
+                                        <div class="fw-bold fs-5">{{ $order->progress->total_quantity }} jerseys</div>
+                                        @if($order->progress->print_press_completed_at)
                                             <small class="text-success"><i class="bi bi-check-circle-fill"></i> Done</small>
+                                        @else
+                                            <small class="text-muted">In Progress</small>
                                         @endif
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <i class="bi bi-layers-fill fs-3 text-warning"></i>
-                                        <div class="mt-2"><small class="text-muted">Press</small></div>
-                                        <div class="fw-bold fs-5">{{ $order->progress->press_done }}/{{ $order->progress->total_quantity }}</div>
-                                        @if($order->progress->press_completed_at)
-                                            <small class="text-success"><i class="bi bi-check-circle-fill"></i> Done</small>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-4">
+                            <div class="col-6">
                                 <div class="card">
                                     <div class="card-body">
                                         <i class="bi bi-scissors fs-3 text-info"></i>
                                         <div class="mt-2"><small class="text-muted">Tailoring</small></div>
-                                        <div class="fw-bold fs-5">{{ $order->progress->tailoring_done }}/{{ $order->progress->total_quantity }}</div>
+                                        <div class="fw-bold fs-5">{{ $order->progress->total_quantity }} jerseys</div>
                                         @if($order->progress->tailoring_completed_at)
                                             <small class="text-success"><i class="bi bi-check-circle-fill"></i> Done</small>
+                                        @elseif($order->progress->print_press_completed_at)
+                                            <small class="text-muted">In Progress</small>
+                                        @else
+                                            <small class="text-muted">Pending</small>
                                         @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="progress" style="height: 25px;">
-                            <div class="progress-bar bg-gradient" style="width: {{ $order->progress->getProgressPercentage() }}%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
+                            <div class="progress-bar bg-gradient" style="width: {{ $order->progress->getProgressPercentage() }}%; background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);">
                                 {{ $order->progress->getProgressPercentage() }}% Complete
                             </div>
                         </div>
