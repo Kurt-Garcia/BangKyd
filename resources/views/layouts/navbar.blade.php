@@ -78,6 +78,15 @@
             margin-right: 0.5rem;
             width: 20px;
         }
+
+        .sidebar-divider {
+            margin: 0 1rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed .sidebar-divider {
+            margin: 0 0.5rem;
+        }
         
         main {
             margin-left: 250px;
@@ -259,9 +268,30 @@
                         <i class="bi bi-bag-check"></i> <span>Orders</span>
                     </a>
                 </li>
+
+                <!-- Divider -->
+                <li class="nav-item mt-3 mb-2">
+                    <hr class="sidebar-divider">
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                        <i class="bi bi-people"></i> <span>User Management</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('change-password') ? 'active' : '' }}" href="{{ route('change-password') }}">
+                        <i class="bi bi-key"></i> <span>Change Password</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('activity-logs') ? 'active' : '' }}" href="{{ route('activity-logs') }}">
+                        <i class="bi bi-clock-history"></i> <span>Activity Logs</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('system-settings.*') ? 'active' : '' }}" href="{{ route('system-settings.index') }}">
-                        <i class="bi bi-gear"></i> <span>Settings</span>
+                        <i class="bi bi-gear"></i> <span>System Settings</span>
                     </a>
                 </li>
             </ul>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AccountReceivable;
 use App\Models\ARPayment;
 use App\Models\SalesOrderSubmission;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 
 class AccountReceivableController extends Controller
@@ -57,6 +58,8 @@ class AccountReceivableController extends Controller
             'confirmed_at' => now(),
         ]);
 
+        ActivityLog::log('create', "Confirmed order and created AR: {$ar->ar_number} for SO: {$submission->salesOrder->so_number}", 'AccountReceivable', $ar->id);
+
         return redirect()->route('account-receivables.index')
             ->with('success', 'Order confirmed! AR Number: ' . $ar->ar_number);
     }
@@ -90,6 +93,8 @@ class AccountReceivableController extends Controller
         // Update AR
         $ar->paid_amount += $request->amount;
         $ar->updatePaymentStatus();
+
+        ActivityLog::log('create', "Recorded payment of ₱" . number_format($request->amount, 2) . " for AR: {$ar->ar_number}", 'ARPayment', $ar->id);
 
         // Create Order record if it doesn't exist (for partial or full payment)
         if (!$ar->order) {

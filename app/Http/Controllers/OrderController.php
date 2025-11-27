@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -60,6 +61,8 @@ class OrderController extends Controller
         }
 
         $order->save();
+
+        ActivityLog::log('update', "Updated order {$order->order_number} status to: {$request->status}", 'Order', $order->id);
 
         return redirect()->route('orders.index')
             ->with('success', 'Order status updated successfully!');

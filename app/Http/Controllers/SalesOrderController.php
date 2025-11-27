@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SalesOrder;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 
 class SalesOrderController extends Controller
@@ -61,6 +62,8 @@ class SalesOrderController extends Controller
             'unique_link' => SalesOrder::generateUniqueLink(),
             'is_submitted' => false,
         ]);
+
+        ActivityLog::log('create', "Created Sales Order: {$so->so_number} - {$so->so_name}", 'SalesOrder', $so->id);
 
         return redirect()->route('sales-orders.index')
             ->with('success', 'Sales Order created successfully! Link: ' . $so->customer_link);

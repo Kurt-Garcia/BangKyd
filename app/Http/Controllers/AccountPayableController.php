@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AccountPayable;
 use App\Models\APPayment;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 
 class AccountPayableController extends Controller
@@ -71,6 +72,8 @@ class AccountPayableController extends Controller
         // Update AP amounts
         $ap->paid_amount += $request->amount;
         $ap->updatePaymentStatus();
+
+        ActivityLog::log('create', "Recorded payment of ₱" . number_format($request->amount, 2) . " for AP: {$ap->ap_number} ({$ap->vendor_type})", 'APPayment', $ap->id);
 
         $message = 'Payment recorded successfully!';
         if ($ap->status === 'paid') {

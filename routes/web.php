@@ -45,4 +45,15 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'index'])->name('system-settings.index');
     Route::put('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'update'])->name('system-settings.update');
+    
+    // User Management Routes
+    Route::get('/users', [\App\Http\Controllers\UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [\App\Http\Controllers\UserManagementController::class, 'create'])->name('users.create');
+    Route::post('/users', [\App\Http\Controllers\UserManagementController::class, 'store'])->name('users.store');
+    Route::delete('/users/{id}', [\App\Http\Controllers\UserManagementController::class, 'destroy'])->name('users.destroy');
+    
+    Route::get('/change-password', [\App\Http\Controllers\UserManagementController::class, 'changePassword'])->name('change-password');
+    Route::put('/change-password', [\App\Http\Controllers\UserManagementController::class, 'updatePassword'])->name('change-password.update');
+    
+    Route::get('/activity-logs', [\App\Http\Controllers\UserManagementController::class, 'activityLogs'])->name('activity-logs');
 });
