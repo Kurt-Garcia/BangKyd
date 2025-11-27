@@ -43,7 +43,7 @@
         
         .sidebar.collapsed .nav-link i {
             margin-right: 0;
-            font-size: 1.5rem;
+            font-size: 18px;
         }
         
         .sidebar-sticky {
@@ -76,7 +76,7 @@
         
         .sidebar .nav-link i {
             margin-right: 0.5rem;
-            width: 20px;
+            width: 65px;
         }
 
         .sidebar-divider {
@@ -86,6 +86,77 @@
 
         .sidebar.collapsed .sidebar-divider {
             margin: 0 0.5rem;
+        }
+
+        /* Dropdown styles */
+        .nav-item.dropdown {
+            position: relative;
+        }
+
+        .nav-link.dropdown-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-link.dropdown-toggle::after {
+            transition: transform 0.3s ease;
+            border: none;
+            content: '\F282';
+            font-family: 'bootstrap-icons';
+            font-size: 0.8rem;
+        }
+
+        .nav-link.dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(90deg);
+        }
+
+        .dropdown-menu {
+            position: static !important;
+            transform: none !important;
+            float: none;
+            border: none;
+            background: #f8f9fa;
+            box-shadow: none;
+            padding: 0;
+            margin: 0;
+            border-radius: 0;
+            display: block;
+            width: 100%;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 1rem 0.5rem 3rem;
+            color: #555;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .dropdown-item:hover {
+            background-color: #fff5f7;
+            color: #fa709a;
+        }
+
+        .dropdown-item.active {
+            background: linear-gradient(90deg, #fff5f7 0%, #fffef5 100%);
+            color: #fa709a;
+            border-left-color: #fa709a;
+        }
+
+        .sidebar.collapsed .dropdown-menu {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .nav-link.dropdown-toggle::after {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-item.dropdown .nav-link span {
+            display: none;
         }
         
         main {
@@ -274,25 +345,39 @@
                     <hr class="sidebar-divider">
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                        <i class="bi bi-people"></i> <span>User Management</span>
+                <!-- Maintenance Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') ? 'active' : '' }}" 
+                       href="#" 
+                       data-bs-toggle="collapse" 
+                       data-bs-target="#maintenanceSubmenu" 
+                       aria-expanded="{{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') ? 'true' : 'false' }}">
+                        <i class="bi bi-tools"></i> <span>Maintenance</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('change-password') ? 'active' : '' }}" href="{{ route('change-password') }}">
-                        <i class="bi bi-key"></i> <span>Change Password</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('activity-logs') ? 'active' : '' }}" href="{{ route('activity-logs') }}">
-                        <i class="bi bi-clock-history"></i> <span>Activity Logs</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('system-settings.*') ? 'active' : '' }}" href="{{ route('system-settings.index') }}">
-                        <i class="bi bi-gear"></i> <span>System Settings</span>
-                    </a>
+                    <div class="collapse {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') ? 'show' : '' }}" id="maintenanceSubmenu">
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                                    <i class="bi bi-people me-2"></i>User Management
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('change-password') ? 'active' : '' }}" href="{{ route('change-password') }}">
+                                    <i class="bi bi-key me-2"></i>Change Password
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('activity-logs') ? 'active' : '' }}" href="{{ route('activity-logs') }}">
+                                    <i class="bi bi-clock-history me-2"></i>Activity Logs
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('system-settings.*') ? 'active' : '' }}" href="{{ route('system-settings.index') }}">
+                                    <i class="bi bi-gear me-2"></i>System Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
             </ul>
         </div>

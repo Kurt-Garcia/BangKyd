@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class ActivityLog extends Model
 {
@@ -34,9 +35,9 @@ class ActivityLog extends Model
      */
     public static function log(string $action, string $description, ?string $model = null, ?int $modelId = null, ?array $changes = null): void
     {
-        if (auth()->check()) {
+        if (Auth::check()) {
             self::create([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'action' => $action,
                 'model' => $model,
                 'model_id' => $modelId,

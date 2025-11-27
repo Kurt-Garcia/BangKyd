@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -69,7 +70,8 @@ class UserManagementController extends Controller
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Current password is incorrect']);
@@ -91,7 +93,7 @@ class UserManagementController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if ($user->id === auth()->id()) {
+        if ($user->id === Auth::id()) {
             return back()->withErrors(['error' => 'You cannot delete your own account']);
         }
 

@@ -25,7 +25,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
             
             // Log successful login
-            ActivityLog::log('login', "User logged in: " . auth()->user()->name);
+            ActivityLog::log('login', "User logged in: " . Auth::user()->name);
             
             return redirect()->intended('/dashboard');
         }
