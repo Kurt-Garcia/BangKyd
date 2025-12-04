@@ -109,7 +109,7 @@
                                 <div class="card bg-light">
                                     <div class="card-body">
                                         <p class="mb-2"><strong>Total Quantity:</strong> {{ $submission->total_quantity }} pcs</p>
-                                        <p class="mb-2"><strong>Price per Piece:</strong> ₱{{ number_format($submission->salesOrder->price_per_pcs, 2) }}</p>
+                                        <p class="mb-2"><strong>Price per Piece:</strong> ₱{{ number_format($submission->salesOrder->product->price ?? 0, 2) }}</p>
                                         <p class="mb-2"><strong>Total Amount:</strong> <span class="text-primary fs-5 fw-bold">₱{{ number_format($submission->total_amount, 2) }}</span></p>
                                         <hr>
                                         <p class="mb-2 text-danger"><strong>Down Payment (50%):</strong> ₱{{ number_format($submission->down_payment, 2) }}</p>

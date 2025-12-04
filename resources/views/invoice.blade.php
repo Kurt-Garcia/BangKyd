@@ -109,7 +109,7 @@
                 <div class="col-6">
                     <h6 class="mb-2">Order Details</h6>
                     <p class="mb-1 small"><strong>Total Jerseys:</strong> {{ $submission->total_quantity }} pcs</p>
-                    <p class="mb-1 small"><strong>Price per Jersey:</strong> ₱{{ number_format($salesOrder->price_per_pcs, 2) }}</p>
+                    <p class="mb-1 small"><strong>Price per Jersey:</strong> ₱{{ number_format($salesOrder->product->price ?? 0, 2) }}</p>
                     <p class="mb-0 small"><strong>Submitted:</strong> {{ $submission->submitted_at->format('M d, Y') }}</p>
                 </div>
             </div>

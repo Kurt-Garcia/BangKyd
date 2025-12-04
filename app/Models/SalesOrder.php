@@ -10,7 +10,7 @@ class SalesOrder extends Model
     protected $fillable = [
         'so_number',
         'so_name',
-        'price_per_pcs',
+        'product_id',
         'unique_link',
         'is_submitted',
         'draft_data'
@@ -20,6 +20,11 @@ class SalesOrder extends Model
         'is_submitted' => 'boolean',
         'draft_data' => 'array',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 
     public function submission()
     {

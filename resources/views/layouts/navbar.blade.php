@@ -76,7 +76,8 @@
         
         .sidebar .nav-link i {
             margin-right: 0.5rem;
-            width: 65px;
+            width: 20px;
+            text-align: center;
         }
 
         .sidebar-divider {
@@ -88,18 +89,18 @@
             margin: 0 0.5rem;
         }
 
-        /* Dropdown styles */
-        .nav-item.dropdown {
+        /* Sidebar Dropdown styles */
+        .sidebar .nav-item.dropdown {
             position: relative;
         }
 
-        .nav-link.dropdown-toggle {
+        .sidebar .nav-link.dropdown-toggle {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .nav-link.dropdown-toggle::after {
+        .sidebar .nav-link.dropdown-toggle::after {
             transition: transform 0.3s ease;
             border: none;
             content: '\F282';
@@ -107,11 +108,11 @@
             font-size: 0.8rem;
         }
 
-        .nav-link.dropdown-toggle[aria-expanded="true"]::after {
+        .sidebar .nav-link.dropdown-toggle[aria-expanded="true"]::after {
             transform: rotate(90deg);
         }
 
-        .dropdown-menu {
+        .sidebar .dropdown-menu {
             position: static !important;
             transform: none !important;
             float: none;
@@ -125,7 +126,7 @@
             width: 100%;
         }
 
-        .dropdown-item {
+        .sidebar .dropdown-item {
             padding: 0.5rem 1rem 0.5rem 3rem;
             color: #555;
             border-left: 3px solid transparent;
@@ -136,12 +137,12 @@
             white-space: nowrap;
         }
 
-        .dropdown-item:hover {
+        .sidebar .dropdown-item:hover {
             background-color: #fff5f7;
             color: #fa709a;
         }
 
-        .dropdown-item.active {
+        .sidebar .dropdown-item.active {
             background: linear-gradient(90deg, #fff5f7 0%, #fffef5 100%);
             color: #fa709a;
             border-left-color: #fa709a;
@@ -157,6 +158,11 @@
 
         .sidebar.collapsed .nav-item.dropdown .nav-link span {
             display: none;
+        }
+
+        /* Top navbar dropdown styles */
+        .navbar .dropdown-menu {
+            position: absolute !important;
         }
         
         main {
@@ -341,21 +347,24 @@
                 </li>
 
                 <!-- Divider -->
-                <li class="nav-item mt-3 mb-2">
-                    <hr class="sidebar-divider">
-                </li>
+                <hr class="sidebar-divider my-3">
 
                 <!-- Maintenance Dropdown -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') ? 'active' : '' }}" 
+                    <a class="nav-link dropdown-toggle {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') || request()->routeIs('products.*') ? 'active' : '' }}" 
                        href="#" 
                        data-bs-toggle="collapse" 
                        data-bs-target="#maintenanceSubmenu" 
-                       aria-expanded="{{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') ? 'true' : 'false' }}">
+                       aria-expanded="{{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') || request()->routeIs('products.*') ? 'true' : 'false' }}">
                         <i class="bi bi-tools"></i> <span>Maintenance</span>
                     </a>
-                    <div class="collapse {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') ? 'show' : '' }}" id="maintenanceSubmenu">
+                    <div class="collapse {{ request()->routeIs('users.*') || request()->routeIs('change-password') || request()->routeIs('activity-logs') || request()->routeIs('system-settings.*') || request()->routeIs('products.*') ? 'show' : '' }}" id="maintenanceSubmenu">
                         <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">
+                                    <i class="bi bi-box-seam me-2"></i>Product Management
+                                </a>
+                            </li>
                             <li>
                                 <a class="dropdown-item {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                                     <i class="bi bi-people me-2"></i>User Management

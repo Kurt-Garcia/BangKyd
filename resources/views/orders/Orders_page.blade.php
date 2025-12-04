@@ -178,7 +178,7 @@
                             <div class="card bg-light">
                                 <div class="card-body">
                                     <p class="mb-2"><strong>Quantity:</strong> {{ $order->accountReceivable->submission->total_quantity }} pcs</p>
-                                    <p class="mb-2"><strong>Price per piece:</strong> ₱{{ number_format($order->accountReceivable->submission->salesOrder->price_per_pcs, 2) }}</p>
+                                    <p class="mb-2"><strong>Price per piece:</strong> ₱{{ number_format($order->accountReceivable->submission->salesOrder->product->price ?? 0, 2) }}</p>
                                     <p class="mb-0"><strong>Total Amount:</strong> <span class="text-primary fs-5">₱{{ number_format($order->accountReceivable->total_amount, 2) }}</span></p>
                                 </div>
                             </div>

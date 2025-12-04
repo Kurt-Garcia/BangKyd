@@ -32,7 +32,7 @@ class OrderProgressController extends Controller
         // Determine partner pricing based on customer price
         // If customer price > 200, assume upper jersey (150 total for print & press)
         // If customer price <= 200, assume lower jersey (160 total for print & press)
-        $customerPrice = $order->accountReceivable->submission->salesOrder->price_per_pcs;
+        $customerPrice = $order->accountReceivable->submission->salesOrder->product->price;
         $partnerPrice = $customerPrice > 200 ? 150 : 160;
         $quantity = $order->accountReceivable->submission->total_quantity;
         

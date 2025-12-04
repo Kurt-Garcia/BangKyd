@@ -45,7 +45,7 @@ class AccountReceivableController extends Controller
 
     public function confirmOrder(Request $request, $submissionId)
     {
-        $submission = SalesOrderSubmission::with('salesOrder')->findOrFail($submissionId);
+        $submission = SalesOrderSubmission::with('salesOrder.product')->findOrFail($submissionId);
 
         // Create AR record
         $ar = AccountReceivable::create([

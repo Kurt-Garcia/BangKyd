@@ -11,7 +11,7 @@ class SystemSettingsController extends Controller
     public function index()
     {
         $settings = SystemSetting::all()->groupBy('group');
-        return view('system_settings.index', compact('settings'));
+        return view('system_settings.systemSettingsPage', compact('settings'));
     }
 
     public function update(Request $request)

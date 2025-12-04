@@ -58,7 +58,7 @@ class SalesOrderSubmissionController extends Controller
 
         // Calculate pricing
         $totalQuantity = count($request->players);
-        $totalAmount = $totalQuantity * $salesOrder->price_per_pcs;
+        $totalAmount = $totalQuantity * $salesOrder->product->price;
         $downPayment = $totalAmount * 0.5; // 50% down payment
         $balance = $totalAmount - $downPayment;
 
@@ -87,7 +87,7 @@ class SalesOrderSubmissionController extends Controller
     public function index(Request $request)
     {
         // Only show submissions that haven't been confirmed to AR yet
-        $query = SalesOrderSubmission::with('salesOrder')
+        $query = SalesOrderSubmission::with('salesOrder.product')
             ->whereDoesntHave('accountReceivable');
 
         // Search filter
@@ -113,14 +113,14 @@ class SalesOrderSubmissionController extends Controller
 
     public function showInvoice($id)
     {
-        $submission = SalesOrderSubmission::with('salesOrder')->findOrFail($id);
+        $submission = SalesOrderSubmission::with('salesOrder.product')->findOrFail($id);
         $salesOrder = $submission->salesOrder;
         return view('invoice', compact('submission', 'salesOrder'));
     }
 
     public function allowResubmission(Request $request, $id)
     {
-        $submission = SalesOrderSubmission::with('salesOrder')->findOrFail($id);
+        $submission = SalesOrderSubmission::with('salesOrder.product')->findOrFail($id);
         $salesOrder = $submission->salesOrder;
 
         // Check if already moved to AR

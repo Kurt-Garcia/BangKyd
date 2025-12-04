@@ -42,12 +42,12 @@ class DashboardController extends Controller
         $totalAPPaid = AccountPayable::sum('paid_amount');
         
         // Recent Activity
-        $recentSubmissions = SalesOrderSubmission::with('salesOrder')
+        $recentSubmissions = SalesOrderSubmission::with('salesOrder.product')
             ->latest()
             ->take(5)
             ->get();
         
-        $recentPayments = AccountReceivable::with('submission.salesOrder', 'payments')
+        $recentPayments = AccountReceivable::with('submission.salesOrder.product', 'payments')
             ->whereHas('payments')
             ->latest()
             ->take(5)

@@ -50,10 +50,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/users', [\App\Http\Controllers\UserManagementController::class, 'index'])->name('users.index');
     Route::get('/users/create', [\App\Http\Controllers\UserManagementController::class, 'create'])->name('users.create');
     Route::post('/users', [\App\Http\Controllers\UserManagementController::class, 'store'])->name('users.store');
+    Route::get('/users/{id}/edit', [\App\Http\Controllers\UserManagementController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{id}', [\App\Http\Controllers\UserManagementController::class, 'update'])->name('users.update');
     Route::delete('/users/{id}', [\App\Http\Controllers\UserManagementController::class, 'destroy'])->name('users.destroy');
     
     Route::get('/change-password', [\App\Http\Controllers\UserManagementController::class, 'changePassword'])->name('change-password');
     Route::put('/change-password', [\App\Http\Controllers\UserManagementController::class, 'updatePassword'])->name('change-password.update');
     
     Route::get('/activity-logs', [\App\Http\Controllers\UserManagementController::class, 'activityLogs'])->name('activity-logs');
+    
+    // Product Management Routes
+    Route::resource('products', \App\Http\Controllers\ProductController::class);
+    Route::get('/api/products', [\App\Http\Controllers\ProductController::class, 'getProducts'])->name('api.products');
 });

@@ -57,6 +57,7 @@
                         <tr>
                             <th>SO Number</th>
                             <th>SO Name</th>
+                            <th>Product</th>
                             <th>Price/Pcs</th>
                             <th>Customer Link</th>
                             <th>Status</th>
@@ -69,7 +70,8 @@
                         <tr>
                             <td><strong>{{ $so->so_number }}</strong></td>
                             <td>{{ $so->so_name }}</td>
-                            <td><span class="badge bg-info">₱{{ number_format($so->price_per_pcs, 2) }}</span></td>
+                            <td><span class="badge bg-secondary">{{ $so->product->name ?? 'N/A' }}</span></td>
+                            <td><span class="badge bg-info">₱{{ $so->product ? number_format($so->product->price, 2) : '0.00' }}</span></td>
                             <td>
                                 <div class="input-group input-group-sm" style="max-width: 350px;">
                                     <input type="text" class="form-control" value="{{ $so->customer_link }}" id="link-{{ $so->id }}" readonly>
@@ -103,17 +105,21 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="row mb-3">
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <h6 class="text-muted">SO Number</h6>
                                                 <p class="fw-bold">{{ $so->so_number }}</p>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <h6 class="text-muted">SO Name</h6>
                                                 <p>{{ $so->so_name }}</p>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
+                                                <h6 class="text-muted">Product</h6>
+                                                <p class="fw-bold">{{ $so->product->name ?? 'N/A' }}</p>
+                                            </div>
+                                            <div class="col-md-3">
                                                 <h6 class="text-muted">Price per Piece</h6>
-                                                <p class="fw-bold text-primary">₱{{ number_format($so->price_per_pcs, 2) }}</p>
+                                                <p class="fw-bold text-primary">₱{{ $so->product ? number_format($so->product->price, 2) : '0.00' }}</p>
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -194,12 +200,13 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <label for="price_per_pcs" class="form-label">Price per Piece (₱) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('price_per_pcs') is-invalid @enderror" 
-                               id="price_per_pcs" name="price_per_pcs" value="{{ old('price_per_pcs') }}" 
-                               placeholder="e.g., 280" step="0.01" min="0" required>
-                        <small class="text-muted">Enter the price per jersey</small>
-                        @error('price_per_pcs')
+                        <label for="product_id" class="form-label">Product <span class="text-danger">*</span></label>
+                        <select class="form-select @error('product_id') is-invalid @enderror" 
+                                id="product_id" name="product_id" required>
+                            <option value="">-- Select Product --</option>
+                        </select>
+                        <small class="text-muted">Select the product type (Jersey, Shorts, Polo, etc.)</small>
+                        @error('product_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -246,6 +253,29 @@ function copyModalLink(id) {
         btn.innerHTML = originalHTML;
     }, 2000);
 }
+
+// Load products when modal opens
+document.addEventListener('DOMContentLoaded', function() {
+    const createSOModal = document.getElementById('createSOModal');
+    const productSelect = document.getElementById('product_id');
+    
+    createSOModal.addEventListener('shown.bs.modal', function() {
+        // Load products only if not already loaded
+        if (productSelect.options.length === 1) {
+            fetch('{{ route("api.products") }}')
+                .then(response => response.json())
+                .then(products => {
+                    products.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.id;
+                        option.textContent = product.name + ' - ₱' + parseFloat(product.price).toFixed(2);
+                        productSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading products:', error));
+        }
+    });
+});
 
 @if($errors->any())
     // Reopen modal if there are validation errors

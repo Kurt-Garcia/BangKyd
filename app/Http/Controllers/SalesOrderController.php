@@ -38,7 +38,7 @@ class SalesOrderController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $salesOrders = $query->latest()->get();
+        $salesOrders = $query->with('product')->latest()->get();
         
         return view('sales_orders.SO_page', compact('salesOrders'));
     }
@@ -52,13 +52,13 @@ class SalesOrderController extends Controller
     {
         $request->validate([
             'so_name' => 'required|string|max:255',
-            'price_per_pcs' => 'required|numeric|min:0',
+            'product_id' => 'required|exists:products,id',
         ]);
 
         $so = SalesOrder::create([
             'so_number' => SalesOrder::generateSONumber(),
             'so_name' => $request->so_name,
-            'price_per_pcs' => $request->price_per_pcs,
+            'product_id' => $request->product_id,
             'unique_link' => SalesOrder::generateUniqueLink(),
             'is_submitted' => false,
         ]);

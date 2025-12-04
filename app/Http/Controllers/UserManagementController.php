@@ -17,15 +17,15 @@ class UserManagementController extends Controller
     public function index()
     {
         $users = User::orderBy('created_at', 'desc')->get();
-        return view('users.index', compact('users'));
+        return view('users.usersPage', compact('users'));
     }
 
     /**
-     * Show form to create new user
+     * Show form to create new user (redirect to index - modal opens there)
      */
     public function create()
     {
-        return view('users.create');
+        return redirect()->route('users.index');
     }
 
     /**
@@ -50,6 +50,44 @@ class UserManagementController extends Controller
         ActivityLog::log('create', "Created new user: {$user->name} (ID: {$user->id})", 'User', $user->id);
 
         return redirect()->route('users.index')->with('success', 'User created successfully!');
+    }
+
+    /**
+     * Show edit user form (redirect to index - modal opens there)
+     */
+    public function edit($id)
+    {
+        return redirect()->route('users.index');
+    }
+
+    /**
+     * Update user
+     */
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . $id,
+            'email' => 'required|email|unique:users,email,' . $id,
+            'password' => ['nullable', 'confirmed', Password::min(8)],
+        ]);
+
+        $user->name = $validated['name'];
+        $user->username = $validated['username'];
+        $user->email = $validated['email'];
+        
+        // Only update password if provided
+        if ($request->filled('password')) {
+            $user->password = Hash::make($validated['password']);
+        }
+        
+        $user->save();
+
+        ActivityLog::log('update', "Updated user: {$user->name} (ID: {$user->id})", 'User', $user->id);
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully!');
     }
 
     /**
