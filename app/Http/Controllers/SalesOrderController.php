@@ -38,7 +38,7 @@ class SalesOrderController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $salesOrders = $query->with('product')->latest()->get();
+        $salesOrders = $query->with(['product', 'products'])->latest()->get();
         
         return view('sales_orders.SO_page', compact('salesOrders'));
     }
@@ -52,16 +52,26 @@ class SalesOrderController extends Controller
     {
         $request->validate([
             'so_name' => 'required|string|max:255',
-            'product_id' => 'required|exists:products,id',
+            'products' => 'required|array|min:1',
+            'products.*' => 'required|exists:products,id',
         ]);
 
         $so = SalesOrder::create([
             'so_number' => SalesOrder::generateSONumber(),
             'so_name' => $request->so_name,
-            'product_id' => $request->product_id,
+            'product_id' => $request->products[0], // Keep first product for backward compatibility
             'unique_link' => SalesOrder::generateUniqueLink(),
             'is_submitted' => false,
         ]);
+
+        // Attach products with prices (quantity will be set when customer submits)
+        foreach ($request->products as $productId) {
+            $product = \App\Models\Product::find($productId);
+            $so->products()->attach($productId, [
+                'quantity' => 0, // Placeholder - will be updated when customer submits
+                'price' => $product->price, // Store price at time of order
+            ]);
+        }
 
         ActivityLog::log('create', "Created Sales Order: {$so->so_number} - {$so->so_name}", 'SalesOrder', $so->id);
 

@@ -21,9 +21,18 @@ class SalesOrder extends Model
         'draft_data' => 'array',
     ];
 
+    // Keep old relationship for backward compatibility
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    // New many-to-many relationship
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'sales_order_product')
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
     }
 
     public function submission()

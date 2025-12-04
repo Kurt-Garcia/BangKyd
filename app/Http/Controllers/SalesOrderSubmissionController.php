@@ -11,7 +11,7 @@ class SalesOrderSubmissionController extends Controller
 {
     public function showForm($uniqueLink)
     {
-        $salesOrder = SalesOrder::with('product')->where('unique_link', $uniqueLink)->firstOrFail();
+        $salesOrder = SalesOrder::with(['product', 'products'])->where('unique_link', $uniqueLink)->firstOrFail();
 
         if ($salesOrder->is_submitted) {
             $submission = $salesOrder->submission;
@@ -32,6 +32,7 @@ class SalesOrderSubmissionController extends Controller
         $request->validate([
             'images.*' => 'nullable|image|max:5120',
             'players.*.full_name' => 'required|string|max:255',
+            'players.*.product_id' => 'required|exists:products,id',
             'players.*.jersey_name' => 'required|string|max:255',
             'players.*.jersey_number' => 'required|integer',
             'players.*.jersey_size' => 'required|string',
@@ -56,9 +57,32 @@ class SalesOrderSubmissionController extends Controller
             $imagePaths = $salesOrder->draft_data['images'];
         }
 
-        // Calculate pricing
+        // Group players by product and calculate quantities
+        $productQuantities = [];
+        $totalAmount = 0;
+        
+        foreach ($request->players as $player) {
+            $productId = $player['product_id'];
+            if (!isset($productQuantities[$productId])) {
+                $productQuantities[$productId] = 0;
+            }
+            $productQuantities[$productId]++;
+        }
+        
+        // Update pivot table quantities and calculate total amount
+        foreach ($productQuantities as $productId => $quantity) {
+            $product = $salesOrder->products()->where('product_id', $productId)->first();
+            if ($product) {
+                // Update quantity in pivot table
+                $salesOrder->products()->updateExistingPivot($productId, [
+                    'quantity' => $quantity
+                ]);
+                // Add to total amount
+                $totalAmount += $quantity * $product->pivot->price;
+            }
+        }
+        
         $totalQuantity = count($request->players);
-        $totalAmount = $totalQuantity * $salesOrder->product->price;
         $downPayment = $totalAmount * 0.5; // 50% down payment
         $balance = $totalAmount - $downPayment;
 

@@ -17,4 +17,11 @@ class Product extends Model
         'price' => 'decimal:2',
         'is_active' => 'boolean'
     ];
+
+    public function salesOrders()
+    {
+        return $this->belongsToMany(SalesOrder::class, 'sales_order_product')
+            ->withPivot('quantity', 'price')
+            ->withTimestamps();
+    }
 }

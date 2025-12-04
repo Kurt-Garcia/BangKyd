@@ -70,9 +70,17 @@
                         <small>{{ $salesOrder->so_name }} ({{ $salesOrder->so_number }})</small>
                     </div>
                     <div class="text-end">
-                        <div class="badge bg-light text-dark fs-6">
-                            ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} / pcs
-                        </div>
+                        @if($salesOrder->products->count() > 0)
+                            @foreach($salesOrder->products as $product)
+                                <div class="badge bg-light text-dark mb-1">
+                                    {{ $product->name }}: ₱{{ number_format($product->pivot->price, 2) }}
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="badge bg-light text-dark fs-6">
+                                ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} / pcs
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -90,7 +98,15 @@
                 @endif
 
                 <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> <strong>Price:</strong> ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} per jersey | <strong>Down Payment:</strong> 50% upon order confirmation
+                    <i class="bi bi-info-circle"></i> <strong>Products & Prices:</strong> 
+                    @if($salesOrder->products->count() > 0)
+                        @foreach($salesOrder->products as $product)
+                            <span class="badge bg-primary">{{ $product->name }}: ₱{{ number_format($product->pivot->price, 2) }}</span>
+                        @endforeach
+                    @else
+                        ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} per item
+                    @endif
+                    | <strong>Down Payment:</strong> 50% upon order confirmation
                 </div>
 
                 <form action="{{ route('order.submit', $salesOrder->unique_link) }}" method="POST" enctype="multipart/form-data" id="orderForm">
@@ -121,50 +137,29 @@
 
                     <hr class="my-4">
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0"><i class="bi bi-people"></i> Player Information</h5>
-                        <button type="button" class="btn btn-sm text-white" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative; overflow: hidden;" onclick="addPlayer()">
-                            <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></span>
-                            <span style="position: relative; z-index: 1;"><i class="bi bi-plus-circle"></i> Add Player</span>
-                        </button>
-                    </div>
+                    <h5 class="mb-3"><i class="bi bi-people"></i> Player Information</h5>
 
-                    <div id="playersContainer">
-                        <div class="player-card" data-player="1">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="mb-0">Player 1</h6>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="removePlayer(1)" style="display: none;">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                    <div id="productsContainer">
+                        @foreach($salesOrder->products as $index => $product)
+                        <div class="card mb-3 product-group" data-product-id="{{ $product->id }}" data-product-name="{{ $product->name }}" data-product-price="{{ $product->pivot->price }}">
+                            <div class="card-header" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative;">
+                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);"></div>
+                                <div class="d-flex justify-content-between align-items-center" style="position: relative; z-index: 1;">
+                                    <h6 class="mb-0 text-white">
+                                        <i class="bi bi-box"></i> {{ $product->name }} - ₱{{ number_format($product->pivot->price, 2) }}
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="addPlayerToProduct({{ $product->id }})">
+                                        <i class="bi bi-plus-circle"></i> Add Player
+                                    </button>
+                                </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="players[0][full_name]" required>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="players[0][jersey_name]" required>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" name="players[0][jersey_number]" required>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="players[0][jersey_size]" required>
-                                        <option value="">Select Size</option>
-                                        <option value="XS">XS</option>
-                                        <option value="S">S</option>
-                                        <option value="M">M</option>
-                                        <option value="L">L</option>
-                                        <option value="XL">XL</option>
-                                        <option value="2XL">2XL</option>
-                                        <option value="3XL">3XL</option>
-                                    </select>
+                            <div class="card-body">
+                                <div class="players-list" id="players-{{ $product->id }}">
+                                    <!-- Players will be added here -->
                                 </div>
                             </div>
                         </div>
+                        @endforeach
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
@@ -258,7 +253,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         let playerCount = 1;
-        const pricePerPcs = {{ $salesOrder->product->price ?? 0 }};
+        
+        // Calculate price per player based on products
+        @if($salesOrder->products->count() > 0)
+        const pricePerPlayer = {{ $salesOrder->products->sum(function($p) { return $p->pivot->quantity * $p->pivot->price; }) }};
+        @else
+        const pricePerPlayer = {{ $salesOrder->product->price ?? 0 }};
+        @endif
         
         // Load draft data if exists
         @if($salesOrder->draft_data && isset($salesOrder->draft_data['players']))
@@ -278,37 +279,42 @@
             }
         }
 
-        function addPlayer() {
-            playerCount++;
-            const container = document.getElementById('playersContainer');
-            const playerIndex = container.children.length;
+        let globalPlayerIndex = 0;
+
+        function addPlayerToProduct(productId) {
+            const container = document.getElementById('players-' + productId);
+            const productGroup = document.querySelector(`[data-product-id="${productId}"]`);
+            const productName = productGroup.dataset.productName;
+            const productPrice = productGroup.dataset.productPrice;
             
+            const playerId = Date.now(); // Unique ID for this player
             const playerCard = document.createElement('div');
-            playerCard.className = 'player-card';
-            playerCard.setAttribute('data-player', playerCount);
+            playerCard.className = 'player-card mb-3';
+            playerCard.setAttribute('data-player-id', playerId);
             playerCard.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0">Player ${playerCount}</h6>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removePlayer(${playerCount})">
+                    <h6 class="mb-0">Player ${container.children.length + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removePlayerFromProduct(${playerId}, ${productId})">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
+                <input type="hidden" name="players[${globalPlayerIndex}][product_id]" value="${productId}">
                 <div class="row">
                     <div class="col-md-6 mb-2">
                         <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="players[${playerIndex}][full_name]" required>
+                        <input type="text" class="form-control" name="players[${globalPlayerIndex}][full_name]" required>
                     </div>
                     <div class="col-md-6 mb-2">
                         <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="players[${playerIndex}][jersey_name]" required>
+                        <input type="text" class="form-control" name="players[${globalPlayerIndex}][jersey_name]" required>
                     </div>
                     <div class="col-md-6 mb-2">
                         <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="players[${playerIndex}][jersey_number]" required>
+                        <input type="number" class="form-control" name="players[${globalPlayerIndex}][jersey_number]" required>
                     </div>
                     <div class="col-md-6 mb-2">
                         <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
-                        <select class="form-select" name="players[${playerIndex}][jersey_size]" required>
+                        <select class="form-select" name="players[${globalPlayerIndex}][jersey_size]" required>
                             <option value="">Select Size</option>
                             <option value="XS">XS</option>
                             <option value="S">S</option>
@@ -322,24 +328,41 @@
                 </div>
             `;
             container.appendChild(playerCard);
+            globalPlayerIndex++;
+            renumberPlayersInProduct(productId);
         }
 
-        function removePlayer(playerId) {
-            const playerCard = document.querySelector(`[data-player="${playerId}"]`);
+        function removePlayerFromProduct(playerId, productId) {
+            const playerCard = document.querySelector(`[data-player-id="${playerId}"]`);
             if (playerCard) {
                 playerCard.remove();
-                // Renumber remaining players
-                updatePlayerNumbers();
+                renumberPlayersInProduct(productId);
+                reindexAllPlayers();
             }
         }
 
-        function updatePlayerNumbers() {
-            const players = document.querySelectorAll('.player-card');
+        function renumberPlayersInProduct(productId) {
+            const container = document.getElementById('players-' + productId);
+            const players = container.querySelectorAll('.player-card');
             players.forEach((player, index) => {
                 const heading = player.querySelector('h6');
                 heading.textContent = `Player ${index + 1}`;
-                player.setAttribute('data-player', index + 1);
             });
+        }
+
+        function reindexAllPlayers() {
+            const allPlayers = document.querySelectorAll('.player-card');
+            allPlayers.forEach((player, index) => {
+                const inputs = player.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name && name.includes('players[')) {
+                        const newName = name.replace(/players\[\d+\]/, `players[${index}]`);
+                        input.setAttribute('name', newName);
+                    }
+                });
+            });
+            globalPlayerIndex = allPlayers.length;
         }
 
         function showConfirmation() {
@@ -350,32 +373,67 @@
                 return;
             }
 
-            // Get player count
-            const playerCards = document.querySelectorAll('.player-card');
-            const playerCount = playerCards.length;
+            // Get all product groups
+            const productGroups = {};
+            let totalAmount = 0;
+            let totalPlayers = 0;
+            
+            document.querySelectorAll('.product-group').forEach(group => {
+                const productId = group.dataset.productId;
+                const productName = group.dataset.productName;
+                const productPrice = parseFloat(group.dataset.productPrice);
+                const playersList = group.querySelector('.players-list');
+                const players = playersList.querySelectorAll('.player-card');
+                
+                if (players.length > 0) {
+                    productGroups[productId] = {
+                        name: productName,
+                        price: productPrice,
+                        players: []
+                    };
+                    
+                    players.forEach(card => {
+                        const fullName = card.querySelector('input[name*="[full_name]"]').value;
+                        const jerseyName = card.querySelector('input[name*="[jersey_name]"]').value;
+                        const jerseyNumber = card.querySelector('input[name*="[jersey_number]"]').value;
+                        const jerseySize = card.querySelector('select[name*="[jersey_size]"]').value;
+                        
+                        productGroups[productId].players.push({
+                            fullName,
+                            jerseyName,
+                            jerseyNumber,
+                            jerseySize
+                        });
+                        
+                        totalAmount += productPrice;
+                        totalPlayers++;
+                    });
+                }
+            });
 
-            // Calculate amounts
-            const totalAmount = playerCount * pricePerPcs;
+            // Calculate payment amounts
             const downPayment = totalAmount * 0.5;
             const balance = totalAmount - downPayment;
 
-            // Update summary
-            document.getElementById('confirmQty').textContent = playerCount;
-            document.getElementById('confirmPrice').textContent = pricePerPcs.toFixed(2);
+            // Update payment summary
+            document.getElementById('confirmQty').textContent = totalPlayers;
+            document.getElementById('confirmPrice').textContent = totalPlayers > 0 ? (totalAmount / totalPlayers).toFixed(2) : '0.00';
             document.getElementById('confirmTotal').textContent = totalAmount.toFixed(2);
             document.getElementById('confirmDown').textContent = downPayment.toFixed(2);
             document.getElementById('confirmBalance').textContent = balance.toFixed(2);
 
-            // Build player list summary
-            let playerList = '<h6>Players:</h6><ol>';
-            playerCards.forEach((card) => {
-                const fullName = card.querySelector('input[name*="[full_name]"]').value;
-                const jerseyName = card.querySelector('input[name*="[jersey_name]"]').value;
-                const jerseyNumber = card.querySelector('input[name*="[jersey_number]"]').value;
-                const jerseySize = card.querySelector('select[name*="[jersey_size]"]').value;
-                playerList += `<li><strong>${fullName}</strong> - Jersey: "${jerseyName}" #${jerseyNumber} (${jerseySize})</li>`;
+            // Build grouped player list summary
+            let playerList = '<h6>Order Summary by Product:</h6>';
+            Object.keys(productGroups).forEach(productId => {
+                const group = productGroups[productId];
+                playerList += `<div class="alert alert-info mb-2">
+                    <h6 class="mb-2"><strong>${group.name}</strong> (${group.players.length} players × ₱${group.price.toFixed(2)} = ₱${(group.players.length * group.price).toFixed(2)})</h6>
+                    <ol class="mb-0">`;
+                group.players.forEach(player => {
+                    playerList += `<li><strong>${player.fullName}</strong> - Jersey: "${player.jerseyName}" #${player.jerseyNumber} (${player.jerseySize})</li>`;
+                });
+                playerList += `</ol></div>`;
             });
-            playerList += '</ol>';
             document.getElementById('orderSummary').innerHTML = playerList;
 
             // Show modal
@@ -390,55 +448,57 @@
         // Load draft data on page load
         document.addEventListener('DOMContentLoaded', function() {
             if (draftPlayers && draftPlayers.length > 0) {
-                const container = document.getElementById('playersContainer');
-                
-                // Clear the default empty player card
-                container.innerHTML = '';
-                
-                // Add player cards from draft data
+                // Group draft players by product
                 draftPlayers.forEach((player, index) => {
-                    const playerCard = document.createElement('div');
-                    playerCard.className = 'player-card';
-                    playerCard.setAttribute('data-player', index + 1);
-                    playerCard.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">Player ${index + 1}</h6>
-                            <button type="button" class="btn btn-sm btn-danger" onclick="removePlayer(${index + 1})" ${index === 0 ? 'style="display: none;"' : ''}>
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="players[${index}][full_name]" value="${player.full_name || ''}" required>
+                    const productId = player.product_id;
+                    const container = document.getElementById('players-' + productId);
+                    
+                    if (container) {
+                        const playerId = Date.now() + index;
+                        const playerCard = document.createElement('div');
+                        playerCard.className = 'player-card mb-3';
+                        playerCard.setAttribute('data-player-id', playerId);
+                        playerCard.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Player ${container.children.length + 1}</h6>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="removePlayerFromProduct(${playerId}, ${productId})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="players[${index}][jersey_name]" value="${player.jersey_name || ''}" required>
+                            <input type="hidden" name="players[${index}][product_id]" value="${productId}">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="players[${index}][full_name]" value="${player.full_name || ''}" required>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="players[${index}][jersey_name]" value="${player.jersey_name || ''}" required>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="players[${index}][jersey_number]" value="${player.jersey_number || ''}" required>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="players[${index}][jersey_size]" required>
+                                        <option value="">Select Size</option>
+                                        <option value="XS" ${player.jersey_size === 'XS' ? 'selected' : ''}>XS</option>
+                                        <option value="S" ${player.jersey_size === 'S' ? 'selected' : ''}>S</option>
+                                        <option value="M" ${player.jersey_size === 'M' ? 'selected' : ''}>M</option>
+                                        <option value="L" ${player.jersey_size === 'L' ? 'selected' : ''}>L</option>
+                                        <option value="XL" ${player.jersey_size === 'XL' ? 'selected' : ''}>XL</option>
+                                        <option value="2XL" ${player.jersey_size === '2XL' ? 'selected' : ''}>2XL</option>
+                                        <option value="3XL" ${player.jersey_size === '3XL' ? 'selected' : ''}>3XL</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="players[${index}][jersey_number]" value="${player.jersey_number || ''}" required>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
-                                <select class="form-select" name="players[${index}][jersey_size]" required>
-                                    <option value="">Select Size</option>
-                                    <option value="XS" ${player.jersey_size === 'XS' ? 'selected' : ''}>XS</option>
-                                    <option value="S" ${player.jersey_size === 'S' ? 'selected' : ''}>S</option>
-                                    <option value="M" ${player.jersey_size === 'M' ? 'selected' : ''}>M</option>
-                                    <option value="L" ${player.jersey_size === 'L' ? 'selected' : ''}>L</option>
-                                    <option value="XL" ${player.jersey_size === 'XL' ? 'selected' : ''}>XL</option>
-                                    <option value="2XL" ${player.jersey_size === '2XL' ? 'selected' : ''}>2XL</option>
-                                    <option value="3XL" ${player.jersey_size === '3XL' ? 'selected' : ''}>3XL</option>
-                                </select>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(playerCard);
+                        `;
+                        container.appendChild(playerCard);
+                    }
                 });
                 
-                playerCount = draftPlayers.length;
+                globalPlayerIndex = draftPlayers.length;
             }
         });
     </script>

@@ -70,8 +70,29 @@
                         <tr>
                             <td><strong>{{ $so->so_number }}</strong></td>
                             <td>{{ $so->so_name }}</td>
-                            <td><span class="badge bg-secondary">{{ $so->product->name ?? 'N/A' }}</span></td>
-                            <td><span class="badge bg-info">₱{{ $so->product ? number_format($so->product->price, 2) : '0.00' }}</span></td>
+                            <td>
+                                @if($so->products->count() > 0)
+                                    @foreach($so->products as $product)
+                                        <span class="badge bg-secondary">{{ $product->name }}</span>
+                                    @endforeach
+                                @else
+                                    <span class="badge bg-secondary">{{ $so->product->name ?? 'N/A' }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($so->products->count() > 0)
+                                    @php $priceRange = $so->products->pluck('pivot.price'); @endphp
+                                    <span class="badge bg-info">
+                                        @if($priceRange->min() == $priceRange->max())
+                                            ₱{{ number_format($priceRange->first(), 2) }}
+                                        @else
+                                            ₱{{ number_format($priceRange->min(), 2) }} - ₱{{ number_format($priceRange->max(), 2) }}
+                                        @endif
+                                    </span>
+                                @else
+                                    <span class="badge bg-info">₱{{ $so->product ? number_format($so->product->price, 2) : '0.00' }}</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="input-group input-group-sm" style="max-width: 350px;">
                                     <input type="text" class="form-control" value="{{ $so->customer_link }}" id="link-{{ $so->id }}" readonly>
@@ -180,7 +201,7 @@
 
 <!-- Create Sales Order Modal -->
 <div class="modal fade" id="createSOModal" tabindex="-1" aria-labelledby="createSOModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="createSOModalLabel">Create New Sales Order</h5>
@@ -199,16 +220,33 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                    
                     <div class="mb-3">
-                        <label for="product_id" class="form-label">Product <span class="text-danger">*</span></label>
-                        <select class="form-select @error('product_id') is-invalid @enderror" 
-                                id="product_id" name="product_id" required>
-                            <option value="">-- Select Product --</option>
-                        </select>
-                        <small class="text-muted">Select the product type (Jersey, Shorts, Polo, etc.)</small>
-                        @error('product_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Products <span class="text-danger">*</span></label>
+                            <button type="button" class="btn btn-sm btn-success" onclick="addProductRow()">
+                                <i class="bi bi-plus-circle"></i> Add Product
+                            </button>
+                        </div>
+                        <div id="productsContainer">
+                            <div class="product-row card mb-2">
+                                <div class="card-body p-2">
+                                    <div class="row g-2">
+                                        <div class="col-md-10">
+                                            <select class="form-select form-select-sm product-select" name="products[]" required>
+                                                <option value="">-- Select Product --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeProductRow(this)" style="display:none;">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted">Add products for this order. Customers will select which product each player wants.</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -254,22 +292,84 @@ function copyModalLink(id) {
     }, 2000);
 }
 
+let productRowIndex = 1;
+let productsData = [];
+
+function addProductRow() {
+    const container = document.getElementById('productsContainer');
+    const rowCount = container.children.length;
+    
+    const productRow = document.createElement('div');
+    productRow.className = 'product-row card mb-2';
+    productRow.innerHTML = `
+        <div class="card-body p-2">
+            <div class="row g-2">
+                <div class="col-md-10">
+                    <select class="form-select form-select-sm product-select" name="products[]" required>
+                        <option value="">-- Select Product --</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeProductRow(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(productRow);
+    
+    // Populate the new select with products
+    const newSelect = productRow.querySelector('.product-select');
+    productsData.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.id;
+        option.textContent = product.name + ' - ₱' + parseFloat(product.price).toFixed(2);
+        newSelect.appendChild(option);
+    });
+    
+    productRowIndex++;
+    updateRemoveButtons();
+}
+
+function removeProductRow(button) {
+    button.closest('.product-row').remove();
+    updateRemoveButtons();
+}
+
+function updateRemoveButtons() {
+    const rows = document.querySelectorAll('.product-row');
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('button[onclick*="removeProductRow"]');
+        if (rows.length === 1) {
+            removeBtn.style.display = 'none';
+        } else {
+            removeBtn.style.display = 'block';
+        }
+    });
+}
+
 // Load products when modal opens
 document.addEventListener('DOMContentLoaded', function() {
     const createSOModal = document.getElementById('createSOModal');
-    const productSelect = document.getElementById('product_id');
     
     createSOModal.addEventListener('shown.bs.modal', function() {
         // Load products only if not already loaded
-        if (productSelect.options.length === 1) {
+        if (productsData.length === 0) {
             fetch('{{ route("api.products") }}')
                 .then(response => response.json())
                 .then(products => {
-                    products.forEach(product => {
-                        const option = document.createElement('option');
-                        option.value = product.id;
-                        option.textContent = product.name + ' - ₱' + parseFloat(product.price).toFixed(2);
-                        productSelect.appendChild(option);
+                    productsData = products;
+                    // Populate all existing selects
+                    document.querySelectorAll('.product-select').forEach(select => {
+                        if (select.options.length === 1) {
+                            products.forEach(product => {
+                                const option = document.createElement('option');
+                                option.value = product.id;
+                                option.textContent = product.name + ' - ₱' + parseFloat(product.price).toFixed(2);
+                                select.appendChild(option);
+                            });
+                        }
                     });
                 })
                 .catch(error => console.error('Error loading products:', error));
