@@ -71,7 +71,7 @@
                     </div>
                     <div class="text-end">
                         <div class="badge bg-light text-dark fs-6">
-                            ₱{{ number_format($salesOrder->product->price, 2) }} / pcs
+                            ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} / pcs
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                 @endif
 
                 <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> <strong>Price:</strong> ₱{{ number_format($salesOrder->product->price, 2) }} per jersey | <strong>Down Payment:</strong> 50% upon order confirmation
+                    <i class="bi bi-info-circle"></i> <strong>Price:</strong> ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} per jersey | <strong>Down Payment:</strong> 50% upon order confirmation
                 </div>
 
                 <form action="{{ route('order.submit', $salesOrder->unique_link) }}" method="POST" enctype="multipart/form-data" id="orderForm">

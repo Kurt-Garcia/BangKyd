@@ -11,7 +11,7 @@ class SalesOrderSubmissionController extends Controller
 {
     public function showForm($uniqueLink)
     {
-        $salesOrder = SalesOrder::where('unique_link', $uniqueLink)->firstOrFail();
+        $salesOrder = SalesOrder::with('product')->where('unique_link', $uniqueLink)->firstOrFail();
 
         if ($salesOrder->is_submitted) {
             $submission = $salesOrder->submission;
