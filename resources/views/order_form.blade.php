@@ -301,10 +301,6 @@
                 <input type="hidden" name="players[${globalPlayerIndex}][product_id]" value="${productId}">
                 <div class="row">
                     <div class="col-md-6 mb-2">
-                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="players[${globalPlayerIndex}][full_name]" required>
-                    </div>
-                    <div class="col-md-6 mb-2">
                         <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="players[${globalPlayerIndex}][jersey_name]" required>
                     </div>
@@ -393,17 +389,15 @@
                     };
                     
                     players.forEach(card => {
-                        const fullName = card.querySelector('input[name*="[full_name]"]').value;
-                        const jerseyName = card.querySelector('input[name*="[jersey_name]"]').value;
-                        const jerseyNumber = card.querySelector('input[name*="[jersey_number]"]').value;
-                        const jerseySize = card.querySelector('select[name*="[jersey_size]"]').value;
-                        
-                        productGroups[productId].players.push({
-                            fullName,
-                            jerseyName,
-                            jerseyNumber,
-                            jerseySize
-                        });
+            const jerseyName = card.querySelector('input[name*="[jersey_name]"]').value;
+            const jerseyNumber = card.querySelector('input[name*="[jersey_number]"]').value;
+            const jerseySize = card.querySelector('select[name*="[jersey_size]"]').value;
+            
+            productGroups[productId].players.push({
+                jerseyName,
+                jerseyNumber,
+                jerseySize
+            });
                         
                         totalAmount += productPrice;
                         totalPlayers++;
@@ -430,7 +424,7 @@
                     <h6 class="mb-2"><strong>${group.name}</strong> (${group.players.length} players × ₱${group.price.toFixed(2)} = ₱${(group.players.length * group.price).toFixed(2)})</h6>
                     <ol class="mb-0">`;
                 group.players.forEach(player => {
-                    playerList += `<li><strong>${player.fullName}</strong> - Jersey: "${player.jerseyName}" #${player.jerseyNumber} (${player.jerseySize})</li>`;
+                    playerList += `<li>Jersey: "${player.jerseyName}" #${player.jerseyNumber} (${player.jerseySize})</li>`;
                 });
                 playerList += `</ol></div>`;
             });
@@ -467,10 +461,6 @@
                             </div>
                             <input type="hidden" name="players[${index}][product_id]" value="${productId}">
                             <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="players[${index}][full_name]" value="${player.full_name || ''}" required>
-                                </div>
                                 <div class="col-md-6 mb-2">
                                     <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="players[${index}][jersey_name]" value="${player.jersey_name || ''}" required>

@@ -31,7 +31,6 @@ class SalesOrderSubmissionController extends Controller
 
         $request->validate([
             'images.*' => 'nullable|image|max:5120',
-            'players.*.full_name' => 'required|string|max:255',
             'players.*.product_id' => 'required|exists:products,id',
             'players.*.jersey_name' => 'required|string|max:255',
             'players.*.jersey_number' => 'required|integer',

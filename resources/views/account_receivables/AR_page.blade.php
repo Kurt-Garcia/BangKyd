@@ -178,7 +178,6 @@
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th>#</th>
-                                                        <th>Full Name</th>
                                                         <th>Jersey Name</th>
                                                         <th>Number</th>
                                                         <th>Size</th>
@@ -188,7 +187,6 @@
                                                     @foreach($ar->submission->players as $index => $player)
                                                     <tr>
                                                         <td>{{ $index + 1 }}</td>
-                                                        <td>{{ $player['full_name'] }}</td>
                                                         <td><strong>{{ $player['jersey_name'] }}</strong></td>
                                                         <td><span class="badge bg-secondary">{{ $player['jersey_number'] }}</span></td>
                                                         <td>{{ $player['jersey_size'] }}</td>

@@ -245,7 +245,7 @@
 <div class="welcome-banner">
     <div class="row align-items-center">
         <div class="col-md-8">
-            <h2 class="mb-3">Welcome back, {{ auth()->user()->username ?? auth()->user()->name }}! 👋</h2>
+            <h2 class="mb-3">Welcome back, {{ auth()->user()->username }}! 👋</h2>
             <p class="mb-0 fs-5 opacity-90">Here's what's happening with your business today.</p>
         </div>
         <div class="col-md-4 text-md-end">
