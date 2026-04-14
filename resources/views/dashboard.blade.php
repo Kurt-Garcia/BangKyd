@@ -458,38 +458,48 @@
                         <h6 class="mb-1 fw-bold">{{ $order->order_number }}</h6>
                         <p class="text-muted mb-0" style="font-size: 0.9rem;">{{ $order->accountReceivable->submission->salesOrder->so_name }}</p>
                     </div>
-                    @if($order->progress)
-                        @if($order->progress->current_stage === 'print_press')
-                            <span class="badge" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                                <i class="bi bi-printer me-1"></i>Print & Press
-                            </span>
-                        @elseif($order->progress->current_stage === 'tailoring')
-                            <span class="badge" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                <i class="bi bi-scissors me-1"></i>Tailoring
-                            </span>
-                        @else
-                            <span class="badge bg-secondary"><i class="bi bi-gear me-1"></i>Processing</span>
-                        @endif
+                    @if($order->status === 'completed')
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i>Completed
+                        </span>
+                    @elseif($order->status === 'claimed')
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-archive me-1"></i>Claimed
+                        </span>
+                    @elseif($order->status === 'ready_for_delivery')
+                        <span class="badge" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="bi bi-box me-1"></i>Ready
+                        </span>
+                    @elseif($order->status === 'ongoing')
+                        <span class="badge" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="bi bi-gear me-1"></i>Ongoing
+                        </span>
                     @else
-                        <span class="badge bg-secondary">Ongoing</span>
+                        <span class="badge bg-secondary">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span>
                     @endif
                 </div>
-                @if($order->progress)
+                @php
+                    $progressWidth = 0;
+                    if ($order->status === 'ongoing') {
+                        $progressWidth = 25;
+                    } elseif ($order->status === 'ready_for_delivery') {
+                        $progressWidth = 75;
+                    } elseif ($order->status === 'completed' || $order->status === 'claimed') {
+                        $progressWidth = 100;
+                    }
+                @endphp
                 <div class="progress progress-thin mb-2">
-                    <div class="progress-bar" style="width: {{ $order->progress->getProgressPercentage() }}%;">
+                    <div class="progress-bar" style="width: {{ $progressWidth }}%;">
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="text-muted">
-                        <i class="bi bi-percent me-1"></i>{{ $order->progress->getProgressPercentage() }}% Complete
+                        <i class="bi bi-percent me-1"></i>{{ $progressWidth }}% Complete
                     </small>
                     <small class="text-muted">
                         <i class="bi bi-box me-1"></i>{{ $order->accountReceivable->submission->total_quantity }} jerseys
                     </small>
                 </div>
-                @else
-                <small class="text-muted"><i class="bi bi-box me-1"></i>{{ $order->accountReceivable->submission->total_quantity }} jerseys</small>
-                @endif
             </div>
         </div>
         @empty

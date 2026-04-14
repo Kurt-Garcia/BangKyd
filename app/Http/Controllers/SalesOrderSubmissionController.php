@@ -31,6 +31,7 @@ class SalesOrderSubmissionController extends Controller
 
         $request->validate([
             'images.*' => 'nullable|image|max:5120',
+            'players' => 'required|array|min:1',
             'players.*.product_id' => 'required|exists:products,id',
             'players.*.jersey_name' => 'required|string|max:255',
             'players.*.jersey_number' => 'required|integer',
@@ -59,8 +60,9 @@ class SalesOrderSubmissionController extends Controller
         // Group players by product and calculate quantities
         $productQuantities = [];
         $totalAmount = 0;
+        $players = $request->input('players', []);
         
-        foreach ($request->players as $player) {
+        foreach ($players as $player) {
             $productId = $player['product_id'];
             if (!isset($productQuantities[$productId])) {
                 $productQuantities[$productId] = 0;
@@ -68,20 +70,31 @@ class SalesOrderSubmissionController extends Controller
             $productQuantities[$productId]++;
         }
         
-        // Update pivot table quantities and calculate total amount
+        // Attach products to Sales Order and calculate total amount
+        // First, clear any existing product relationships
+        $salesOrder->products()->detach();
+        
         foreach ($productQuantities as $productId => $quantity) {
-            $product = $salesOrder->products()->where('product_id', $productId)->first();
+            $product = \App\Models\Product::find($productId);
             if ($product) {
-                // Update quantity in pivot table
-                $salesOrder->products()->updateExistingPivot($productId, [
-                    'quantity' => $quantity
+                // Attach product with quantity and price
+                $salesOrder->products()->attach($productId, [
+                    'quantity' => $quantity,
+                    'price' => $product->price, // Store current price
                 ]);
                 // Add to total amount
-                $totalAmount += $quantity * $product->pivot->price;
+                $totalAmount += $quantity * $product->price;
             }
         }
         
-        $totalQuantity = count($request->players);
+        // Update Sales Order with first product for backward compatibility
+        if (!empty($productQuantities)) {
+            $salesOrder->update([
+                'product_id' => array_keys($productQuantities)[0]
+            ]);
+        }
+        
+        $totalQuantity = count($players);
         $downPayment = $totalAmount * 0.5; // 50% down payment
         $balance = $totalAmount - $downPayment;
 
@@ -89,7 +102,7 @@ class SalesOrderSubmissionController extends Controller
         $submission = SalesOrderSubmission::create([
             'sales_order_id' => $salesOrder->id,
             'images' => $imagePaths,
-            'players' => $request->players,
+            'players' => $players,
             'total_quantity' => $totalQuantity,
             'total_amount' => $totalAmount,
             'down_payment' => $downPayment,

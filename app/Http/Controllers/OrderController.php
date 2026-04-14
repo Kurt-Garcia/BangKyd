@@ -67,4 +67,19 @@ class OrderController extends Controller
         return redirect()->route('orders.index')
             ->with('success', 'Order status updated successfully!');
     }
+
+    public function markCompleted($id)
+    {
+        $order = Order::findOrFail($id);
+        
+        // Mark order as completed
+        $order->status = 'completed';
+        $order->completed_at = now();
+        $order->save();
+
+        ActivityLog::log('update', "Marked order {$order->order_number} as completed", 'Order', $order->id);
+
+        return redirect()->route('orders.index')
+            ->with('success', 'Order marked as completed successfully!');
+    }
 }

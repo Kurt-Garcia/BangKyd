@@ -52,31 +52,23 @@ class SalesOrderController extends Controller
     {
         $request->validate([
             'so_name' => 'required|string|max:255',
-            'products' => 'required|array|min:1',
-            'products.*' => 'required|exists:products,id',
         ]);
 
         $so = SalesOrder::create([
             'so_number' => SalesOrder::generateSONumber(),
             'so_name' => $request->so_name,
-            'product_id' => $request->products[0], // Keep first product for backward compatibility
+            'product_id' => null, // No pre-selected products
             'unique_link' => SalesOrder::generateUniqueLink(),
             'is_submitted' => false,
         ]);
 
-        // Attach products with prices (quantity will be set when customer submits)
-        foreach ($request->products as $productId) {
-            $product = \App\Models\Product::find($productId);
-            $so->products()->attach($productId, [
-                'quantity' => 0, // Placeholder - will be updated when customer submits
-                'price' => $product->price, // Store price at time of order
-            ]);
-        }
+        // No products are attached at SO creation
+        // Products will be selected by customers in the order form
 
         ActivityLog::log('create', "Created Sales Order: {$so->so_number} - {$so->so_name}", 'SalesOrder', $so->id);
 
         return redirect()->route('sales-orders.index')
-            ->with('success', 'Sales Order created successfully! Link: ' . $so->customer_link);
+            ->with('success', 'Sales Order created successfully! Customer can now select products via link: ' . $so->customer_link);
     }
 
     public function show($id)

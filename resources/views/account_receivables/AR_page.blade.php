@@ -174,26 +174,39 @@
                                         <!-- Order Details -->
                                         <h6 class="border-bottom pb-2 mt-4"><i class="bi bi-people"></i> Order Details ({{ $ar->submission->total_quantity }} jerseys)</h6>
                                         <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Jersey Name</th>
-                                                        <th>Number</th>
-                                                        <th>Size</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($ar->submission->players as $index => $player)
-                                                    <tr>
-                                                        <td>{{ $index + 1 }}</td>
-                                                        <td><strong>{{ $player['jersey_name'] }}</strong></td>
-                                                        <td><span class="badge bg-secondary">{{ $player['jersey_number'] }}</span></td>
-                                                        <td>{{ $player['jersey_size'] }}</td>
-                                                    </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
+                                            @php
+                                                $playersByProduct = collect($ar->submission->players)->groupBy('product_id');
+                                            @endphp
+
+                                            @foreach($playersByProduct as $productId => $players)
+                                                @php
+                                                    $product = \App\Models\Product::find($productId);
+                                                    $productName = $product ? $product->name : 'Unknown Product';
+                                                @endphp
+                                                <div class="mt-3 mb-2">
+                                                    <h6 class="text-primary"><i class="bi bi-box"></i> {{ $productName }} <span class="badge bg-secondary ms-2">{{ count($players) }} pcs</span></h6>
+                                                </div>
+                                                <table class="table table-sm mb-4">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Jersey Name</th>
+                                                            <th>Number</th>
+                                                            <th>Size</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($players as $index => $player)
+                                                        <tr>
+                                                            <td>{{ $index + 1 }}</td>
+                                                            <td><strong>{{ $player['jersey_name'] }}</strong></td>
+                                                            <td><span class="badge bg-secondary">{{ $player['jersey_number'] }}</span></td>
+                                                            <td>{{ $player['jersey_size'] }}</td>
+                                                        </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            @endforeach
                                         </div>
                                     </div>
                                     <div class="modal-footer">

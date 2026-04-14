@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
+            background: url('{{ asset('img/BG.jpg') }}') center center fixed;
             background-size: cover;
-            position: relative;
             min-height: 100vh;
-            padding: 2rem 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
         }
         
         body::before {
@@ -22,183 +22,384 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.7);
             z-index: -1;
         }
-        .form-container {
-            max-width: 800px;
-            margin: 0 auto;
+        
+        .main-container {
+            min-height: 100vh;
+            padding: 2rem 0 8rem 0;
+            position: relative;
+            z-index: 1;
         }
-        .card {
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        
+        .header-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
-        .image-upload-box {
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
+        
+        .upload-section {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2.5rem 2rem;
+            color: white;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .text-primary {
+            color: #333 !important;
+        }
+        
+        .btn-primary {
+            background-color: #333;
+            border-color: #333;
+        }
+        
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: #555;
+            border-color: #555;
+        }
+        
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .upload-card {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
-        .image-upload-box:hover {
-            border-color: #f04826;
-            background-color: #fff5f3;
+        
+        .upload-card:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-5px);
         }
+        
+        .upload-card i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
         .image-preview {
             max-width: 100%;
-            max-height: 150px;
+            max-height: 120px;
+            border-radius: 10px;
             margin-top: 10px;
-            border-radius: 8px;
         }
-        .player-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #f8f9fa;
+        
+        .products-section {
+            margin-top: 2rem;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 6rem;
+            padding-bottom: 2rem;
+        }
+        
+        .product-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: #333;
+        }
+        
+        .product-card.selected {
+            border-color: #333;
+            background: rgba(255, 255, 255, 0.98);
+        }
+        
+        .product-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #333;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .product-card.selected .product-header {
+            background: rgba(0, 0, 0, 0.05);
+            color: #333;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-body {
+            padding: 1.5rem;
+            color: #444;
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #333;
+            color: white;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .player-count {
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 0.8rem;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+        }
+        
+        .order-summary {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            padding: 1.5rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .section-title {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn-floating {
+            position: fixed;
+            bottom: 6rem;
+            right: 2rem;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.8rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-floating:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5);
+            background: black;
+        }
+        
+        .btn-floating:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
-    <div class="container form-container">
-        <div class="card">
-            <div class="card-header text-white" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative;">
-                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);"></div>
-                <div class="d-flex justify-content-between align-items-center" style="position: relative; z-index: 1;">
-                    <div>
-                        <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Order Form</h4>
-                        <small>{{ $salesOrder->so_name }} ({{ $salesOrder->so_number }})</small>
-                    </div>
-                    <div class="text-end">
-                        @if($salesOrder->products->count() > 0)
-                            @foreach($salesOrder->products as $product)
-                                <div class="badge bg-light text-dark mb-1">
-                                    {{ $product->name }}: ₱{{ number_format($product->pivot->price, 2) }}
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="badge bg-light text-dark fs-6">
-                                ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} / pcs
-                            </div>
-                        @endif
-                    </div>
+    <div class="main-container">
+        <div class="container-fluid">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="text-center p-5">
+                    <h1 class="display-4 fw-bold mb-2" style="color: #333; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"><i class="bi bi-clipboard-check"></i> Order Form</h1>
+                    <p class="text-muted fs-5 mb-0">{{ $salesOrder->so_name }} <span class="badge bg-secondary ms-2">{{ $salesOrder->so_number }}</span></p>
                 </div>
-            </div>
-            <div class="card-body">
+                
                 @if(session('error'))
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger mx-4">
                         {{ session('error') }}
                     </div>
                 @endif
 
                 @if($salesOrder->draft_data)
-                    <div class="alert alert-warning">
+                    <div class="alert alert-warning mx-4">
                         <i class="bi bi-exclamation-circle"></i> <strong>Resubmission Requested:</strong> You can edit your previous submission below. Please review and make any necessary corrections.
                     </div>
                 @endif
-
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> <strong>Products & Prices:</strong> 
-                    @if($salesOrder->products->count() > 0)
-                        @foreach($salesOrder->products as $product)
-                            <span class="badge bg-primary">{{ $product->name }}: ₱{{ number_format($product->pivot->price, 2) }}</span>
-                        @endforeach
-                    @else
-                        ₱{{ number_format($salesOrder->product->price ?? 0, 2) }} per item
-                    @endif
-                    | <strong>Down Payment:</strong> 50% upon order confirmation
-                </div>
-
+                
+                <!-- Upload Design Section -->
                 <form action="{{ route('order.submit', $salesOrder->unique_link) }}" method="POST" enctype="multipart/form-data" id="orderForm">
                     @csrf
-                    
-                    <h5 class="mb-3"><i class="bi bi-images"></i> Upload Design Images (Up to 3)</h5>
-                    <div class="row mb-4">
-                        @for($i = 1; $i <= 3; $i++)
-                        <div class="col-md-4 mb-3">
-                            <label class="image-upload-box" for="image{{ $i }}">
+                    <div class="upload-section">
+                        <h3><i class="bi bi-images"></i> Upload Your Design</h3>
+                        <p class="mb-0">Share your jersey design with us (up to 3 images)</p>
+                        <div class="upload-grid">
+                            @for($i = 1; $i <= 3; $i++)
+                            <div class="upload-card" onclick="document.getElementById('image{{ $i }}').click()">
                                 <input type="file" class="d-none" id="image{{ $i }}" name="images[]" accept="image/*" onchange="previewImage(this, {{ $i }})">
-                                <div id="preview{{ $i }}">
+                                <div id="uploadPreview{{ $i }}">
                                     @if($salesOrder->draft_data && isset($salesOrder->draft_data['images'][$i-1]))
                                         <img src="{{ asset('storage/' . $salesOrder->draft_data['images'][$i-1]) }}" class="image-preview" alt="Previous Upload">
-                                        <p class="mb-0 text-muted mt-2"><small>Click to change</small></p>
+                                        <small class="d-block mt-2">Click to change</small>
                                     @else
-                                        <i class="bi bi-cloud-upload fs-1 text-muted"></i>
-                                        <p class="mb-0 text-muted">Click to upload<br><small>Image {{ $i }}</small></p>
+                                        <i class="bi bi-cloud-upload"></i>
+                                        <small>Image {{ $i }}</small>
                                     @endif
                                 </div>
-                            </label>
-                            @error('images.' . ($i-1))
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                        @endfor
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h5 class="mb-3"><i class="bi bi-people"></i> Player Information</h5>
-
-                    <div id="productsContainer">
-                        @foreach($salesOrder->products as $index => $product)
-                        <div class="card mb-3 product-group" data-product-id="{{ $product->id }}" data-product-name="{{ $product->name }}" data-product-price="{{ $product->pivot->price }}">
-                            <div class="card-header" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative;">
-                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);"></div>
-                                <div class="d-flex justify-content-between align-items-center" style="position: relative; z-index: 1;">
-                                    <h6 class="mb-0 text-white">
-                                        <i class="bi bi-box"></i> {{ $product->name }} - ₱{{ number_format($product->pivot->price, 2) }}
-                                    </h6>
-                                    <button type="button" class="btn btn-sm btn-success" onclick="addPlayerToProduct({{ $product->id }})">
-                                        <i class="bi bi-plus-circle"></i> Add Player
-                                    </button>
-                                </div>
+                                @error('images.' . ($i-1))
+                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                @enderror
                             </div>
-                            <div class="card-body">
-                                <div class="players-list" id="players-{{ $product->id }}">
-                                    <!-- Players will be added here -->
-                                </div>
-                            </div>
+                            @endfor
                         </div>
-                        @endforeach
-                    </div>
-
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="button" class="btn btn-lg text-white" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative; overflow: hidden;" onclick="showConfirmation()">
-                            <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></span>
-                            <span style="position: relative; z-index: 1;"><i class="bi bi-check-circle"></i> Review & Submit Order</span>
-                        </button>
                     </div>
                 </form>
             </div>
+
+            <!-- Products Section -->
+            <div class="products-section">
+                <h2 class="section-title">Choose Your Products</h2>
+                <p class="text-center text-white mb-4">Click on a product card to add players</p>
+                
+                <div id="productsError" class="alert alert-danger d-none mx-4">
+                    <i class="bi bi-exclamation-triangle"></i> <strong>Error:</strong> 
+                    <span id="errorMessage">Failed to load products.</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="retryLoadProducts()">
+                        <i class="bi bi-arrow-clockwise"></i> Retry
+                    </button>
+                </div>
+                
+                <div class="products-grid" id="productsGrid">
+                    <div class="text-center text-white">
+                        <div class="loading-spinner"></div>
+                        <p class="mt-2">Loading products...</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="text-center mt-3">
-            <small class="text-white">{{ \App\Models\SystemSetting::get('business_name', 'BangKyd ERP') }}</small>
-            @if(\App\Models\SystemSetting::get('business_phone') || \App\Models\SystemSetting::get('business_email'))
-                <br>
-                <small class="text-white">
-                    @if(\App\Models\SystemSetting::get('business_phone'))
-                        <i class="bi bi-telephone"></i> {{ \App\Models\SystemSetting::get('business_phone') }}
-                    @endif
-                    @if(\App\Models\SystemSetting::get('business_phone') && \App\Models\SystemSetting::get('business_email'))
-                        |
-                    @endif
-                    @if(\App\Models\SystemSetting::get('business_email'))
-                        <i class="bi bi-envelope"></i> {{ \App\Models\SystemSetting::get('business_email') }}
-                    @endif
-                </small>
-            @endif
+    </div>
+
+    <!-- Order Summary Footer -->
+    <div class="order-summary" id="orderSummary" style="display: none;">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h6 class="mb-1"><i class="bi bi-cart"></i> Order Summary</h6>
+                    <small class="text-muted">Total Players: <span id="playerCount">0</span></small>
+                </div>
+                <div class="col-md-4 text-end">
+                    <h5 class="mb-0" id="totalAmount">₱0.00</h5>
+                    <small class="text-muted">Total Amount</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Submit Button -->
+    <button type="button" class="btn-floating d-none" id="submitBtn" title="Submit Order" onclick="submitFormManually()">
+        <i class="bi bi-send-fill"></i>
+    </button>
+
+    <!-- Product Selection Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 15px; overflow: hidden; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                <div class="modal-header bg-dark text-white" style="border-bottom: none;">
+                    <h5 class="modal-title" id="modalProductTitle">
+                        <i class="bi bi-person-plus"></i> Add Players
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Add all players who want this product. You can add multiple players at once.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0 fw-bold">Players List</h6>
+                        <button type="button" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm" onclick="addModalPlayer()">
+                            <i class="bi bi-plus-circle"></i> Add Player
+                        </button>
+                    </div>
+                    
+                    <div id="modalPlayersContainer">
+                        <div class="text-center text-muted py-5 bg-light rounded-3 border-dashed" id="modalEmptyState" style="border: 2px dashed #dee2e6;">
+                            <i class="bi bi-person-plus text-secondary" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">No Players Added Yet</h5>
+                            <p class="text-muted">Click the "Add Player" button above to get started.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveModalPlayers()">
+                        <i class="bi bi-check-circle"></i> Save Players
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Confirmation Modal -->
     <div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirm Your Order</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-content" style="border-radius: 15px; overflow: hidden; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                <div class="modal-header bg-dark text-white" style="border-bottom: none;">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Confirm Your Order</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <div class="alert alert-info">
                         <strong>Please review your order carefully before submitting.</strong>
                     </div>
@@ -250,246 +451,435 @@
         </div>
     </div>
 
+    <!-- Draft data bootstrap (for resubmission persistence) -->
+    <script>
+        window.__draftPlayers = @json($salesOrder->draft_data['players'] ?? []);
+        window.__draftImages = @json($salesOrder->draft_data['images'] ?? []);
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-        let playerCount = 1;
-        
-        // Calculate price per player based on products
-        @if($salesOrder->products->count() > 0)
-        const pricePerPlayer = {{ $salesOrder->products->sum(function($p) { return $p->pivot->quantity * $p->pivot->price; }) }};
-        @else
-        const pricePerPlayer = {{ $salesOrder->product->price ?? 0 }};
-        @endif
-        
-        // Load draft data if exists
-        @if($salesOrder->draft_data && isset($salesOrder->draft_data['players']))
-        const draftPlayers = @json($salesOrder->draft_data['players']);
-        @else
-        const draftPlayers = null;
-        @endif
+        let isSubmitting = false;
+        let availableProducts = [];
+        let productsLoaded = false;
+        let orderData = {}; // Store players by product ID
+        let currentProductId = null;
+        let modalPlayerIndex = 0;
+        let hydratedFromDraft = false;
 
         function previewImage(input, index) {
-            const preview = document.getElementById('preview' + index);
+            const preview = document.getElementById('uploadPreview' + index);
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    preview.innerHTML = '<img src="' + e.target.result + '" class="image-preview" alt="Preview">';
+                    preview.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="Preview"><small class="d-block mt-2">Click to change</small>`;
                 }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        let globalPlayerIndex = 0;
-
-        function addPlayerToProduct(productId) {
-            const container = document.getElementById('players-' + productId);
-            const productGroup = document.querySelector(`[data-product-id="${productId}"]`);
-            const productName = productGroup.dataset.productName;
-            const productPrice = productGroup.dataset.productPrice;
+        // Load available products
+        async function loadProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            const productsError = document.getElementById('productsError');
+            const errorMessage = document.getElementById('errorMessage');
             
-            const playerId = Date.now(); // Unique ID for this player
-            const playerCard = document.createElement('div');
-            playerCard.className = 'player-card mb-3';
-            playerCard.setAttribute('data-player-id', playerId);
-            playerCard.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="mb-0">Player ${container.children.length + 1}</h6>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removePlayerFromProduct(${playerId}, ${productId})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-                <input type="hidden" name="players[${globalPlayerIndex}][product_id]" value="${productId}">
-                <div class="row">
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="players[${globalPlayerIndex}][jersey_name]" required>
+            try {
+                // Show loading state
+                productsError.classList.add('d-none');
+                
+                console.log('Fetching products from:', '{{ route("api.products") }}');
+                console.log('Current page URL:', window.location.href);
+                
+                let apiUrl = '{{ route("api.products") }}';
+                // For Laravel dev server, ensure we use the correct base URL
+                if (window.location.host.includes(':8000') || window.location.host.includes('127.0.0.1')) {
+                    apiUrl = window.location.origin + '/api/products';
+                }
+                // If the generated route doesn't include the subdirectory, construct it manually for Apache
+                else if (window.location.pathname.includes('/BangKyd/')) {
+                    apiUrl = window.location.origin + '/BangKyd/api/products';
+                }
+                console.log('Using API URL:', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const products = await response.json();
+                console.log('Raw API response:', products);
+                
+                if (!Array.isArray(products)) {
+                    console.error('API response is not an array:', products);
+                    throw new Error('Invalid response format from products API');
+                }
+                
+                // Server already filters for active products, so we can use them directly
+                availableProducts = products;
+                
+                console.log('Available products (pre-filtered by server):', availableProducts);
+                
+                // Hydrate previous selection from draft (if any)
+                hydrateOrderDataFromDraft();
+                
+                if (availableProducts.length === 0) {
+                    console.warn('No products returned from API');
+                    throw new Error('No products available. Please add products in the admin panel.');
+                }
+                
+                productsLoaded = true;
+                displayProducts();
+                updateOrderSummary();
+                
+            } catch (error) {
+                console.error('Error loading products:', error);
+                productsLoaded = false;
+                
+                // Show error state
+                productsError.classList.remove('d-none');
+                errorMessage.textContent = error.message || 'Failed to load available products. Please try again.';
+                
+                // Show error in products grid
+                productsGrid.innerHTML = `
+                    <div class="col-12 text-center text-white">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                        <p class="mt-2">${error.message}</p>
                     </div>
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="players[${globalPlayerIndex}][jersey_number]" required>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                        <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
-                        <select class="form-select" name="players[${globalPlayerIndex}][jersey_size]" required>
-                            <option value="">Select Size</option>
-                            <option value="XS">XS</option>
-                            <option value="S">S</option>
-                            <option value="M">M</option>
-                            <option value="L">L</option>
-                            <option value="XL">XL</option>
-                            <option value="2XL">2XL</option>
-                            <option value="3XL">3XL</option>
-                        </select>
-                    </div>
-                </div>
-            `;
-            container.appendChild(playerCard);
-            globalPlayerIndex++;
-            renumberPlayersInProduct(productId);
-        }
-
-        function removePlayerFromProduct(playerId, productId) {
-            const playerCard = document.querySelector(`[data-player-id="${playerId}"]`);
-            if (playerCard) {
-                playerCard.remove();
-                renumberPlayersInProduct(productId);
-                reindexAllPlayers();
+                `;
             }
         }
 
-        function renumberPlayersInProduct(productId) {
-            const container = document.getElementById('players-' + productId);
-            const players = container.querySelectorAll('.player-card');
-            players.forEach((player, index) => {
-                const heading = player.querySelector('h6');
-                heading.textContent = `Player ${index + 1}`;
-            });
-        }
-
-        function reindexAllPlayers() {
-            const allPlayers = document.querySelectorAll('.player-card');
-            allPlayers.forEach((player, index) => {
-                const inputs = player.querySelectorAll('input, select');
-                inputs.forEach(input => {
-                    const name = input.getAttribute('name');
-                    if (name && name.includes('players[')) {
-                        const newName = name.replace(/players\[\d+\]/, `players[${index}]`);
-                        input.setAttribute('name', newName);
-                    }
-                });
-            });
-            globalPlayerIndex = allPlayers.length;
-        }
-
-        function showConfirmation() {
-            // Validate form first
-            const form = document.getElementById('orderForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
+        function hydrateOrderDataFromDraft() {
+            if (hydratedFromDraft) return;
+            const draftPlayers = Array.isArray(window.__draftPlayers) ? window.__draftPlayers : [];
+            if (draftPlayers.length === 0) {
+                hydratedFromDraft = true;
                 return;
             }
-
-            // Get all product groups
-            const productGroups = {};
-            let totalAmount = 0;
-            let totalPlayers = 0;
-            
-            document.querySelectorAll('.product-group').forEach(group => {
-                const productId = group.dataset.productId;
-                const productName = group.dataset.productName;
-                const productPrice = parseFloat(group.dataset.productPrice);
-                const playersList = group.querySelector('.players-list');
-                const players = playersList.querySelectorAll('.player-card');
-                
-                if (players.length > 0) {
-                    productGroups[productId] = {
-                        name: productName,
-                        price: productPrice,
-                        players: []
-                    };
-                    
-                    players.forEach(card => {
-            const jerseyName = card.querySelector('input[name*="[jersey_name]"]').value;
-            const jerseyNumber = card.querySelector('input[name*="[jersey_number]"]').value;
-            const jerseySize = card.querySelector('select[name*="[jersey_size]"]').value;
-            
-            productGroups[productId].players.push({
-                jerseyName,
-                jerseyNumber,
-                jerseySize
-            });
-                        
-                        totalAmount += productPrice;
-                        totalPlayers++;
-                    });
-                }
-            });
-
-            // Calculate payment amounts
-            const downPayment = totalAmount * 0.5;
-            const balance = totalAmount - downPayment;
-
-            // Update payment summary
-            document.getElementById('confirmQty').textContent = totalPlayers;
-            document.getElementById('confirmPrice').textContent = totalPlayers > 0 ? (totalAmount / totalPlayers).toFixed(2) : '0.00';
-            document.getElementById('confirmTotal').textContent = totalAmount.toFixed(2);
-            document.getElementById('confirmDown').textContent = downPayment.toFixed(2);
-            document.getElementById('confirmBalance').textContent = balance.toFixed(2);
-
-            // Build grouped player list summary
-            let playerList = '<h6>Order Summary by Product:</h6>';
-            Object.keys(productGroups).forEach(productId => {
-                const group = productGroups[productId];
-                playerList += `<div class="alert alert-info mb-2">
-                    <h6 class="mb-2"><strong>${group.name}</strong> (${group.players.length} players × ₱${group.price.toFixed(2)} = ₱${(group.players.length * group.price).toFixed(2)})</h6>
-                    <ol class="mb-0">`;
-                group.players.forEach(player => {
-                    playerList += `<li>Jersey: "${player.jerseyName}" #${player.jerseyNumber} (${player.jerseySize})</li>`;
+            const grouped = {};
+            draftPlayers.forEach(p => {
+                if (!p || !p.product_id) return;
+                if (!grouped[p.product_id]) grouped[p.product_id] = [];
+                grouped[p.product_id].push({
+                    jersey_name: p.jersey_name || '',
+                    jersey_number: p.jersey_number || '',
+                    jersey_size: p.jersey_size || ''
                 });
-                playerList += `</ol></div>`;
             });
-            document.getElementById('orderSummary').innerHTML = playerList;
+            orderData = grouped;
+            hydratedFromDraft = true;
+            console.log('Hydrated orderData from draft:', orderData);
+        }
 
+        function displayProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            let html = '';
+            
+            availableProducts.forEach(product => {
+                const playerCount = orderData[product.id] ? orderData[product.id].length : 0;
+                html += `
+                    <div class="product-card ${playerCount > 0 ? 'selected' : ''}" onclick="openProductModal(${product.id})" id="product-card-${product.id}">
+                        <div class="product-header">
+                            <div class="product-badge">₱${parseFloat(product.price).toFixed(2)}</div>
+                            <h5 class="mb-1"><i class="bi bi-box"></i> ${product.name}</h5>
+                            <small>Click to add players</small>
+                            ${playerCount > 0 ? `<div class="player-count">${playerCount}</div>` : ''}
+                        </div>
+                        <div class="product-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Price per piece</small>
+                                    <h6 class="text-primary">₱${parseFloat(product.price).toFixed(2)}</h6>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <small class="text-muted">Players</small>
+                                    <h6 class="${playerCount > 0 ? 'text-success' : 'text-muted'}">${playerCount} selected</h6>
+                                </div>
+                            </div>
+                            ${playerCount > 0 ? 
+                                `<div class="mt-2">
+                                    <small class="text-success"><i class="bi bi-check-circle"></i> ${playerCount} player${playerCount > 1 ? 's' : ''} added</small>
+                                </div>` : 
+                                `<div class="mt-2">
+                                    <small class="text-muted"><i class="bi bi-plus-circle"></i> Click to add players</small>
+                                </div>`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+            
+            productsGrid.innerHTML = html;
+        }
+
+        function openProductModal(productId) {
+            currentProductId = productId;
+            const product = availableProducts.find(p => p.id == productId);
+            if (!product) return;
+            
+            // Update modal title
+            document.getElementById('modalProductTitle').innerHTML = 
+                `<i class="bi bi-person-plus"></i> Add Players - ${product.name} (₱${parseFloat(product.price).toFixed(2)})`;
+            
+            // Load existing players for this product
+            loadModalPlayers();
+            
             // Show modal
-            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            const modal = new bootstrap.Modal(document.getElementById('productModal'));
             modal.show();
         }
 
-        function submitForm() {
-            document.getElementById('orderForm').submit();
+        function loadModalPlayers() {
+            const container = document.getElementById('modalPlayersContainer');
+            if (!orderData[currentProductId] || orderData[currentProductId].length === 0) {
+                container.innerHTML = `<div class="text-center text-muted py-5 bg-light rounded-3 border-dashed" id="modalEmptyState" style="border: 2px dashed #dee2e6;"><i class="bi bi-person-plus text-secondary" style="font-size: 3rem;"></i><h5 class="mt-3">No Players Added Yet</h5><p class="text-muted">Click the "Add Player" button above to get started.</p></div>`;
+                return;
+            }
+            const emptyState = document.getElementById('modalEmptyState');
+            if (emptyState) emptyState.remove();
+            let html = '';
+            
+            orderData[currentProductId].forEach((player, index) => {
+                html += createModalPlayerCard(player, index);
+            });
+            
+            container.innerHTML = html;
+            modalPlayerIndex = orderData[currentProductId].length;
         }
 
-        // Load draft data on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            if (draftPlayers && draftPlayers.length > 0) {
-                // Group draft players by product
-                draftPlayers.forEach((player, index) => {
-                    const productId = player.product_id;
-                    const container = document.getElementById('players-' + productId);
-                    
-                    if (container) {
-                        const playerId = Date.now() + index;
-                        const playerCard = document.createElement('div');
-                        playerCard.className = 'player-card mb-3';
-                        playerCard.setAttribute('data-player-id', playerId);
-                        playerCard.innerHTML = `
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="mb-0">Player ${container.children.length + 1}</h6>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="removePlayerFromProduct(${playerId}, ${productId})">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+        function createModalPlayerCard(player = {}, index = null) {
+            const cardIndex = index !== null ? index : modalPlayerIndex++;
+            return `
+                <div class="card mb-3 modal-player-card shadow-sm" data-index="${cardIndex}" style="border-radius: 10px; border: 1px solid rgba(0,0,0,0.1);">
+                    <div class="card-header bg-light" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-secondary"><i class="bi bi-person"></i> Player ${cardIndex + 1}</h6>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeModalPlayer(${cardIndex})">
+                                <i class="bi bi-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control jersey-name" value="${player.jersey_name || ''}" 
+                                       placeholder="Player name or text on jersey" required>
                             </div>
-                            <input type="hidden" name="players[${index}][product_id]" value="${productId}">
-                            <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="players[${index}][jersey_name]" value="${player.jersey_name || ''}" required>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" name="players[${index}][jersey_number]" value="${player.jersey_number || ''}" required>
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="players[${index}][jersey_size]" required>
-                                        <option value="">Select Size</option>
-                                        <option value="XS" ${player.jersey_size === 'XS' ? 'selected' : ''}>XS</option>
-                                        <option value="S" ${player.jersey_size === 'S' ? 'selected' : ''}>S</option>
-                                        <option value="M" ${player.jersey_size === 'M' ? 'selected' : ''}>M</option>
-                                        <option value="L" ${player.jersey_size === 'L' ? 'selected' : ''}>L</option>
-                                        <option value="XL" ${player.jersey_size === 'XL' ? 'selected' : ''}>XL</option>
-                                        <option value="2XL" ${player.jersey_size === '2XL' ? 'selected' : ''}>2XL</option>
-                                        <option value="3XL" ${player.jersey_size === '3XL' ? 'selected' : ''}>3XL</option>
-                                    </select>
-                                </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control jersey-number" value="${player.jersey_number || ''}" 
+                                       placeholder="Jersey #" min="0" max="999" required>
                             </div>
-                        `;
-                        container.appendChild(playerCard);
-                    }
-                });
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
+                                <select class="form-select jersey-size" required>
+                                    <option value="">Select Size</option>
+                                    <option value="XS" ${player.jersey_size === 'XS' ? 'selected' : ''}>XS</option>
+                                    <option value="S" ${player.jersey_size === 'S' ? 'selected' : ''}>S</option>
+                                    <option value="M" ${player.jersey_size === 'M' ? 'selected' : ''}>M</option>
+                                    <option value="L" ${player.jersey_size === 'L' ? 'selected' : ''}>L</option>
+                                    <option value="XL" ${player.jersey_size === 'XL' ? 'selected' : ''}>XL</option>
+                                    <option value="2XL" ${player.jersey_size === '2XL' ? 'selected' : ''}>2XL</option>
+                                    <option value="3XL" ${player.jersey_size === '3XL' ? 'selected' : ''}>3XL</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function addModalPlayer() {
+            const container = document.getElementById('modalPlayersContainer');
+            if (!container) return;
+            const emptyState = document.getElementById('modalEmptyState');
+            if (emptyState) emptyState.remove();
+            
+            // Create new player card
+            const playerHtml = createModalPlayerCard();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = playerHtml;
+            const playerCard = tempDiv.firstElementChild;
+            
+            container.appendChild(playerCard);
+        }
+
+        function removeModalPlayer(index) {
+            const playerCard = document.querySelector(`[data-index="${index}"]`);
+            if (playerCard) {
+                playerCard.remove();
                 
-                globalPlayerIndex = draftPlayers.length;
+                // Show empty state if no players
+                const container = document.getElementById('modalPlayersContainer');
+                if (container.querySelectorAll('.modal-player-card').length === 0) {
+                    container.innerHTML = `<div class="text-center text-muted py-5 bg-light rounded-3 border-dashed" id="modalEmptyState" style="border: 2px dashed #dee2e6;"><i class="bi bi-person-plus text-secondary" style="font-size: 3rem;"></i><h5 class="mt-3">No Players Added Yet</h5><p class="text-muted">Click the "Add Player" button above to get started.</p></div>`;
+                }
             }
+        }
+
+        function saveModalPlayers() {
+            const playerCards = document.querySelectorAll('#modalPlayersContainer .modal-player-card');
+            const players = [];
+            
+            playerCards.forEach(card => {
+                const jerseyName = card.querySelector('.jersey-name').value.trim();
+                const jerseyNumber = card.querySelector('.jersey-number').value.trim();
+                const jerseySize = card.querySelector('.jersey-size').value;
+                
+                if (jerseyName && jerseyNumber && jerseySize) {
+                    players.push({
+                        jersey_name: jerseyName,
+                        jersey_number: jerseyNumber,
+                        jersey_size: jerseySize
+                    });
+                }
+            });
+            
+            // Save to order data
+            if (players.length > 0) {
+                if (!orderData[currentProductId]) {
+                    orderData[currentProductId] = [];
+                }
+                orderData[currentProductId] = players;
+            } else {
+                // Remove product if no players
+                delete orderData[currentProductId];
+            }
+            
+            // Update display
+            displayProducts();
+            updateOrderSummary();
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+            modal.hide();
+        }
+
+        function clearModalPlayers() {
+            // Remove all players for this product
+            delete orderData[currentProductId];
+            
+            // Reload modal
+            loadModalPlayers();
+            
+            // Update display
+            displayProducts();
+            updateOrderSummary();
+        }
+
+        function updateOrderSummary() {
+            const orderSummary = document.getElementById('orderSummary');
+            const totalAmount = document.getElementById('totalAmount');
+            const playerCountSpan = document.getElementById('playerCount');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            let totalPlayers = 0;
+            let totalAmount_calc = 0;
+            
+            // Calculate totals
+            Object.keys(orderData).forEach(productId => {
+                const product = availableProducts.find(p => p.id == productId);
+                const players = orderData[productId];
+                if (product && players) {
+                    totalPlayers += players.length;
+                    totalAmount_calc += players.length * parseFloat(product.price);
+                }
+            });
+            
+            if (totalPlayers === 0) {
+                orderSummary.style.display = 'none';
+                submitBtn.classList.add('d-none');
+            } else {
+                orderSummary.style.display = 'block';
+                submitBtn.classList.remove('d-none');
+                
+                playerCountSpan.textContent = totalPlayers;
+                totalAmount.textContent = `₱${totalAmount_calc.toFixed(2)}`;
+            }
+        }
+
+        function prepareFormSubmission() {
+            if (isSubmitting) return false;
+            
+            // Validate we have orders
+            if (Object.keys(orderData).length === 0) {
+                alert('Please add at least one player before submitting the order.');
+                return false;
+            }
+            
+            // Check if design is uploaded or present in draft
+            const designUpload = document.querySelector('input[name="images[]"]');
+            const hasDraftImages = Array.isArray(window.__draftImages) && window.__draftImages.length > 0;
+            if ((!designUpload || !designUpload.files || designUpload.files.length === 0) && !hasDraftImages) {
+                alert('Please upload a design before submitting the order.');
+                return false;
+            }
+            
+            // Prepare form data
+            const form = document.getElementById('orderForm');
+            
+            // Clear any existing product inputs
+            const existingInputs = form.querySelectorAll('input[name^="players["], input[name^="products["]');
+            existingInputs.forEach(input => input.remove());
+            
+            // Add product data to form
+            let playerIndex = 0;
+            Object.keys(orderData).forEach(productId => {
+                const players = orderData[productId];
+                players.forEach(player => {
+                    const inputs = [
+                        { name: `players[${playerIndex}][product_id]`, value: productId },
+                        { name: `players[${playerIndex}][jersey_name]`, value: player.jersey_name },
+                        { name: `players[${playerIndex}][jersey_number]`, value: player.jersey_number },
+                        { name: `players[${playerIndex}][jersey_size]`, value: player.jersey_size }
+                    ];
+                    
+                    inputs.forEach(inputData => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = inputData.name;
+                        input.value = inputData.value;
+                        form.appendChild(input);
+                    });
+                    
+                    playerIndex++;
+                });
+            });
+            
+            isSubmitting = true;
+            console.log('Form submission prepared with', playerIndex, 'players');
+            return true;
+        }
+
+        function submitFormManually() {
+            // Call the same validation and preparation function
+            if (prepareFormSubmission()) {
+                const form = document.getElementById('orderForm');
+                if (form) {
+                    console.log('Submitting form manually...');
+                    form.submit();
+                } else {
+                    console.error('Form not found!');
+                    alert('Error: Could not find the form to submit.');
+                }
+            }
+        }
+
+        function submitForm() {
+            if (prepareFormSubmission()) {
+                const form = document.getElementById('orderForm');
+                if (form) {
+                    form.submit();
+                }
+            }
+        }
+
+        // Load products on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
         });
     </script>
 </body>

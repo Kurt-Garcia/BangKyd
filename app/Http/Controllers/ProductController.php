@@ -76,7 +76,7 @@ class ProductController extends Controller
     {
         $products = Product::where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'price']);
+            ->get(['id', 'name', 'price', 'is_active']);
         
         return response()->json($products);
     }

@@ -27,22 +27,18 @@ class Order extends Model
         return $this->belongsTo(AccountReceivable::class);
     }
 
-    public function progress()
-    {
-        return $this->hasOne(OrderProgress::class);
-    }
-
     public function accountsPayable()
     {
         return $this->hasMany(AccountPayable::class);
     }
 
+    public function progress()
+    {
+        return $this->hasOne(OrderProgress::class);
+    }
+
     public function getDetailedStatus()
     {
-        if ($this->progress) {
-            return $this->progress->getDetailedStatus();
-        }
-        
         $statuses = [
             'ongoing' => 'Ongoing',
             'ready_for_delivery' => 'Ready for Delivery',

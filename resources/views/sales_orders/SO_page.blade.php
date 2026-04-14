@@ -71,16 +71,18 @@
                             <td><strong>{{ $so->so_number }}</strong></td>
                             <td>{{ $so->so_name }}</td>
                             <td>
-                                @if($so->products->count() > 0)
+                                @if($so->is_submitted && $so->products->count() > 0)
                                     @foreach($so->products as $product)
                                         <span class="badge bg-secondary">{{ $product->name }}</span>
                                     @endforeach
+                                @elseif($so->is_submitted && $so->product)
+                                    <span class="badge bg-secondary">{{ $so->product->name }}</span>
                                 @else
-                                    <span class="badge bg-secondary">{{ $so->product->name ?? 'N/A' }}</span>
+                                    <span class="badge bg-light text-muted">Customer will select</span>
                                 @endif
                             </td>
                             <td>
-                                @if($so->products->count() > 0)
+                                @if($so->is_submitted && $so->products->count() > 0)
                                     @php $priceRange = $so->products->pluck('pivot.price'); @endphp
                                     <span class="badge bg-info">
                                         @if($priceRange->min() == $priceRange->max())
@@ -89,8 +91,10 @@
                                             ₱{{ number_format($priceRange->min(), 2) }} - ₱{{ number_format($priceRange->max(), 2) }}
                                         @endif
                                     </span>
+                                @elseif($so->is_submitted && $so->product)
+                                    <span class="badge bg-info">₱{{ number_format($so->product->price, 2) }}</span>
                                 @else
-                                    <span class="badge bg-info">₱{{ $so->product ? number_format($so->product->price, 2) : '0.00' }}</span>
+                                    <span class="badge bg-light text-muted">TBD by customer</span>
                                 @endif
                             </td>
                             <td>
@@ -135,12 +139,31 @@
                                                 <p>{{ $so->so_name }}</p>
                                             </div>
                                             <div class="col-md-3">
-                                                <h6 class="text-muted">Product</h6>
-                                                <p class="fw-bold">{{ $so->product->name ?? 'N/A' }}</p>
+                                                <h6 class="text-muted">Product(s)</h6>
+                                                @if($so->is_submitted && $so->products->count() > 0)
+                                                    @foreach($so->products as $product)
+                                                        <p class="fw-bold">{{ $product->name }}</p>
+                                                    @endforeach
+                                                @elseif($so->is_submitted && $so->product)
+                                                    <p class="fw-bold">{{ $so->product->name }}</p>
+                                                @else
+                                                    <p class="text-muted fst-italic">Products will be selected by customer</p>
+                                                @endif
                                             </div>
                                             <div class="col-md-3">
-                                                <h6 class="text-muted">Price per Piece</h6>
-                                                <p class="fw-bold text-primary">₱{{ $so->product ? number_format($so->product->price, 2) : '0.00' }}</p>
+                                                <h6 class="text-muted">Price Range</h6>
+                                                @if($so->is_submitted && $so->products->count() > 0)
+                                                    @php $priceRange = $so->products->pluck('pivot.price'); @endphp
+                                                    @if($priceRange->min() == $priceRange->max())
+                                                        <p class="fw-bold text-primary">₱{{ number_format($priceRange->first(), 2) }}</p>
+                                                    @else
+                                                        <p class="fw-bold text-primary">₱{{ number_format($priceRange->min(), 2) }} - ₱{{ number_format($priceRange->max(), 2) }}</p>
+                                                    @endif
+                                                @elseif($so->is_submitted && $so->product)
+                                                    <p class="fw-bold text-primary">₱{{ number_format($so->product->price, 2) }}</p>
+                                                @else
+                                                    <p class="text-muted fst-italic">Varies by product selected</p>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="row mb-3">
@@ -211,48 +234,20 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="so_name" class="form-label">SO Name <span class="text-danger">*</span></label>
+                        <label for="so_name" class="form-label">Customer Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('so_name') is-invalid @enderror" 
                                id="so_name" name="so_name" value="{{ old('so_name') }}" 
                                placeholder="e.g., Customer Name - Team Name" required>
-                        <small class="text-muted">SO Number will be generated automatically</small>
+                        <small class="text-muted">SO Number will be generated automatically. Customers will select products in the order form.</small>
                         @error('so_name')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
-                    </div>
-                    
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label mb-0">Products <span class="text-danger">*</span></label>
-                            <button type="button" class="btn btn-sm btn-success" onclick="addProductRow()">
-                                <i class="bi bi-plus-circle"></i> Add Product
-                            </button>
-                        </div>
-                        <div id="productsContainer">
-                            <div class="product-row card mb-2">
-                                <div class="card-body p-2">
-                                    <div class="row g-2">
-                                        <div class="col-md-10">
-                                            <select class="form-select form-select-sm product-select" name="products[]" required>
-                                                <option value="">-- Select Product --</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeProductRow(this)" style="display:none;">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <small class="text-muted">Add products for this order. Customers will select which product each player wants.</small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-link-45deg"></i> Generate SO Link
+                        <i class="bi bi-link-45deg"></i> Create Sales Order & Generate Link
                     </button>
                 </div>
             </form>
@@ -291,91 +286,6 @@ function copyModalLink(id) {
         btn.innerHTML = originalHTML;
     }, 2000);
 }
-
-let productRowIndex = 1;
-let productsData = [];
-
-function addProductRow() {
-    const container = document.getElementById('productsContainer');
-    const rowCount = container.children.length;
-    
-    const productRow = document.createElement('div');
-    productRow.className = 'product-row card mb-2';
-    productRow.innerHTML = `
-        <div class="card-body p-2">
-            <div class="row g-2">
-                <div class="col-md-10">
-                    <select class="form-select form-select-sm product-select" name="products[]" required>
-                        <option value="">-- Select Product --</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeProductRow(this)">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    container.appendChild(productRow);
-    
-    // Populate the new select with products
-    const newSelect = productRow.querySelector('.product-select');
-    productsData.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = product.name + ' - ₱' + parseFloat(product.price).toFixed(2);
-        newSelect.appendChild(option);
-    });
-    
-    productRowIndex++;
-    updateRemoveButtons();
-}
-
-function removeProductRow(button) {
-    button.closest('.product-row').remove();
-    updateRemoveButtons();
-}
-
-function updateRemoveButtons() {
-    const rows = document.querySelectorAll('.product-row');
-    rows.forEach((row, index) => {
-        const removeBtn = row.querySelector('button[onclick*="removeProductRow"]');
-        if (rows.length === 1) {
-            removeBtn.style.display = 'none';
-        } else {
-            removeBtn.style.display = 'block';
-        }
-    });
-}
-
-// Load products when modal opens
-document.addEventListener('DOMContentLoaded', function() {
-    const createSOModal = document.getElementById('createSOModal');
-    
-    createSOModal.addEventListener('shown.bs.modal', function() {
-        // Load products only if not already loaded
-        if (productsData.length === 0) {
-            fetch('{{ route("api.products") }}')
-                .then(response => response.json())
-                .then(products => {
-                    productsData = products;
-                    // Populate all existing selects
-                    document.querySelectorAll('.product-select').forEach(select => {
-                        if (select.options.length === 1) {
-                            products.forEach(product => {
-                                const option = document.createElement('option');
-                                option.value = product.id;
-                                option.textContent = product.name + ' - ₱' + parseFloat(product.price).toFixed(2);
-                                select.appendChild(option);
-                            });
-                        }
-                    });
-                })
-                .catch(error => console.error('Error loading products:', error));
-        }
-    });
-});
 
 @if($errors->any())
     // Reopen modal if there are validation errors

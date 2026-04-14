@@ -21,9 +21,7 @@ Route::get('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'showF
 Route::post('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'submit'])->name('order.submit');
 Route::get('/invoice/{id}', [SalesOrderSubmissionController::class, 'showInvoice'])->name('invoice.show');
 
-// Public partner progress routes (no auth required)
-Route::get('/progress/{uniqueLink}', [\App\Http\Controllers\OrderProgressController::class, 'showProgress'])->name('progress.show');
-Route::post('/progress/{uniqueLink}', [\App\Http\Controllers\OrderProgressController::class, 'updateProgress'])->name('progress.update');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
@@ -37,11 +35,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/account-receivables/{id}/payment', [\App\Http\Controllers\AccountReceivableController::class, 'recordPayment'])->name('account-receivables.payment');
     
     Route::get('/accounts-payable', [\App\Http\Controllers\AccountPayableController::class, 'index'])->name('accounts-payable.index');
+    Route::post('/accounts-payable/order/{id}', [\App\Http\Controllers\AccountPayableController::class, 'store'])->name('accounts-payable.store');
     Route::post('/accounts-payable/{id}/payment', [\App\Http\Controllers\AccountPayableController::class, 'recordPayment'])->name('accounts-payable.payment');
     
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
-    Route::post('/orders/{id}/status', [\App\Http\Controllers\OrderController::class, 'updateStatus'])->name('orders.update-status');
-    Route::post('/orders/{id}/generate-link', [\App\Http\Controllers\OrderProgressController::class, 'generateLink'])->name('orders.generate-link');
+    Route::post('/orders/{id}/complete', [\App\Http\Controllers\OrderController::class, 'markCompleted'])->name('orders.complete');
     
     Route::get('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'index'])->name('system-settings.index');
     Route::put('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'update'])->name('system-settings.update');
