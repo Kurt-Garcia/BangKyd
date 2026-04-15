@@ -71,6 +71,14 @@ class OrderController extends Controller
     public function markCompleted($id)
     {
         $order = Order::findOrFail($id);
+        $order->load('accountReceivable');
+
+        $ar = $order->accountReceivable;
+        $isFullyPaid = $ar && ($ar->status === 'paid' || ($ar->paid_amount >= $ar->total_amount));
+        if (!$isFullyPaid) {
+            return redirect()->route('orders.index')
+                ->with('error', 'Order must be fully paid before marking as completed.');
+        }
         
         // Mark order as completed
         $order->status = 'completed';

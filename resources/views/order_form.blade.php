@@ -64,41 +64,45 @@
             border-color: #555;
         }
         
-        .upload-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+        .design-preview-shell {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            padding: 1rem;
             margin-top: 1rem;
-        }
-        
-        .upload-card {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px dashed rgba(255, 255, 255, 0.5);
-            border-radius: 15px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
-        
-        .upload-card:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.8);
-            transform: translateY(-5px);
-        }
-        
-        .upload-card i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-        
-        .image-preview {
+
+        .design-preview-img {
             max-width: 100%;
-            max-height: 120px;
-            border-radius: 10px;
-            margin-top: 10px;
+            max-height: 300px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .design-empty-state {
+            border: 2px dashed rgba(255, 255, 255, 0.35);
+            border-radius: 14px;
+            padding: 2rem 1rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .design-empty-state i {
+            font-size: 2.25rem;
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .design-carousel .carousel-item {
+            text-align: center;
+        }
+
+        .design-carousel .carousel-item img {
+            height: 300px;
+            width: 100%;
+            object-fit: contain;
         }
         
         .products-section {
@@ -139,7 +143,7 @@
         .product-header {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             color: #333;
-            padding: 1.5rem;
+            padding: 1.5rem 6.25rem 1.5rem 3.25rem;
             position: relative;
             overflow: hidden;
             border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -167,6 +171,7 @@
             font-size: 0.8rem;
             font-weight: 600;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 2;
         }
         
         .player-count {
@@ -180,10 +185,11 @@
             justify-content: center;
             font-weight: bold;
             position: absolute;
-            top: -10px;
-            right: -10px;
+            top: 1rem;
+            left: 1rem;
             font-size: 0.8rem;
             box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+            z-index: 2;
         }
         
         .order-summary {
@@ -283,26 +289,33 @@
                     @csrf
                     <div class="upload-section">
                         <h3><i class="bi bi-images"></i> Upload Your Design</h3>
-                        <p class="mb-0">Share your jersey design with us (up to 3 images)</p>
-                        <div class="upload-grid">
-                            @for($i = 1; $i <= 3; $i++)
-                            <div class="upload-card" onclick="document.getElementById('image{{ $i }}').click()">
-                                <input type="file" class="d-none" id="image{{ $i }}" name="images[]" accept="image/*" onchange="previewImage(this, {{ $i }})">
-                                <div id="uploadPreview{{ $i }}">
-                                    @if($salesOrder->draft_data && isset($salesOrder->draft_data['images'][$i-1]))
-                                        <img src="{{ asset('storage/' . $salesOrder->draft_data['images'][$i-1]) }}" class="image-preview" alt="Previous Upload">
-                                        <small class="d-block mt-2">Click to change</small>
-                                    @else
-                                        <i class="bi bi-cloud-upload"></i>
-                                        <small>Image {{ $i }}</small>
-                                    @endif
-                                </div>
-                                @error('images.' . ($i-1))
-                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
-                                @enderror
-                            </div>
-                            @endfor
+                        <p class="mb-2">Share your jersey design with us (up to 3 images)</p>
+
+                        <input type="file" class="d-none" id="designImages" name="images[]" accept="image/*" multiple onchange="handleDesignImagesChange()">
+
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <button type="button" class="btn btn-outline-light" onclick="document.getElementById('designImages').click()">
+                                <i class="bi bi-cloud-upload"></i> Upload Images
+                            </button>
+                            <span class="small text-white-50" id="designCountText"></span>
                         </div>
+
+                        <div class="design-preview-shell" id="designPreviewShell">
+                            <div id="designPreviewArea"></div>
+                        </div>
+
+                        @if($errors->has('images') || $errors->has('images.0') || $errors->has('images.1') || $errors->has('images.2'))
+                            <div class="mt-2">
+                                @error('images')
+                                    <small class="text-danger d-block">{{ $message }}</small>
+                                @enderror
+                                @for($i = 0; $i < 3; $i++)
+                                    @error('images.' . $i)
+                                        <small class="text-danger d-block">{{ $message }}</small>
+                                    @enderror
+                                @endfor
+                            </div>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -347,7 +360,7 @@
     </div>
 
     <!-- Floating Submit Button -->
-    <button type="button" class="btn-floating d-none" id="submitBtn" title="Submit Order" onclick="submitFormManually()">
+    <button type="button" class="btn-floating d-none" id="submitBtn" title="Submit Order" onclick="openConfirmationModal()">
         <i class="bi bi-send-fill"></i>
     </button>
 
@@ -415,7 +428,7 @@
                         </div>
                     </div>
 
-                    <div id="orderSummary"></div>
+                    <div id="confirmationOrderSummary"></div>
 
                     <hr>
 
@@ -432,7 +445,7 @@
                                 </div>
                                 <div class="col-6 text-end">
                                     <p class="mb-1"><span id="confirmQty">0</span> pcs</p>
-                                    <p class="mb-1">₱<span id="confirmPrice">0.00</span></p>
+                                    <p class="mb-1"><span id="confirmPrice">₱0.00</span></p>
                                     <p class="mb-1 fw-bold fs-5">₱<span id="confirmTotal">0.00</span></p>
                                     <p class="mb-1 text-danger">₱<span id="confirmDown">0.00</span></p>
                                     <p class="mb-0 text-success">₱<span id="confirmBalance">0.00</span></p>
@@ -466,16 +479,134 @@
         let currentProductId = null;
         let modalPlayerIndex = 0;
         let hydratedFromDraft = false;
+        const storageBaseUrl = @json(asset('storage'));
 
-        function previewImage(input, index) {
-            const preview = document.getElementById('uploadPreview' + index);
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="Preview"><small class="d-block mt-2">Click to change</small>`;
+        function normalizeStorageUrl(path) {
+            const cleaned = (path || '').toString().replace(/^\/+/, '');
+            return `${storageBaseUrl}/${cleaned}`;
+        }
+
+        function normalizeUppercaseInput(el) {
+            if (!el) return;
+            const start = el.selectionStart;
+            const end = el.selectionEnd;
+            const upper = (el.value || '').toUpperCase();
+            if (el.value !== upper) {
+                el.value = upper;
+                if (typeof start === 'number' && typeof end === 'number') {
+                    el.setSelectionRange(start, end);
                 }
-                reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        function sanitizeJerseyNumberValue(raw) {
+            let value = (raw || '').toString();
+            value = value.replace(/[^\d+\-]/g, '');
+            const sign = value[0] === '+' || value[0] === '-' ? value[0] : '';
+            value = value.replace(/[+\-]/g, '');
+            return `${sign}${value}`;
+        }
+
+        function isAllowedJerseyNumberKey(e) {
+            if (!e || typeof e.key !== 'string') return true;
+            const key = e.key;
+            if (e.ctrlKey || e.metaKey || e.altKey) return true;
+            if (key === 'Backspace' || key === 'Delete' || key === 'Tab' || key === 'Enter') return true;
+            if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown') return true;
+            if (key === 'Home' || key === 'End') return true;
+            if (/^\d$/.test(key)) return true;
+            if (key === '+' || key === '-') return true;
+            return false;
+        }
+
+        function renderDesignPreview(urls) {
+            const previewArea = document.getElementById('designPreviewArea');
+            const countText = document.getElementById('designCountText');
+
+            const safeUrls = Array.isArray(urls) ? urls.filter(Boolean) : [];
+            countText.textContent = safeUrls.length > 0 ? `${safeUrls.length} image${safeUrls.length > 1 ? 's' : ''} selected` : '';
+
+            if (!previewArea) return;
+
+            if (safeUrls.length === 0) {
+                previewArea.innerHTML = `
+                    <div class="design-empty-state">
+                        <i class="bi bi-image"></i>
+                        <div class="fw-semibold">No images selected</div>
+                        <div class="small text-white-50 mt-1">Click “Upload Images” to add up to 3 design photos.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (safeUrls.length === 1) {
+                previewArea.innerHTML = `
+                    <div class="text-center">
+                        <img src="${safeUrls[0]}" class="design-preview-img" alt="Design Preview">
+                    </div>
+                `;
+                return;
+            }
+
+            const slides = safeUrls.map((url, idx) => {
+                const active = idx === 0 ? 'active' : '';
+                return `
+                    <div class="carousel-item ${active}">
+                        <img src="${url}" class="design-preview-img" alt="Design Preview ${idx + 1}">
+                    </div>
+                `;
+            }).join('');
+
+            const indicators = safeUrls.map((_, idx) => {
+                const active = idx === 0 ? 'active' : '';
+                const ariaCurrent = idx === 0 ? 'true' : 'false';
+                return `<button type="button" data-bs-target="#designCarousel" data-bs-slide-to="${idx}" class="${active}" aria-current="${ariaCurrent}" aria-label="Slide ${idx + 1}"></button>`;
+            }).join('');
+
+            previewArea.innerHTML = `
+                <div id="designCarousel" class="carousel slide design-carousel" data-bs-ride="false">
+                    <div class="carousel-indicators">${indicators}</div>
+                    <div class="carousel-inner">${slides}</div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#designCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#designCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        function getDraftDesignUrls() {
+            const draft = Array.isArray(window.__draftImages) ? window.__draftImages : [];
+            return draft.filter(Boolean).slice(0, 3).map(normalizeStorageUrl);
+        }
+
+        function handleDesignImagesChange() {
+            const input = document.getElementById('designImages');
+            if (!input) return;
+
+            const files = Array.from(input.files || []);
+            if (files.length > 3) {
+                const dt = new DataTransfer();
+                files.slice(0, 3).forEach(f => dt.items.add(f));
+                input.files = dt.files;
+                alert('You can upload up to 3 images only.');
+            }
+
+            const finalFiles = Array.from(input.files || []);
+            if (finalFiles.length === 0) {
+                renderDesignPreview(getDraftDesignUrls());
+                return;
+            }
+
+            Promise.all(finalFiles.map(file => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            }))).then(urls => renderDesignPreview(urls));
         }
 
         // Load available products
@@ -507,7 +638,14 @@
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
+                const contentType = (response.headers.get('content-type') || '').toLowerCase();
+                if (!contentType.includes('application/json')) {
+                    const rawText = await response.text();
+                    console.error('Non-JSON response from products API:', rawText.slice(0, 300));
+                    throw new Error('Products API returned a non-JSON response. Please check that /api/products is publicly accessible and returning JSON.');
+                }
+
                 const products = await response.json();
                 console.log('Raw API response:', products);
                 
@@ -563,8 +701,8 @@
                 if (!p || !p.product_id) return;
                 if (!grouped[p.product_id]) grouped[p.product_id] = [];
                 grouped[p.product_id].push({
-                    jersey_name: p.jersey_name || '',
-                    jersey_number: p.jersey_number || '',
+                    jersey_name: (p.jersey_name || '').toString().toUpperCase(),
+                    jersey_number: sanitizeJerseyNumberValue(p.jersey_number || ''),
                     jersey_size: p.jersey_size || ''
                 });
             });
@@ -665,13 +803,13 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Jersey Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control jersey-name" value="${player.jersey_name || ''}" 
+                                <input type="text" class="form-control jersey-name" value="${(player.jersey_name || '').toString().toUpperCase()}" style="text-transform: uppercase;"
                                        placeholder="Player name or text on jersey" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">Jersey Number <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control jersey-number" value="${player.jersey_number || ''}" 
-                                       placeholder="Jersey #" min="0" max="999" required>
+                                <input type="text" class="form-control jersey-number" value="${sanitizeJerseyNumberValue(player.jersey_number || '')}"
+                                       inputmode="numeric" autocomplete="off" placeholder="Jersey #" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">Jersey Size <span class="text-danger">*</span></label>
@@ -725,8 +863,8 @@
             const players = [];
             
             playerCards.forEach(card => {
-                const jerseyName = card.querySelector('.jersey-name').value.trim();
-                const jerseyNumber = card.querySelector('.jersey-number').value.trim();
+                const jerseyName = (card.querySelector('.jersey-name').value || '').trim().toUpperCase();
+                const jerseyNumber = sanitizeJerseyNumberValue((card.querySelector('.jersey-number').value || '').trim());
                 const jerseySize = card.querySelector('.jersey-size').value;
                 
                 if (jerseyName && jerseyNumber && jerseySize) {
@@ -801,6 +939,103 @@
             }
         }
 
+        function validateBeforeConfirmation() {
+            if (Object.keys(orderData).length === 0) {
+                alert('Please add at least one player before submitting the order.');
+                return false;
+            }
+
+            const designUpload = document.getElementById('designImages');
+            const hasDraftImages = Array.isArray(window.__draftImages) && window.__draftImages.length > 0;
+            if ((!designUpload || !designUpload.files || designUpload.files.length === 0) && !hasDraftImages) {
+                alert('Please upload a design before submitting the order.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function updateConfirmationModal() {
+            const summaryEl = document.getElementById('confirmationOrderSummary');
+            const qtyEl = document.getElementById('confirmQty');
+            const priceEl = document.getElementById('confirmPrice');
+            const totalEl = document.getElementById('confirmTotal');
+            const downEl = document.getElementById('confirmDown');
+            const balanceEl = document.getElementById('confirmBalance');
+
+            let totalPlayers = 0;
+            let totalAmount_calc = 0;
+            const prices = [];
+            const productLines = [];
+
+            Object.keys(orderData).forEach(productId => {
+                const product = availableProducts.find(p => p.id == productId);
+                const players = orderData[productId];
+                if (!product || !players) return;
+                const qty = players.length;
+                const price = parseFloat(product.price);
+                const lineTotal = qty * price;
+                totalPlayers += qty;
+                totalAmount_calc += lineTotal;
+                prices.push(price);
+                productLines.push({
+                    name: product.name,
+                    qty,
+                    lineTotal
+                });
+            });
+
+            if (qtyEl) qtyEl.textContent = totalPlayers.toString();
+            if (totalEl) totalEl.textContent = totalAmount_calc.toFixed(2);
+            const down = totalAmount_calc * 0.5;
+            if (downEl) downEl.textContent = down.toFixed(2);
+            if (balanceEl) balanceEl.textContent = (totalAmount_calc - down).toFixed(2);
+
+            const distinctPrices = Array.from(new Set(prices.map(p => p.toFixed(2))));
+            if (priceEl) {
+                if (distinctPrices.length === 1 && distinctPrices[0]) {
+                    priceEl.textContent = `₱${distinctPrices[0]}`;
+                } else {
+                    priceEl.textContent = 'MIXED';
+                }
+            }
+
+            if (!summaryEl) return;
+
+            if (productLines.length === 0) {
+                summaryEl.innerHTML = '';
+                return;
+            }
+
+            const itemsHtml = productLines.map(line => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold">${line.name}</div>
+                        <small class="text-muted">${line.qty} player${line.qty > 1 ? 's' : ''}</small>
+                    </div>
+                    <div class="fw-bold">₱${line.lineTotal.toFixed(2)}</div>
+                </li>
+            `).join('');
+
+            summaryEl.innerHTML = `
+                <div class="card bg-light mb-3">
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            ${itemsHtml}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openConfirmationModal() {
+            if (isSubmitting) return;
+            if (!validateBeforeConfirmation()) return;
+            updateConfirmationModal();
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            modal.show();
+        }
+
         function prepareFormSubmission() {
             if (isSubmitting) return false;
             
@@ -811,7 +1046,7 @@
             }
             
             // Check if design is uploaded or present in draft
-            const designUpload = document.querySelector('input[name="images[]"]');
+            const designUpload = document.getElementById('designImages');
             const hasDraftImages = Array.isArray(window.__draftImages) && window.__draftImages.length > 0;
             if ((!designUpload || !designUpload.files || designUpload.files.length === 0) && !hasDraftImages) {
                 alert('Please upload a design before submitting the order.');
@@ -879,6 +1114,28 @@
 
         // Load products on page load
         document.addEventListener('DOMContentLoaded', function() {
+            const modalPlayersContainer = document.getElementById('modalPlayersContainer');
+            if (modalPlayersContainer) {
+                modalPlayersContainer.addEventListener('input', function(e) {
+                    const target = e.target;
+                    if (!target || !target.classList) return;
+                    if (target.classList.contains('jersey-name')) {
+                        normalizeUppercaseInput(target);
+                    } else if (target.classList.contains('jersey-number')) {
+                        const cleaned = sanitizeJerseyNumberValue(target.value);
+                        if (target.value !== cleaned) target.value = cleaned;
+                    }
+                });
+
+                modalPlayersContainer.addEventListener('keydown', function(e) {
+                    const target = e.target;
+                    if (!target || !target.classList) return;
+                    if (!target.classList.contains('jersey-number')) return;
+                    if (!isAllowedJerseyNumberKey(e)) e.preventDefault();
+                });
+            }
+
+            renderDesignPreview(getDraftDesignUrls());
             loadProducts();
         });
     </script>

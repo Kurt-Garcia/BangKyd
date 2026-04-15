@@ -30,31 +30,31 @@ class SalesOrderSubmissionController extends Controller
         }
 
         $request->validate([
+            'images' => 'nullable|array|max:3',
             'images.*' => 'nullable|image|max:5120',
             'players' => 'required|array|min:1',
             'players.*.product_id' => 'required|exists:products,id',
             'players.*.jersey_name' => 'required|string|max:255',
-            'players.*.jersey_number' => 'required|integer',
+            'players.*.jersey_number' => ['required', 'string', 'regex:/^[+-]?\d+$/'],
             'players.*.jersey_size' => 'required|string',
         ]);
 
-        // Clean up old draft images if they exist
-        if ($salesOrder->draft_data && isset($salesOrder->draft_data['images'])) {
-            foreach ($salesOrder->draft_data['images'] as $oldImage) {
-                Storage::disk('public')->delete($oldImage);
-            }
+        $imagePaths = [];
+        $oldDraftImages = [];
+        if (is_array($salesOrder->draft_data ?? null) && isset($salesOrder->draft_data['images']) && is_array($salesOrder->draft_data['images'])) {
+            $oldDraftImages = $salesOrder->draft_data['images'];
         }
 
-        // Handle image uploads
-        $imagePaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 $path = $image->store('order-images', 'public');
                 $imagePaths[] = $path;
             }
+            foreach ($oldDraftImages as $oldImage) {
+                Storage::disk('public')->delete($oldImage);
+            }
         } elseif ($salesOrder->draft_data && isset($salesOrder->draft_data['images'])) {
-            // If no new images uploaded, keep the old ones
-            $imagePaths = $salesOrder->draft_data['images'];
+            $imagePaths = $oldDraftImages;
         }
 
         // Group players by product and calculate quantities

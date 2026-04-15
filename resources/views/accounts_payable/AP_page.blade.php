@@ -126,6 +126,7 @@
                                         <th>Type</th>
                                         <th>Amount</th>
                                         <th>Notes</th>
+                                        <th class="text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -135,6 +136,32 @@
                                         <td><span class="badge bg-secondary">{{ ucfirst($ap->vendor_type) }}</span></td>
                                         <td class="text-danger fw-bold">₱{{ number_format($ap->total_amount, 2) }}</td>
                                         <td>{{ $ap->notes ?? '-' }}</td>
+                                        <td class="text-end">
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-primary js-open-edit-payable"
+                                                data-order-id="{{ $order->id }}"
+                                                data-update-action="{{ route('accounts-payable.update', $ap->id) }}"
+                                                data-vendor-type="{{ $ap->vendor_type }}"
+                                                data-amount="{{ $ap->total_amount }}"
+                                                data-notes="{{ $ap->notes }}"
+                                                title="Edit"
+                                            >
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <form action="{{ route('accounts-payable.destroy', $ap->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-danger js-confirm-payable-delete"
+                                                    data-payable-label="{{ ucfirst($ap->vendor_type) }} (₱{{ number_format($ap->total_amount, 2) }})"
+                                                    title="Delete"
+                                                >
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -156,10 +183,10 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Add Payable</h5>
+                    <h5 class="modal-title js-payable-modal-title" data-default-text="Add Payable"><i class="bi bi-plus-circle"></i> Add Payable</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('accounts-payable.store', $order->id) }}" method="POST">
+                <form action="{{ route('accounts-payable.store', $order->id) }}" method="POST" class="js-payable-form" data-store-action="{{ route('accounts-payable.store', $order->id) }}">
                     @csrf
                     <div class="modal-body">
                         <div class="alert alert-info">
@@ -184,7 +211,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="backToOrderModal{{ $order->id }}()">Back</button>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary js-payable-submit">
                             <i class="bi bi-check-circle"></i> Save Payable
                         </button>
                     </div>
@@ -198,7 +225,12 @@
         const orderModalEl = document.getElementById('orderModal{{ $order->id }}');
         const addPayableModalEl = document.getElementById('addPayableModal{{ $order->id }}');
         
+        addPayableModalEl.dataset.returnOrderId = '{{ $order->id }}';
+
         let orderModal = bootstrap.Modal.getInstance(orderModalEl);
+        if (!orderModal) {
+            orderModal = new bootstrap.Modal(orderModalEl);
+        }
         orderModal.hide();
         
         orderModalEl.addEventListener('hidden.bs.modal', function openAdd() {
@@ -209,16 +241,8 @@
     }
 
     function backToOrderModal{{ $order->id }}() {
-        const orderModalEl = document.getElementById('orderModal{{ $order->id }}');
         const addPayableModalEl = document.getElementById('addPayableModal{{ $order->id }}');
-        
-        // Modal instance is handled by bootstrap data-bs-dismiss on the button,
-        // so we just need to listen for when it's hidden to show the order modal again.
-        addPayableModalEl.addEventListener('hidden.bs.modal', function openOrder() {
-            const orderModal = new bootstrap.Modal(orderModalEl);
-            orderModal.show();
-            addPayableModalEl.removeEventListener('hidden.bs.modal', openOrder);
-        }, { once: true });
+        addPayableModalEl.dataset.returnOrderId = '{{ $order->id }}';
     }
     </script>
     @empty
@@ -232,4 +256,213 @@
     </div>
     @endforelse
 </div>
+
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmActionModalTitle">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmActionModalBody">Are you sure?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmActionModalConfirmBtn">Proceed</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const confirmModalEl = document.getElementById('confirmActionModal');
+    const confirmModal = new bootstrap.Modal(confirmModalEl);
+    const confirmTitleEl = document.getElementById('confirmActionModalTitle');
+    const confirmBodyEl = document.getElementById('confirmActionModalBody');
+    const confirmBtn = document.getElementById('confirmActionModalConfirmBtn');
+
+    let pendingForm = null;
+    let restoreModalEl = null;
+    let isConfirmed = false;
+
+    function showConfirm(options) {
+        pendingForm = options.form;
+        restoreModalEl = options.restoreModalEl;
+        isConfirmed = false;
+
+        confirmTitleEl.textContent = options.title || 'Confirm Action';
+        confirmBodyEl.textContent = options.message || 'Are you sure?';
+        confirmBtn.textContent = options.confirmText || 'Proceed';
+
+        confirmBtn.className = 'btn';
+        confirmBtn.classList.add(options.confirmBtnClass || 'btn-primary');
+
+        confirmModal.show();
+    }
+
+    function confirmForForm(form, options) {
+        const currentModalEl = form.closest('.modal');
+        if (currentModalEl && currentModalEl.classList.contains('show')) {
+            const currentModal = bootstrap.Modal.getInstance(currentModalEl) || new bootstrap.Modal(currentModalEl);
+            currentModalEl.dataset.apSuppressOnHideReturn = '1';
+            currentModal.hide();
+            currentModalEl.addEventListener('hidden.bs.modal', function openConfirm() {
+                showConfirm({ ...options, form, restoreModalEl: currentModalEl });
+            }, { once: true });
+            return;
+        }
+
+        showConfirm({ ...options, form, restoreModalEl: null });
+    }
+
+    confirmModalEl.addEventListener('hidden.bs.modal', function () {
+        if (!isConfirmed && restoreModalEl) {
+            delete restoreModalEl.dataset.apSuppressOnHideReturn;
+            const modal = bootstrap.Modal.getInstance(restoreModalEl) || new bootstrap.Modal(restoreModalEl);
+            modal.show();
+            restoreModalEl = null;
+        }
+        pendingForm = null;
+        isConfirmed = false;
+        confirmBtn.disabled = false;
+    });
+
+    confirmBtn.addEventListener('click', function () {
+        if (!pendingForm) return;
+        isConfirmed = true;
+        confirmBtn.disabled = true;
+        pendingForm.submit();
+    });
+
+    document.querySelectorAll('.js-payable-form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const mode = form.dataset.mode || 'create';
+            if (mode === 'edit') {
+                confirmForForm(form, {
+                    title: 'Update Payable',
+                    message: 'Are you sure you want to update this payable?',
+                    confirmText: 'Yes, Update',
+                    confirmBtnClass: 'btn-primary'
+                });
+                return;
+            }
+            confirmForForm(form, {
+                title: 'Save Payable',
+                message: 'Are you sure you want to save this payable?',
+                confirmText: 'Yes, Save',
+                confirmBtnClass: 'btn-primary'
+            });
+        });
+    });
+
+    document.querySelectorAll('.js-confirm-payable-delete').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const form = btn.closest('form');
+            const label = btn.getAttribute('data-payable-label') || 'this payable';
+            confirmForForm(form, {
+                title: 'Delete Payable',
+                message: `Are you sure you want to delete ${label}?`,
+                confirmText: 'Yes, Delete',
+                confirmBtnClass: 'btn-danger'
+            });
+        });
+    });
+
+    document.querySelectorAll('.js-open-edit-payable').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const orderId = btn.getAttribute('data-order-id');
+            const orderModalEl = document.getElementById(`orderModal${orderId}`);
+            const addPayableModalEl = document.getElementById(`addPayableModal${orderId}`);
+            if (!orderModalEl || !addPayableModalEl) return;
+
+            const updateAction = btn.getAttribute('data-update-action');
+            const vendorType = btn.getAttribute('data-vendor-type') || '';
+            const amount = btn.getAttribute('data-amount') || '';
+            const notes = btn.getAttribute('data-notes') || '';
+
+            const form = addPayableModalEl.querySelector('form');
+            const titleEl = addPayableModalEl.querySelector('.js-payable-modal-title');
+            const submitBtn = addPayableModalEl.querySelector('.js-payable-submit');
+            if (!form || !titleEl || !submitBtn) return;
+
+            form.dataset.mode = 'edit';
+            if (!form.dataset.storeAction) {
+                form.dataset.storeAction = form.getAttribute('action') || '';
+            }
+            if (updateAction) {
+                form.setAttribute('action', updateAction);
+            }
+
+            const existingMethod = form.querySelector('input[name="_method"]');
+            if (!existingMethod) {
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'PUT';
+                form.appendChild(methodInput);
+            } else {
+                existingMethod.value = 'PUT';
+            }
+
+            const vendorInput = form.querySelector('input[name="vendor_type"]');
+            const amountInput = form.querySelector('input[name="amount"]');
+            const notesInput = form.querySelector('textarea[name="notes"]');
+            if (vendorInput) vendorInput.value = vendorType;
+            if (amountInput) amountInput.value = amount;
+            if (notesInput) notesInput.value = notes;
+
+            titleEl.innerHTML = '<i class="bi bi-pencil"></i> Edit Payable';
+            submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Update Payable';
+
+            const orderModal = bootstrap.Modal.getInstance(orderModalEl) || new bootstrap.Modal(orderModalEl);
+            orderModal.hide();
+
+            orderModalEl.addEventListener('hidden.bs.modal', function openEdit() {
+                const addModal = new bootstrap.Modal(addPayableModalEl);
+                addPayableModalEl.dataset.returnOrderId = orderId;
+                addModal.show();
+            }, { once: true });
+        });
+    });
+
+    function resetAddPayableModal(addPayableModalEl) {
+        const form = addPayableModalEl.querySelector('form');
+        const titleEl = addPayableModalEl.querySelector('.js-payable-modal-title');
+        const submitBtn = addPayableModalEl.querySelector('.js-payable-submit');
+        if (!form || !titleEl || !submitBtn) return;
+
+        form.dataset.mode = 'create';
+        const storeAction = form.dataset.storeAction || form.getAttribute('data-store-action') || '';
+        if (storeAction) form.setAttribute('action', storeAction);
+
+        const methodInput = form.querySelector('input[name="_method"]');
+        if (methodInput) methodInput.remove();
+
+        titleEl.innerHTML = '<i class="bi bi-plus-circle"></i> Add Payable';
+        submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Save Payable';
+
+        const vendorInput = form.querySelector('input[name="vendor_type"]');
+        const amountInput = form.querySelector('input[name="amount"]');
+        const notesInput = form.querySelector('textarea[name="notes"]');
+        if (vendorInput) vendorInput.value = '';
+        if (amountInput) amountInput.value = '';
+        if (notesInput) notesInput.value = '';
+    }
+
+    document.querySelectorAll('[id^="addPayableModal"]').forEach(function (addPayableModalEl) {
+        addPayableModalEl.addEventListener('hidden.bs.modal', function () {
+            if (addPayableModalEl.dataset.apSuppressOnHideReturn === '1') return;
+            resetAddPayableModal(addPayableModalEl);
+            const returnOrderId = addPayableModalEl.dataset.returnOrderId;
+            if (!returnOrderId) return;
+            const orderModalEl = document.getElementById(`orderModal${returnOrderId}`);
+            if (!orderModalEl) return;
+            const orderModal = bootstrap.Modal.getInstance(orderModalEl) || new bootstrap.Modal(orderModalEl);
+            orderModal.show();
+            addPayableModalEl.dataset.returnOrderId = '';
+        });
+    });
+});
+</script>
 @endsection

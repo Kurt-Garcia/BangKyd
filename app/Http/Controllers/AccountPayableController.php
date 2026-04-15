@@ -74,6 +74,70 @@ class AccountPayableController extends Controller
         return redirect()->route('accounts-payable.index')->with('success', 'Payable added and deducted from downpayment successfully!');
     }
 
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'vendor_type' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string'
+        ]);
+
+        $ap = AccountPayable::with(['order', 'payments'])->findOrFail($id);
+        $oldAmount = $ap->total_amount;
+
+        $ap->vendor_type = $request->vendor_type;
+        $ap->price_per_pcs = $request->amount;
+        $ap->total_amount = $request->amount;
+        $ap->notes = $request->notes;
+
+        if ($ap->payments->count() === 1) {
+            $payment = $ap->payments->first();
+            if ($payment) {
+                $payment->amount = $request->amount;
+                $payment->save();
+            }
+        }
+
+        if ($ap->status === 'paid' || $ap->balance == 0) {
+            $ap->paid_amount = $ap->total_amount;
+        } elseif ($ap->paid_amount > $ap->total_amount) {
+            $ap->paid_amount = $ap->total_amount;
+        }
+
+        $ap->updatePaymentStatus();
+
+        $orderNumber = $ap->order?->order_number ?? 'Unknown Order';
+        ActivityLog::log(
+            'update',
+            "Updated payable for {$ap->vendor_type} on Order {$orderNumber} (₱" . number_format($oldAmount, 2) . " → ₱" . number_format($request->amount, 2) . ")",
+            'AccountPayable',
+            $ap->id
+        );
+
+        return redirect()->route('accounts-payable.index')->with('success', 'Payable updated successfully!');
+    }
+
+    public function destroy($id)
+    {
+        $ap = AccountPayable::with('order')->findOrFail($id);
+
+        $orderNumber = $ap->order?->order_number ?? 'Unknown Order';
+        $vendorType = $ap->vendor_type;
+        $amount = $ap->total_amount;
+
+        $ap->payments()->delete();
+        $ap->delete();
+
+        ActivityLog::log(
+            'delete',
+            "Deleted payable of ₱" . number_format($amount, 2) . " for {$vendorType} on Order {$orderNumber}",
+            'AccountPayable',
+            $id
+        );
+
+        return redirect()->route('accounts-payable.index')->with('success', 'Payable deleted successfully!');
+    }
+
     public function recordPayment(Request $request, $id)
     {
         $request->validate([

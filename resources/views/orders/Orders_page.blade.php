@@ -94,14 +94,27 @@
 
                 @if($order->accountReceivable->submission->images && count($order->accountReceivable->submission->images) > 0)
                 <hr class="my-2">
-                <div class="row g-1">
-                    @foreach($order->accountReceivable->submission->images as $index => $image)
-                        @if($index < 3)
-                        <div class="col-4">
-                            <img src="{{ asset('storage/' . $image) }}" class="img-fluid rounded" alt="Design" style="height: 60px; width: 100%; object-fit: cover;">
-                        </div>
-                        @endif
-                    @endforeach
+                @php
+                    $cardImages = collect($order->accountReceivable->submission->images)->take(3)->values();
+                @endphp
+                <div id="orderCardCarousel{{ $order->id }}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2500">
+                    <div class="carousel-inner rounded">
+                        @foreach($cardImages as $index => $image)
+                            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                <img src="{{ asset('storage/' . $image) }}" class="d-block w-100" alt="Design" style="height: 300px; object-fit: cover; object-position: center;">
+                            </div>
+                        @endforeach
+                    </div>
+                    @if($cardImages->count() > 1)
+                        <button class="carousel-control-prev" type="button" data-bs-target="#orderCardCarousel{{ $order->id }}" data-bs-slide="prev" onclick="event.stopPropagation();">
+                            <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1) grayscale(1);"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#orderCardCarousel{{ $order->id }}" data-bs-slide="next" onclick="event.stopPropagation();">
+                            <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1) grayscale(1);"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    @endif
                 </div>
                 @endif
             </div>
@@ -177,14 +190,38 @@
                     @if($order->accountReceivable->submission->images && count($order->accountReceivable->submission->images) > 0)
                     <div class="mb-4">
                         <h6 class="border-bottom pb-2"><i class="bi bi-images"></i> Design Images</h6>
-                        <div class="row g-3">
-                            @foreach($order->accountReceivable->submission->images as $image)
-                            <div class="col-md-4">
-                                <a href="{{ asset('storage/' . $image) }}" target="_blank">
-                                    <img src="{{ asset('storage/' . $image) }}" class="img-thumbnail" alt="Design" style="height: 200px; width: 100%; object-fit: cover;">
-                                </a>
+                        @php
+                            $modalImages = collect($order->accountReceivable->submission->images)->take(3)->values();
+                        @endphp
+                        <div id="orderModalCarousel{{ $order->id }}" class="carousel slide" data-bs-ride="carousel">
+                            @if($modalImages->count() > 1)
+                                <div class="carousel-indicators">
+                                    @foreach($modalImages as $index => $image)
+                                        <button type="button" data-bs-target="#orderModalCarousel{{ $order->id }}" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}" aria-current="{{ $index === 0 ? 'true' : 'false' }}" aria-label="Slide {{ $index + 1 }}" onclick="event.stopPropagation();"></button>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div class="carousel-inner rounded">
+                                @foreach($modalImages as $index => $image)
+                                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                        <a href="{{ asset('storage/' . $image) }}" target="_blank" rel="noopener noreferrer">
+                                            <img src="{{ asset('storage/' . $image) }}" class="d-block w-100" alt="Design" style="height: 420px; max-height: 60vh; object-fit: contain; background-color: #f8f9fa;">
+                                        </a>
+                                    </div>
+                                @endforeach
                             </div>
-                            @endforeach
+
+                            @if($modalImages->count() > 1)
+                                <button class="carousel-control-prev" type="button" data-bs-target="#orderModalCarousel{{ $order->id }}" data-bs-slide="prev" onclick="event.stopPropagation();">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1) grayscale(1);"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#orderModalCarousel{{ $order->id }}" data-bs-slide="next" onclick="event.stopPropagation();">
+                                    <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1) grayscale(1);"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            @endif
                         </div>
                     </div>
                     @endif
@@ -237,13 +274,20 @@
                     @endif
                 </div>
                 <div class="modal-footer">
+                    @php
+                        $ar = $order->accountReceivable;
+                        $isFullyPaid = $ar && ($ar->status === 'paid' || ($ar->paid_amount >= $ar->total_amount));
+                    @endphp
                     @if($order->status !== 'completed')
-                    <form action="{{ route('orders.complete', $order->id) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-success" onclick="return confirm('Mark this order as completed?')">
-                            <i class="bi bi-check-circle"></i> Done
-                        </button>
-                    </form>
+                        @if($isFullyPaid)
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeOrderModal{{ $order->id }}">
+                                <i class="bi bi-check-circle"></i> Done
+                            </button>
+                        @else
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#orderPaymentRequiredModal{{ $order->id }}">
+                                <i class="bi bi-check-circle"></i> Done
+                            </button>
+                        @endif
                     @endif
                     
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -251,6 +295,56 @@
             </div>
         </div>
     </div>
+
+    @if($order->status !== 'completed')
+    <div class="modal fade" id="completeOrderModal{{ $order->id }}" tabindex="-1" aria-labelledby="completeOrderModalLabel{{ $order->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="completeOrderModalLabel{{ $order->id }}">Mark Order as Completed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Mark <strong>{{ $order->order_number }}</strong> as completed?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{{ route('orders.complete', $order->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-success">
+                            Yes, Done
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($order->status !== 'completed' && !$isFullyPaid)
+    <div class="modal fade" id="orderPaymentRequiredModal{{ $order->id }}" tabindex="-1" aria-labelledby="orderPaymentRequiredModalLabel{{ $order->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderPaymentRequiredModalLabel{{ $order->id }}">Payment Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    This order must be fully paid before you can mark it as completed.
+                    @if($ar)
+                        <div class="mt-3">
+                            <div><strong>AR Status:</strong> {{ ucfirst($ar->status) }}</div>
+                            <div><strong>Balance:</strong> ₱{{ number_format($ar->balance ?? ($ar->total_amount - $ar->paid_amount), 2) }}</div>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
 
 

@@ -234,18 +234,26 @@
             <div class="card-body-custom pt-0">
                 <!-- Design Images Preview -->
                 @if($submission->images && count($submission->images) > 0)
-                <div class="image-preview-grid">
-                    @foreach($submission->images as $index => $image)
-                        @if($index < 3)
-                            <img src="{{ asset('storage/' . $image) }}" class="preview-img-item" alt="Design">
-                        @endif
-                    @endforeach
-                    @if(count($submission->images) < 3)
-                        @for($i = count($submission->images); $i < 3; $i++)
-                            <div class="preview-img-item d-flex align-items-center justify-content-center bg-light text-muted small">
-                                <i class="bi bi-image"></i>
+                @php
+                    $rrCardImages = collect($submission->images)->take(3)->values();
+                @endphp
+                <div id="rrCardCarousel{{ $submission->id }}" class="carousel slide carousel-dark mt-3" data-bs-ride="carousel" data-bs-interval="2500">
+                    <div class="carousel-inner rounded">
+                        @foreach($rrCardImages as $index => $image)
+                            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                <img src="{{ asset('storage/' . $image) }}" class="d-block w-100" alt="Design" style="height: 300px; object-fit: cover; object-position: center;">
                             </div>
-                        @endfor
+                        @endforeach
+                    </div>
+                    @if($rrCardImages->count() > 1)
+                        <button class="carousel-control-prev" type="button" data-bs-target="#rrCardCarousel{{ $submission->id }}" data-bs-slide="prev" onclick="event.stopPropagation();">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#rrCardCarousel{{ $submission->id }}" data-bs-slide="next" onclick="event.stopPropagation();">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     @endif
                 </div>
                 @else
@@ -319,10 +327,6 @@
                                         <div class="info-label">Total Qty</div>
                                         <div class="info-value">{{ $submission->total_quantity }} pcs</div>
                                     </div>
-                                    <div class="col-6">
-                                        <div class="info-label">Unit Price</div>
-                                        <div class="info-value">₱{{ number_format($submission->salesOrder->product->price ?? 0, 2) }}</div>
-                                    </div>
                                 </div>
 
                                 <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light mb-2">
@@ -351,34 +355,61 @@
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                                        <table class="table table-modern table-hover mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th style="padding-left: 24px;">#</th>
-                                                    <th>Jersey Name</th>
-                                                    <th>Number</th>
-                                                    <th>Size</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($submission->players as $index => $player)
-                                                <tr>
-                                                    <td style="padding-left: 24px;">
-                                                        <span class="text-muted">{{ $index + 1 }}</span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="fw-bold text-dark">{{ $player['jersey_name'] }}</div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="avatar-circle">{{ $player['jersey_number'] }}</div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-light text-dark border">{{ $player['jersey_size'] }}</span>
-                                                    </td>
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                        @php
+                                            $playersByProduct = collect($submission->players)->groupBy('product_id');
+                                            $productIds = $playersByProduct->keys()->filter()->values();
+                                            $productsById = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
+                                            $sortedProductIds = $playersByProduct->keys()
+                                                ->sortBy(function ($productId) use ($productsById) {
+                                                    $name = optional($productsById->get($productId))->name;
+                                                    return strtolower((string) ($name ?? 'zzzzzz'));
+                                                })
+                                                ->values();
+                                        @endphp
+
+                                        @foreach($sortedProductIds as $productId)
+                                            @php
+                                                $product = $productsById->get($productId);
+                                                $productName = $product ? $product->name : 'Unknown Product';
+                                                $players = $playersByProduct->get($productId, collect());
+                                            @endphp
+
+                                            <div class="px-4 pt-3 pb-2 {{ $loop->first ? '' : 'border-top' }}">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="fw-bold text-primary"><i class="bi bi-box me-2"></i>{{ $productName }}</div>
+                                                    <span class="badge bg-secondary">{{ count($players) }} pcs</span>
+                                                </div>
+                                            </div>
+
+                                            <table class="table table-modern table-hover mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="padding-left: 24px;">#</th>
+                                                        <th>Jersey Name</th>
+                                                        <th>Number</th>
+                                                        <th>Size</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($players as $index => $player)
+                                                    <tr>
+                                                        <td style="padding-left: 24px;">
+                                                            <span class="text-muted">{{ $index + 1 }}</span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="fw-bold text-dark">{{ $player['jersey_name'] }}</div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="avatar-circle">{{ $player['jersey_number'] }}</div>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-light text-dark border">{{ $player['jersey_size'] }}</span>
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        @endforeach
                                     </div>
                                 </div>
                             </div>

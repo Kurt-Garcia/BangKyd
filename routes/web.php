@@ -21,6 +21,8 @@ Route::get('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'showF
 Route::post('/order/{uniqueLink}', [SalesOrderSubmissionController::class, 'submit'])->name('order.submit');
 Route::get('/invoice/{id}', [SalesOrderSubmissionController::class, 'showInvoice'])->name('invoice.show');
 
+Route::get('/api/products', [\App\Http\Controllers\ProductController::class, 'getProducts'])->name('api.products');
+
 
 
 Route::middleware('auth')->group(function () {
@@ -36,6 +38,8 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/accounts-payable', [\App\Http\Controllers\AccountPayableController::class, 'index'])->name('accounts-payable.index');
     Route::post('/accounts-payable/order/{id}', [\App\Http\Controllers\AccountPayableController::class, 'store'])->name('accounts-payable.store');
+    Route::put('/accounts-payable/{id}', [\App\Http\Controllers\AccountPayableController::class, 'update'])->name('accounts-payable.update');
+    Route::delete('/accounts-payable/{id}', [\App\Http\Controllers\AccountPayableController::class, 'destroy'])->name('accounts-payable.destroy');
     Route::post('/accounts-payable/{id}/payment', [\App\Http\Controllers\AccountPayableController::class, 'recordPayment'])->name('accounts-payable.payment');
     
     Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
@@ -59,5 +63,4 @@ Route::middleware('auth')->group(function () {
     
     // Product Management Routes
     Route::resource('products', \App\Http\Controllers\ProductController::class);
-    Route::get('/api/products', [\App\Http\Controllers\ProductController::class, 'getProducts'])->name('api.products');
 });
