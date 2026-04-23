@@ -32,6 +32,7 @@ class SalesOrderSubmissionController extends Controller
         $request->validate([
             'images' => 'nullable|array|max:3',
             'images.*' => 'nullable|image|max:5120',
+            'deadline_date' => 'required|date|after_or_equal:today',
             'players' => 'required|array|min:1',
             'players.*.product_id' => 'required|exists:products,id',
             'players.*.jersey_name' => 'required|string|max:255',
@@ -109,6 +110,7 @@ class SalesOrderSubmissionController extends Controller
             'balance' => $balance,
             'is_paid' => false,
             'submitted_at' => now(),
+            'deadline_date' => $request->deadline_date,
         ]);
 
         // Mark SO as submitted and clear draft data
@@ -168,6 +170,7 @@ class SalesOrderSubmissionController extends Controller
         $draftData = [
             'players' => $submission->players,
             'images' => $submission->images,
+            'deadline_date' => $submission->deadline_date?->toDateString(),
         ];
         $salesOrder->update(['draft_data' => $draftData]);
 

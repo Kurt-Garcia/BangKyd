@@ -7,6 +7,8 @@ use App\Models\SalesOrderSubmission;
 use App\Models\AccountReceivable;
 use App\Models\AccountPayable;
 use App\Models\Order;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -60,6 +62,40 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $trendDays = 14;
+        $trendEnd = Carbon::today();
+        $trendStart = $trendEnd->copy()->subDays($trendDays - 1);
+        $trendStartTs = $trendStart->copy()->startOfDay();
+        $trendEndTs = $trendEnd->copy()->endOfDay();
+
+        $submissionsByDate = SalesOrderSubmission::query()
+            ->selectRaw('DATE(created_at) as d, COUNT(*) as c, COALESCE(SUM(total_amount), 0) as s')
+            ->whereBetween('created_at', [$trendStartTs, $trendEndTs])
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy('d')
+            ->get()
+            ->keyBy('d');
+
+        $trendLabels = [];
+        $trendCounts = [];
+        $trendRevenue = [];
+        for ($i = 0; $i < $trendDays; $i++) {
+            $day = $trendStart->copy()->addDays($i);
+            $key = $day->toDateString();
+            $trendLabels[] = $day->format('M j');
+            $trendCounts[] = (int) ($submissionsByDate[$key]->c ?? 0);
+            $trendRevenue[] = (float) ($submissionsByDate[$key]->s ?? 0);
+        }
+
+        $prevStart = $trendStart->copy()->subDays($trendDays)->startOfDay();
+        $prevEnd = $trendStart->copy()->subDay()->endOfDay();
+        $prevRevenue = (float) SalesOrderSubmission::whereBetween('created_at', [$prevStart, $prevEnd])->sum('total_amount');
+        $currRevenue = (float) array_sum($trendRevenue);
+
+        $revenueDelta = $prevRevenue > 0
+            ? (($currRevenue - $prevRevenue) / $prevRevenue) * 100
+            : ($currRevenue > 0 ? 100 : 0);
+
         return view('dashboard', compact(
             'totalSalesOrders',
             'pendingSalesOrders',
@@ -81,7 +117,13 @@ class DashboardController extends Controller
             'totalAPPaid',
             'recentSubmissions',
             'recentPayments',
-            'ordersInProduction'
+            'ordersInProduction',
+            'trendLabels',
+            'trendCounts',
+            'trendRevenue',
+            'currRevenue',
+            'prevRevenue',
+            'revenueDelta'
         ));
     }
 }

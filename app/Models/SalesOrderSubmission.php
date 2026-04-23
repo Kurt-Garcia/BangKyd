@@ -16,13 +16,15 @@ class SalesOrderSubmission extends Model
         'balance',
         'is_paid',
         'paid_at',
-        'submitted_at'
+        'submitted_at',
+        'deadline_date'
     ];
 
     protected $casts = [
         'images' => 'array',
         'players' => 'array',
         'submitted_at' => 'datetime',
+        'deadline_date' => 'date',
         'paid_at' => 'datetime',
         'is_paid' => 'boolean',
     ];

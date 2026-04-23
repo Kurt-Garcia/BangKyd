@@ -293,6 +293,16 @@
 
                         <input type="file" class="d-none" id="designImages" name="images[]" accept="image/*" multiple onchange="handleDesignImagesChange()">
 
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-4">
+                                <label for="deadlineDate" class="form-label text-white">Deadline Date</label>
+                                <input type="date" class="form-control" id="deadlineDate" name="deadline_date" min="{{ now()->toDateString() }}" required>
+                                @error('deadline_date')
+                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             <button type="button" class="btn btn-outline-light" onclick="document.getElementById('designImages').click()">
                                 <i class="bi bi-cloud-upload"></i> Upload Images
@@ -468,6 +478,7 @@
     <script>
         window.__draftPlayers = @json($salesOrder->draft_data['players'] ?? []);
         window.__draftImages = @json($salesOrder->draft_data['images'] ?? []);
+        window.__draftDeadlineDate = @json($salesOrder->draft_data['deadline_date'] ?? null);
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -1114,6 +1125,10 @@
 
         // Load products on page load
         document.addEventListener('DOMContentLoaded', function() {
+            const deadlineEl = document.getElementById('deadlineDate');
+            if (deadlineEl && window.__draftDeadlineDate) {
+                deadlineEl.value = window.__draftDeadlineDate;
+            }
             const modalPlayersContainer = document.getElementById('modalPlayersContainer');
             if (modalPlayersContainer) {
                 modalPlayersContainer.addEventListener('input', function(e) {
