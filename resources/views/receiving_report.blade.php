@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .modal-content {
-        border: none;
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
         border-radius: 16px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     }
@@ -45,19 +45,19 @@
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: #8898aa;
+        color: rgba(0, 0, 0, 0.55);
         margin-bottom: 4px;
         font-weight: 600;
     }
     .info-value {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #32325d;
+        color: #111;
         margin-bottom: 0;
     }
     .payment-summary-card {
-        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-        border: 1px solid rgba(0,0,0,0.05);
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
         border-radius: 16px;
         padding: 24px;
     }
@@ -71,12 +71,13 @@
         gap: 8px;
     }
     .status-pill.paid {
-        background-color: #d1e7dd;
-        color: #0f5132;
+        background-color: #111;
+        color: #fff;
     }
     .status-pill.pending {
-        background-color: #fff3cd;
-        color: #664d03;
+        background-color: rgba(0, 0, 0, 0.06);
+        color: #111;
+        border: 1px solid rgba(0, 0, 0, 0.14);
     }
     .table-modern {
         margin: 0;
@@ -85,7 +86,7 @@
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 1px;
-        color: #8898aa;
+        color: rgba(0, 0, 0, 0.6);
         border-bottom: 1px solid #e9ecef;
         padding: 12px 16px;
         font-weight: 600;
@@ -94,7 +95,7 @@
         padding: 16px;
         vertical-align: middle;
         border-bottom: 1px solid #f6f9fc;
-        color: #525f7f;
+        color: rgba(0, 0, 0, 0.72);
         font-size: 0.95rem;
     }
     .table-modern tr:last-child td {
@@ -103,14 +104,15 @@
     .avatar-circle {
         width: 32px;
         height: 32px;
-        background-color: #e9ecef;
+        background-color: rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(0, 0, 0, 0.10);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 0.8rem;
         font-weight: 600;
-        color: #525f7f;
+        color: #111;
     }
     .submission-card {
         border: none;
@@ -169,8 +171,9 @@
         margin-top: 16px;
     }
     .so-badge {
-        background: rgba(13, 110, 253, 0.1);
-        color: #0d6efd;
+        background: rgba(0, 0, 0, 0.06);
+        color: #111;
+        border: 1px solid rgba(0, 0, 0, 0.12);
         padding: 4px 12px;
         border-radius: 6px;
         font-weight: 600;
@@ -182,7 +185,7 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3"><i class="bi bi-inbox"></i> Receiving Report</h1>
-    <span class="badge bg-primary">{{ $submissions->count() }} Total Submissions</span>
+    <span class="badge text-bg-dark">{{ $submissions->count() }} Total Submissions</span>
 </div>
 
 <div class="card mb-4">
@@ -204,9 +207,9 @@
                 <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        <button type="submit" class="btn btn-dark"><i class="bi bi-funnel"></i> Filter</button>
                         @if(request()->hasAny(['search', 'date_from', 'date_to']))
-                            <a href="{{ route('receiving-report') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                            <a href="{{ route('receiving-report') }}" class="btn btn-outline-dark"><i class="bi bi-x-circle"></i> Clear</a>
                         @endif
                     </div>
                 </div>
@@ -223,9 +226,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="so-badge">{{ $submission->salesOrder->so_number }}</span>
                     @if($submission->is_paid)
-                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Paid</span>
+                        <span class="badge text-bg-dark rounded-pill px-3">Paid</span>
                     @else
-                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3">Pending</span>
+                        <span class="badge bg-light text-dark border border-dark rounded-pill px-3">Pending</span>
                     @endif
                 </div>
                 <h6 class="fw-bold text-dark mb-0 text-truncate" title="{{ $submission->salesOrder->so_name }}">{{ $submission->salesOrder->so_name }}</h6>
@@ -273,7 +276,7 @@
                 <div class="text-muted small">
                     <i class="bi bi-clock me-1"></i> {{ $submission->submitted_at->format('M d, Y') }}
                 </div>
-                <div class="text-primary fw-bold">
+                <div class="text-dark fw-bold">
                     ₱{{ number_format($submission->total_amount, 2) }}
                 </div>
             </div>
@@ -334,12 +337,12 @@
                                     <span class="fw-bold text-dark">₱{{ number_format($submission->total_amount, 2) }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-light mb-2">
-                                    <span class="text-danger">Down Payment (50%)</span>
-                                    <span class="fw-bold text-danger">- ₱{{ number_format($submission->down_payment, 2) }}</span>
+                                    <span class="text-muted">Down Payment (50%)</span>
+                                    <span class="fw-bold text-dark">- ₱{{ number_format($submission->down_payment, 2) }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center pt-2">
-                                    <span class="text-success fw-bold">Balance Due</span>
-                                    <span class="fs-4 fw-bold text-success">₱{{ number_format($submission->balance, 2) }}</span>
+                                    <span class="text-dark fw-bold">Balance Due</span>
+                                    <span class="fs-4 fw-bold text-dark">₱{{ number_format($submission->balance, 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -376,8 +379,8 @@
 
                                             <div class="px-4 pt-3 pb-2 {{ $loop->first ? '' : 'border-top' }}">
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <div class="fw-bold text-primary"><i class="bi bi-box me-2"></i>{{ $productName }}</div>
-                                                    <span class="badge bg-secondary">{{ count($players) }} pcs</span>
+                                                    <div class="fw-bold text-dark"><i class="bi bi-box me-2"></i>{{ $productName }}</div>
+                                                    <span class="badge text-bg-dark">{{ count($players) }} pcs</span>
                                                 </div>
                                             </div>
 
@@ -418,12 +421,12 @@
                 </div>
                 <div class="modal-footer bg-white border-top-0 pt-0 pb-4 px-4">
                     <div class="d-flex w-100 justify-content-between align-items-center">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-dark rounded-pill px-4" data-bs-dismiss="modal">Close</button>
                         <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-warning rounded-pill px-4" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#allowResubmissionModal{{ $submission->id }}">
+                            <button type="button" class="btn btn-outline-dark rounded-pill px-4" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#allowResubmissionModal{{ $submission->id }}">
                                 <i class="bi bi-arrow-clockwise me-2"></i>Allow Resubmission
                             </button>
-                            <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#confirmPaymentModal{{ $submission->id }}">
+                            <button type="button" class="btn btn-dark rounded-pill px-4" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#confirmPaymentModal{{ $submission->id }}">
                                 <i class="bi bi-check-circle me-2"></i>Confirm Order
                             </button>
                         </div>
@@ -437,14 +440,14 @@
     <div class="modal fade" id="allowResubmissionModal{{ $submission->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-warning">
+                <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Allow Customer to Resubmit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('receiving-report.allow-resubmission', $submission->id) }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="alert alert-warning">
+                        <div class="alert alert-light border border-dark">
                             <strong>This will allow the customer to resubmit their order.</strong>
                         </div>
                         <p><strong>SO Number:</strong> {{ $submission->salesOrder->so_number }}</p>
@@ -457,8 +460,8 @@
                         <p class="text-muted small"><i class="bi bi-info-circle"></i> This will unlock the order form link and delete the current submission. The customer can then submit a corrected version.</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-warning">
+                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-dark">
                             <i class="bi bi-arrow-clockwise"></i> Allow Resubmission
                         </button>
                     </div>
@@ -471,25 +474,25 @@
     <div class="modal fade" id="confirmPaymentModal{{ $submission->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-warning">
+                <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirm Payment Received</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('receiving-report.confirm', $submission->id) }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="alert alert-info">
+                        <div class="alert alert-light border border-dark">
                             <strong>Confirm that you have received the down payment for this order.</strong>
                         </div>
                         <p><strong>SO Number:</strong> {{ $submission->salesOrder->so_number }}</p>
                         <p><strong>Customer:</strong> {{ $submission->salesOrder->so_name }}</p>
-                        <p><strong>Down Payment Expected:</strong> <span class="text-danger fs-5">₱{{ number_format($submission->down_payment, 2) }}</span></p>
+                        <p><strong>Down Payment Expected:</strong> <span class="text-dark fs-5">₱{{ number_format($submission->down_payment, 2) }}</span></p>
                         <hr>
                         <p class="text-muted small">This will create an Account Receivable record and move the order to AR tracking.</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
+                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-dark">
                             <i class="bi bi-check2-circle"></i> Confirm Payment Received
                         </button>
                     </div>

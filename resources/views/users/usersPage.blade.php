@@ -3,68 +3,73 @@
 @section('content')
 <style>
     .page-header {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
         padding: 2rem;
         border-radius: 16px;
         margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
     .page-header h2 {
-        color: #2d3748;
-        font-weight: 600;
+        color: #111;
+        font-weight: 700;
         margin-bottom: 0.5rem;
     }
     .page-header p {
-        color: #64748b;
+        color: rgba(0, 0, 0, 0.6);
         margin: 0;
     }
     .user-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.92);
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
     }
     .table thead {
-        background-color: #f8fafc;
+        background-color: rgba(0, 0, 0, 0.02);
     }
     .table thead th {
-        color: #64748b;
-        font-weight: 600;
-        border-bottom: 2px solid #e2e8f0;
+        color: rgba(0, 0, 0, 0.65);
+        font-weight: 700;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.10);
         padding: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.85rem;
     }
     .table tbody tr {
         transition: background-color 0.2s ease;
     }
     .table tbody tr:hover {
-        background-color: #f8fafc;
+        background-color: rgba(0, 0, 0, 0.02);
     }
     .btn-add-user {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
+        background: #111;
+        border: 1px solid rgba(0, 0, 0, 0.2);
         padding: 0.75rem 1.5rem;
         border-radius: 10px;
-        font-weight: 500;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        font-weight: 700;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
         transition: all 0.3s ease;
     }
     .btn-add-user:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+        background: #000;
     }
     .badge-you {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #111;
         padding: 0.35rem 0.75rem;
         border-radius: 20px;
-        font-weight: 500;
+        font-weight: 700;
     }
     .modal-content {
         border-radius: 16px;
-        border: none;
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     }
     .modal-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #111;
         color: white;
         border-radius: 16px 16px 0 0;
         padding: 1.5rem;
@@ -73,41 +78,43 @@
         filter: brightness(0) invert(1);
     }
     .form-label {
-        font-weight: 500;
-        color: #2d3748;
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.75);
         margin-bottom: 0.5rem;
     }
     .form-control {
-        border: 2px solid #e2e8f0;
+        border: 1px solid rgba(0, 0, 0, 0.14);
         border-radius: 10px;
         padding: 0.75rem;
         transition: all 0.2s ease;
     }
     .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: rgba(0, 0, 0, 0.65);
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
     }
     .btn-submit {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
+        background: #111;
+        border: 1px solid rgba(0, 0, 0, 0.2);
         padding: 0.75rem 2rem;
         border-radius: 10px;
-        font-weight: 500;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        font-weight: 700;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
     }
     .btn-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+        background: #000;
     }
     .modal-header.edit-mode {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: #111;
     }
     .btn-submit.edit-mode {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        background: #111;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
     }
     .btn-submit.edit-mode:hover {
-        box-shadow: 0 6px 16px rgba(245, 158, 11, 0.5);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+        background: #000;
     }
 </style>
 
@@ -119,7 +126,7 @@
                 <h2><i class="bi bi-people me-2"></i>User Management</h2>
                 <p>Manage system users and their access</p>
             </div>
-            <button type="button" class="btn btn-primary btn-add-user" onclick="openAddModal()">
+            <button type="button" class="btn btn-dark btn-add-user" onclick="openAddModal()">
                 <i class="bi bi-person-plus me-2"></i>Add New User
             </button>
         </div>
@@ -173,12 +180,12 @@
                             <td class="align-middle">{{ $user->created_at->format('M d, Y h:i A') }}</td>
                             <td class="align-middle">
                                 @if($user->id !== auth()->id())
-                                <button type="button" class="btn btn-sm btn-warning me-1" 
+                                <button type="button" class="btn btn-sm btn-outline-dark me-1" 
                                     onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->username }}', '{{ $user->email }}')"
                                     style="border-radius: 8px;">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-danger" 
+                                <button type="button" class="btn btn-sm btn-outline-dark" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#deleteModal{{ $user->id }}"
                                     style="border-radius: 8px;">
@@ -189,7 +196,7 @@
                                 <div class="modal fade" id="deleteModal{{ $user->id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header bg-danger">
+                                            <div class="modal-header bg-dark">
                                                 <h5 class="modal-title text-white">
                                                     <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
                                                 </h5>
@@ -197,14 +204,14 @@
                                             </div>
                                             <div class="modal-body">
                                                 <p class="mb-0">Are you sure you want to delete user <strong>{{ $user->name }}</strong>?</p>
-                                                <p class="text-danger small mt-2 mb-0">This action cannot be undone.</p>
+                                                <p class="text-muted small mt-2 mb-0">This action cannot be undone.</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
                                                 <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">Delete User</button>
+                                                    <button type="submit" class="btn btn-dark">Delete User</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -268,8 +275,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary btn-submit" id="submitBtn">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark btn-submit" id="submitBtn">
                         <i class="bi bi-check-lg me-2"></i><span id="submitBtnText">Create User</span>
                     </button>
                 </div>

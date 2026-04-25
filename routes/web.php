@@ -43,10 +43,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/complete', [OrderController::class, 'markCompleted'])->name('orders.complete');
-    Route::get('/orders/checklists', [OrderController::class, 'playerChecklistsIndex'])->name('orders.checklists');
-    Route::get('/orders/{id}/player-checklist', [OrderController::class, 'playerChecklist'])->name('orders.player-checklist');
-    Route::post('/orders/{id}/player-checklist/update', [OrderController::class, 'updatePlayerChecklist'])->name('orders.player-checklist.update');
-    Route::post('/orders/{id}/player-checklist/bulk', [OrderController::class, 'bulkUpdatePlayerChecklist'])->name('orders.player-checklist.bulk');
+    Route::get('/orders/checklists', fn () => abort(404))->name('orders.checklists');
+    Route::get('/orders/{id}/player-checklist', fn () => abort(404))->name('orders.player-checklist');
+    Route::post('/orders/{id}/player-checklist/update', fn () => abort(404))->name('orders.player-checklist.update');
+    Route::post('/orders/{id}/player-checklist/bulk', fn () => abort(404))->name('orders.player-checklist.bulk');
 
     Route::get('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'index'])->name('system-settings.index');
     Route::put('/system-settings', [\App\Http\Controllers\SystemSettingsController::class, 'update'])->name('system-settings.update');

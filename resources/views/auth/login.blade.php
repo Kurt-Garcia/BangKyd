@@ -22,13 +22,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
+            background: url('{{ asset('img/bg.svg') }}') no-repeat center center fixed;
             background-size: cover;
+            background-color: #f2f2f2;
             position: relative;
             overflow: hidden;
         }
 
-        /* Dark overlay for better glass effect visibility */
         body::before {
             content: '';
             position: absolute;
@@ -36,22 +36,27 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
             z-index: 0;
+            pointer-events: none;
         }
 
-        /* Floating shapes */
         .shape {
             position: absolute;
             border-radius: 50%;
-            opacity: 0.1;
-            animation: float 15s ease-in-out infinite;
+            opacity: 0.06;
+            animation: float 18s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .shape1 {
             width: 200px;
             height: 200px;
-            background: white;
+            background: #000;
             top: 10%;
             left: 10%;
             animation-delay: 0s;
@@ -60,7 +65,7 @@
         .shape2 {
             width: 150px;
             height: 150px;
-            background: white;
+            background: #000;
             bottom: 15%;
             right: 15%;
             animation-delay: 5s;
@@ -69,7 +74,7 @@
         .shape3 {
             width: 100px;
             height: 100px;
-            background: white;
+            background: #000;
             top: 50%;
             left: 80%;
             animation-delay: 10s;
@@ -88,24 +93,26 @@
             padding: 20px;
         }
 
-        /* Glass morphism card */
         .glass-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 22px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.14),
+                0 2px 10px rgba(0, 0, 0, 0.06);
             padding: 35px 30px;
             transition: all 0.3s ease;
         }
 
         .glass-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 45px 0 rgba(31, 38, 135, 0.5);
+            box-shadow:
+                0 26px 80px rgba(0, 0, 0, 0.18),
+                0 2px 12px rgba(0, 0, 0, 0.08);
         }
 
-        /* Logo section */
         .logo-section {
             text-align: center;
             margin-bottom: 30px;
@@ -118,6 +125,11 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 22px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         }
 
         .logo-icon img {
@@ -127,61 +139,58 @@
         }
 
         .logo-title {
-            color: white;
+            color: #0f0f0f;
             font-size: 1.6rem;
             font-weight: 700;
             margin-bottom: 5px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.3px;
         }
 
         .logo-subtitle {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 0, 0, 0.6);
             font-size: 0.85rem;
             font-weight: 400;
         }
 
-        /* Form styles */
         .form-label {
-            color: white;
-            font-weight: 600;
+            color: rgba(0, 0, 0, 0.82);
+            font-weight: 700;
             margin-bottom: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.9px;
         }
 
         .glass-input {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.14);
             border-radius: 12px;
             padding: 12px 18px;
-            color: white;
+            color: #101010;
             font-size: 0.95rem;
             transition: all 0.3s ease;
         }
 
         .glass-input:focus {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-            color: white;
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.65);
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+            color: #101010;
             outline: none;
         }
 
         .glass-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(0, 0, 0, 0.45);
         }
 
         .glass-input:-webkit-autofill,
         .glass-input:-webkit-autofill:hover,
         .glass-input:-webkit-autofill:focus {
-            -webkit-text-fill-color: white;
-            -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.2) inset;
+            -webkit-text-fill-color: #101010;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(0, 0, 0, 0.03) inset;
             transition: background-color 5000s ease-in-out 0s;
         }
 
-        /* Checkbox */
         .glass-checkbox {
             display: flex;
             align-items: center;
@@ -192,23 +201,22 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
-            accent-color: white;
+            accent-color: #111;
         }
 
         .glass-checkbox label {
-            color: white;
+            color: rgba(0, 0, 0, 0.75);
             font-size: 0.9rem;
             cursor: pointer;
             margin: 0;
         }
 
-        /* Button */
         .glass-button {
             width: 100%;
             padding: 12px;
-            background: white;
-            color: #fa709a;
-            border: none;
+            background: #111;
+            color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
             border-radius: 12px;
             font-weight: 700;
             font-size: 1rem;
@@ -216,25 +224,23 @@
             letter-spacing: 1px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
         }
 
         .glass-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
-            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+            background: #000;
         }
 
         .glass-button:active {
             transform: translateY(0);
         }
 
-        /* Error message */
         .error-message {
-            background: rgba(220, 53, 69, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(220, 53, 69, 0.3);
-            color: white;
+            background: rgba(220, 53, 69, 0.08);
+            border: 1px solid rgba(220, 53, 69, 0.22);
+            color: #a00014;
             padding: 12px 15px;
             border-radius: 10px;
             margin-top: 8px;
@@ -248,7 +254,7 @@
         }
 
         .back-home a {
-            color: white;
+            color: #111;
             text-decoration: none;
             font-size: 0.85rem;
             transition: all 0.3s ease;
@@ -272,7 +278,7 @@
             left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(0, 0, 0, 0.55);
             font-size: 1.1rem;
             pointer-events: none;
         }

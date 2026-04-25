@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background: url('{{ asset('img/BG.jpg') }}') center center fixed;
+            background: url('{{ asset('img/bg.svg') }}') no-repeat center center fixed;
             background-size: cover;
+            background-color: #f2f2f2;
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             position: relative;
@@ -22,7 +23,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(255, 255, 255, 0.55);
             z-index: -1;
         }
         
@@ -43,10 +44,10 @@
         }
         
         .upload-section {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(255, 255, 255, 0.92);
             padding: 2.5rem 2rem;
-            color: white;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #111;
+            border-top: 1px solid rgba(0,0,0,0.08);
         }
         
         .text-primary {
@@ -65,12 +66,11 @@
         }
         
         .design-preview-shell {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 16px;
             padding: 1rem;
             margin-top: 1rem;
-            backdrop-filter: blur(10px);
         }
 
         .design-preview-img {
@@ -78,15 +78,15 @@
             max-height: 300px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.06);
         }
 
         .design-empty-state {
-            border: 2px dashed rgba(255, 255, 255, 0.35);
+            border: 2px dashed rgba(0, 0, 0, 0.22);
             border-radius: 14px;
             padding: 2rem 1rem;
             text-align: center;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(0, 0, 0, 0.75);
         }
 
         .design-empty-state i {
@@ -175,7 +175,7 @@
         }
         
         .player-count {
-            background: #28a745;
+            background: #111;
             color: white;
             border-radius: 50%;
             width: 30px;
@@ -188,7 +188,7 @@
             top: 1rem;
             left: 1rem;
             font-size: 0.8rem;
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
             z-index: 2;
         }
         
@@ -207,12 +207,11 @@
         }
         
         .section-title {
-            color: white;
+            color: #111;
             font-size: 2.5rem;
             font-weight: 800;
             text-align: center;
             margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
             letter-spacing: 1px;
         }
         
@@ -220,9 +219,9 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
+            border: 3px solid rgba(0, 0, 0, 0.18);
             border-radius: 50%;
-            border-top-color: #fff;
+            border-top-color: #111;
             animation: spin 1s ease-in-out infinite;
         }
         
@@ -295,7 +294,7 @@
 
                         <div class="row g-3 mt-2">
                             <div class="col-md-4">
-                                <label for="deadlineDate" class="form-label text-white">Deadline Date</label>
+                                <label for="deadlineDate" class="form-label">Deadline Date</label>
                                 <input type="date" class="form-control" id="deadlineDate" name="deadline_date" min="{{ now()->toDateString() }}" required>
                                 @error('deadline_date')
                                     <small class="text-danger d-block mt-1">{{ $message }}</small>
@@ -304,10 +303,10 @@
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <button type="button" class="btn btn-outline-light" onclick="document.getElementById('designImages').click()">
+                            <button type="button" class="btn btn-outline-dark" onclick="document.getElementById('designImages').click()">
                                 <i class="bi bi-cloud-upload"></i> Upload Images
                             </button>
-                            <span class="small text-white-50" id="designCountText"></span>
+                            <span class="small text-muted" id="designCountText"></span>
                         </div>
 
                         <div class="design-preview-shell" id="designPreviewShell">
@@ -333,18 +332,18 @@
             <!-- Products Section -->
             <div class="products-section">
                 <h2 class="section-title">Choose Your Products</h2>
-                <p class="text-center text-white mb-4">Click on a product card to add players</p>
+                <p class="text-center text-muted mb-4">Click on a product card to add players</p>
                 
                 <div id="productsError" class="alert alert-danger d-none mx-4">
                     <i class="bi bi-exclamation-triangle"></i> <strong>Error:</strong> 
                     <span id="errorMessage">Failed to load products.</span>
-                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="retryLoadProducts()">
+                    <button type="button" class="btn btn-sm btn-outline-dark ms-2" onclick="retryLoadProducts()">
                         <i class="bi bi-arrow-clockwise"></i> Retry
                     </button>
                 </div>
                 
                 <div class="products-grid" id="productsGrid">
-                    <div class="text-center text-white">
+                    <div class="text-center text-muted">
                         <div class="loading-spinner"></div>
                         <p class="mt-2">Loading products...</p>
                     </div>
@@ -385,13 +384,13 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="alert alert-info">
+                    <div class="alert alert-light border border-dark">
                         <i class="bi bi-info-circle"></i> Add all players who want this product. You can add multiple players at once.
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="mb-0 fw-bold">Players List</h6>
-                        <button type="button" class="btn btn-success btn-sm rounded-pill px-3 shadow-sm" onclick="addModalPlayer()">
+                        <button type="button" class="btn btn-dark btn-sm rounded-pill px-3 shadow-sm" onclick="addModalPlayer()">
                             <i class="bi bi-plus-circle"></i> Add Player
                         </button>
                     </div>
@@ -405,8 +404,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="saveModalPlayers()">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-dark" onclick="saveModalPlayers()">
                         <i class="bi bi-check-circle"></i> Save Players
                     </button>
                 </div>
@@ -423,7 +422,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="alert alert-info">
+                    <div class="alert alert-light border border-dark">
                         <strong>Please review your order carefully before submitting.</strong>
                     </div>
                     
@@ -450,23 +449,23 @@
                                     <p class="mb-1">Total Quantity:</p>
                                     <p class="mb-1">Price per piece:</p>
                                     <p class="mb-1 fw-bold fs-5">Total Amount:</p>
-                                    <p class="mb-1 text-danger">Down Payment (50%):</p>
-                                    <p class="mb-0 text-success">Balance:</p>
+                                    <p class="mb-1 text-muted">Down Payment (50%):</p>
+                                    <p class="mb-0 text-dark">Balance:</p>
                                 </div>
                                 <div class="col-6 text-end">
                                     <p class="mb-1"><span id="confirmQty">0</span> pcs</p>
                                     <p class="mb-1"><span id="confirmPrice">₱0.00</span></p>
                                     <p class="mb-1 fw-bold fs-5">₱<span id="confirmTotal">0.00</span></p>
-                                    <p class="mb-1 text-danger">₱<span id="confirmDown">0.00</span></p>
-                                    <p class="mb-0 text-success">₱<span id="confirmBalance">0.00</span></p>
+                                    <p class="mb-1 text-muted">₱<span id="confirmDown">0.00</span></p>
+                                    <p class="mb-0 text-dark">₱<span id="confirmBalance">0.00</span></p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back & Edit</button>
-                    <button type="button" class="btn btn-success" onclick="submitForm()">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Go Back & Edit</button>
+                    <button type="button" class="btn btn-dark" onclick="submitForm()">
                         <i class="bi bi-check2-circle"></i> Confirm & Submit Order
                     </button>
                 </div>
@@ -544,7 +543,7 @@
                     <div class="design-empty-state">
                         <i class="bi bi-image"></i>
                         <div class="fw-semibold">No images selected</div>
-                        <div class="small text-white-50 mt-1">Click “Upload Images” to add up to 3 design photos.</div>
+                        <div class="small text-muted mt-1">Click “Upload Images” to add up to 3 design photos.</div>
                     </div>
                 `;
                 return;
@@ -744,12 +743,12 @@
                                 </div>
                                 <div class="col-6 text-end">
                                     <small class="text-muted">Players</small>
-                                    <h6 class="${playerCount > 0 ? 'text-success' : 'text-muted'}">${playerCount} selected</h6>
+                                    <h6 class="${playerCount > 0 ? 'text-dark' : 'text-muted'}">${playerCount} selected</h6>
                                 </div>
                             </div>
                             ${playerCount > 0 ? 
                                 `<div class="mt-2">
-                                    <small class="text-success"><i class="bi bi-check-circle"></i> ${playerCount} player${playerCount > 1 ? 's' : ''} added</small>
+                                    <small class="text-dark"><i class="bi bi-check-circle"></i> ${playerCount} player${playerCount > 1 ? 's' : ''} added</small>
                                 </div>` : 
                                 `<div class="mt-2">
                                     <small class="text-muted"><i class="bi bi-plus-circle"></i> Click to add players</small>
@@ -804,8 +803,8 @@
                 <div class="card mb-3 modal-player-card shadow-sm" data-index="${cardIndex}" style="border-radius: 10px; border: 1px solid rgba(0,0,0,0.1);">
                     <div class="card-header bg-light" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold text-secondary"><i class="bi bi-person"></i> Player ${cardIndex + 1}</h6>
-                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeModalPlayer(${cardIndex})">
+                            <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-person"></i> Player ${cardIndex + 1}</h6>
+                            <button type="button" class="btn btn-sm btn-outline-dark" onclick="removeModalPlayer(${cardIndex})">
                                 <i class="bi bi-trash"></i> Remove
                             </button>
                         </div>

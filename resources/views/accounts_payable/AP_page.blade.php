@@ -2,15 +2,57 @@
 
 @section('title', 'Accounts Payable')
 
+@push('styles')
+<style>
+    .bw-page .card,
+    .bw-page .modal-content {
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .table thead th {
+        color: rgba(0, 0, 0, 0.75);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom-color: rgba(0, 0, 0, 0.10);
+    }
+
+    .bw-page .table td {
+        border-top-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .form-label {
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.75);
+    }
+
+    .bw-page .form-control,
+    .bw-page .form-select {
+        border-color: rgba(0, 0, 0, 0.14);
+        border-radius: 12px;
+    }
+
+    .bw-page .form-control:focus,
+    .bw-page .form-select:focus {
+        border-color: rgba(0, 0, 0, 0.65);
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    }
+</style>
+@endpush
+
 @section('content')
+<div class="bw-page">
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3"><i class="bi bi-wallet2"></i> Accounts Payable</h1>
     <div>
-        <span class="badge bg-primary">{{ $orders->count() }} Total Orders</span>
+        <span class="badge text-bg-dark">{{ $orders->count() }} Total Orders</span>
     </div>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 border-0">
     <div class="card-body">
         <form method="GET" action="{{ route('accounts-payable.index') }}">
             <div class="row g-3">
@@ -21,9 +63,9 @@
                 <div class="col-md-3">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        <button type="submit" class="btn btn-dark"><i class="bi bi-funnel"></i> Filter</button>
                         @if(request()->hasAny(['search']))
-                            <a href="{{ route('accounts-payable.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                            <a href="{{ route('accounts-payable.index') }}" class="btn btn-outline-dark"><i class="bi bi-x-circle"></i> Clear</a>
                         @endif
                     </div>
                 </div>
@@ -40,14 +82,14 @@
         $remaining = $downpayment - $totalPayables;
     @endphp
     <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm border-start border-4 border-info" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#orderModal{{ $order->id }}">
+        <div class="card h-100 shadow-sm border-start border-4 border-dark" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#orderModal{{ $order->id }}">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <h5 class="card-title mb-1">{{ $order->order_number }}</h5>
                         <p class="text-muted small mb-0">{{ $order->accountReceivable->submission->salesOrder->so_number ?? '' }}</p>
                     </div>
-                    <span class="badge {{ $remaining >= 0 ? 'bg-success' : 'bg-danger' }}">
+                    <span class="badge {{ $remaining >= 0 ? 'text-bg-dark' : 'bg-light text-dark border border-dark' }}">
                         ₱{{ number_format($remaining, 2) }} Rem.
                     </span>
                 </div>
@@ -57,11 +99,11 @@
                 <div class="row text-center">
                     <div class="col-6 border-end">
                         <small class="text-muted d-block">Downpayment</small>
-                        <strong class="text-success">₱{{ number_format($downpayment, 2) }}</strong>
+                        <strong class="text-dark">₱{{ number_format($downpayment, 2) }}</strong>
                     </div>
                     <div class="col-6">
                         <small class="text-muted d-block">Payables</small>
-                        <strong class="text-danger">₱{{ number_format($totalPayables, 2) }}</strong>
+                        <strong class="text-dark">₱{{ number_format($totalPayables, 2) }}</strong>
                     </div>
                 </div>
             </div>
@@ -75,7 +117,7 @@
     <div class="modal fade" id="orderModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header bg-info text-white">
+                <div class="modal-header bg-dark text-white">
                     <div>
                         <h5 class="modal-title">{{ $order->order_number }} - Payables Details</h5>
                         <small>{{ $order->accountReceivable->submission->salesOrder->so_name ?? '' }}</small>
@@ -85,7 +127,7 @@
                 <div class="modal-body">
                     <div class="row mb-4">
                         <div class="col-md-4">
-                            <div class="card bg-success text-white h-100">
+                            <div class="card bg-dark text-white h-100 border-0">
                                 <div class="card-body text-center">
                                     <h6 class="card-title"><i class="bi bi-cash"></i> Total Downpayment</h6>
                                     <h3>₱{{ number_format($downpayment, 2) }}</h3>
@@ -93,7 +135,7 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-danger text-white h-100">
+                            <div class="card bg-dark text-white h-100 border-0">
                                 <div class="card-body text-center">
                                     <h6 class="card-title"><i class="bi bi-cart-dash"></i> Total Payables</h6>
                                     <h3>₱{{ number_format($totalPayables, 2) }}</h3>
@@ -101,7 +143,7 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card {{ $remaining >= 0 ? 'bg-primary' : 'bg-warning' }} text-white h-100">
+                            <div class="card {{ $remaining >= 0 ? 'bg-dark text-white border-0' : 'bg-light text-dark border border-dark' }} h-100">
                                 <div class="card-body text-center">
                                     <h6 class="card-title"><i class="bi bi-wallet2"></i> Remaining Downpayment</h6>
                                     <h3>₱{{ number_format($remaining, 2) }}</h3>
@@ -112,7 +154,7 @@
 
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
                         <h6 class="mb-0"><i class="bi bi-list-ul"></i> Payables List</h6>
-                        <button type="button" class="btn btn-sm btn-primary" onclick="switchToAddPayableModal{{ $order->id }}()">
+                        <button type="button" class="btn btn-sm btn-dark" onclick="switchToAddPayableModal{{ $order->id }}()">
                             <i class="bi bi-plus-circle"></i> Add Payable
                         </button>
                     </div>
@@ -133,13 +175,13 @@
                                     @foreach($order->accountsPayable as $ap)
                                     <tr>
                                         <td>{{ $ap->created_at->format('M d, Y h:i A') }}</td>
-                                        <td><span class="badge bg-secondary">{{ ucfirst($ap->vendor_type) }}</span></td>
-                                        <td class="text-danger fw-bold">₱{{ number_format($ap->total_amount, 2) }}</td>
+                                        <td><span class="badge text-bg-dark">{{ ucfirst($ap->vendor_type) }}</span></td>
+                                        <td class="text-dark fw-bold">₱{{ number_format($ap->total_amount, 2) }}</td>
                                         <td>{{ $ap->notes ?? '-' }}</td>
                                         <td class="text-end">
                                             <button
                                                 type="button"
-                                                class="btn btn-sm btn-outline-primary js-open-edit-payable"
+                                                class="btn btn-sm btn-outline-dark js-open-edit-payable"
                                                 data-order-id="{{ $order->id }}"
                                                 data-update-action="{{ route('accounts-payable.update', $ap->id) }}"
                                                 data-vendor-type="{{ $ap->vendor_type }}"
@@ -154,7 +196,7 @@
                                                 @method('DELETE')
                                                 <button
                                                     type="button"
-                                                    class="btn btn-sm btn-outline-danger js-confirm-payable-delete"
+                                                    class="btn btn-sm btn-outline-dark js-confirm-payable-delete"
                                                     data-payable-label="{{ ucfirst($ap->vendor_type) }} (₱{{ number_format($ap->total_amount, 2) }})"
                                                     title="Delete"
                                                 >
@@ -172,7 +214,7 @@
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -182,14 +224,14 @@
     <div class="modal fade" id="addPayableModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title js-payable-modal-title" data-default-text="Add Payable"><i class="bi bi-plus-circle"></i> Add Payable</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('accounts-payable.store', $order->id) }}" method="POST" class="js-payable-form" data-store-action="{{ route('accounts-payable.store', $order->id) }}">
                     @csrf
                     <div class="modal-body">
-                        <div class="alert alert-info">
+                        <div class="alert alert-light border border-dark">
                             <strong>Available Downpayment:</strong> ₱{{ number_format($remaining, 2) }}
                         </div>
 
@@ -210,8 +252,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="backToOrderModal{{ $order->id }}()">Back</button>
-                        <button type="submit" class="btn btn-primary js-payable-submit">
+                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal" onclick="backToOrderModal{{ $order->id }}()">Back</button>
+                        <button type="submit" class="btn btn-dark js-payable-submit">
                             <i class="bi bi-check-circle"></i> Save Payable
                         </button>
                     </div>
@@ -266,8 +308,8 @@
             </div>
             <div class="modal-body" id="confirmActionModalBody">Are you sure?</div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmActionModalConfirmBtn">Proceed</button>
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-dark" id="confirmActionModalConfirmBtn">Proceed</button>
             </div>
         </div>
     </div>
@@ -343,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     title: 'Update Payable',
                     message: 'Are you sure you want to update this payable?',
                     confirmText: 'Yes, Update',
-                    confirmBtnClass: 'btn-primary'
+                    confirmBtnClass: 'btn-dark'
                 });
                 return;
             }
@@ -351,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'Save Payable',
                 message: 'Are you sure you want to save this payable?',
                 confirmText: 'Yes, Save',
-                confirmBtnClass: 'btn-primary'
+                confirmBtnClass: 'btn-dark'
             });
         });
     });
@@ -364,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'Delete Payable',
                 message: `Are you sure you want to delete ${label}?`,
                 confirmText: 'Yes, Delete',
-                confirmBtnClass: 'btn-danger'
+                confirmBtnClass: 'btn-dark'
             });
         });
     });
@@ -466,3 +508,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endsection
+</div>

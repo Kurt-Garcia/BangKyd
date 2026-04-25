@@ -2,15 +2,73 @@
 
 @section('title', 'Sales Orders')
 
+@push('styles')
+<style>
+    .bw-page .card,
+    .bw-page .modal-content {
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .table thead th {
+        color: rgba(0, 0, 0, 0.75);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom-color: rgba(0, 0, 0, 0.10);
+    }
+
+    .bw-page .table td {
+        border-top-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .so-row {
+        cursor: pointer;
+    }
+
+    .bw-page .so-row:hover {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
+    .bw-page .form-label {
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.75);
+    }
+
+    .bw-page .form-control,
+    .bw-page .form-select {
+        border-color: rgba(0, 0, 0, 0.14);
+        border-radius: 12px;
+    }
+
+    .bw-page .form-control:focus,
+    .bw-page .form-select:focus {
+        border-color: rgba(0, 0, 0, 0.65);
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .modal-header {
+        border-bottom-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .bw-page .btn-dark {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    }
+</style>
+@endpush
+
 @section('content')
+<div class="bw-page">
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3">Sales Orders</h1>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSOModal">
+    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#createSOModal">
         <i class="bi bi-plus-circle"></i> Create SO
     </button>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 border-0">
     <div class="card-body">
         <form method="GET" action="{{ route('sales-orders.index') }}">
             <div class="row g-3">
@@ -37,9 +95,9 @@
                 <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        <button type="submit" class="btn btn-dark"><i class="bi bi-funnel"></i> Filter</button>
                         @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                            <a href="{{ route('sales-orders.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                            <a href="{{ route('sales-orders.index') }}" class="btn btn-outline-dark"><i class="bi bi-x-circle"></i> Clear</a>
                         @endif
                     </div>
                 </div>
@@ -48,43 +106,42 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card border-0">
     <div class="card-body">
         @if($salesOrders->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>SO Number</th>
                             <th>SO Name</th>
                             <th>Product</th>
                             <th>Price/Pcs</th>
-                            <th>Customer Link</th>
+                            <th>Link</th>
                             <th>Status</th>
                             <th>Created</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($salesOrders as $so)
-                        <tr>
+                        <tr class="so-row" data-bs-toggle="modal" data-bs-target="#viewSOModal{{ $so->id }}" tabindex="0">
                             <td><strong>{{ $so->so_number }}</strong></td>
                             <td>{{ $so->so_name }}</td>
                             <td>
                                 @if($so->is_submitted && $so->products->count() > 0)
                                     @foreach($so->products as $product)
-                                        <span class="badge bg-secondary">{{ $product->name }}</span>
+                                        <span class="badge text-bg-dark">{{ $product->name }}</span>
                                     @endforeach
                                 @elseif($so->is_submitted && $so->product)
-                                    <span class="badge bg-secondary">{{ $so->product->name }}</span>
+                                    <span class="badge text-bg-dark">{{ $so->product->name }}</span>
                                 @else
-                                    <span class="badge bg-light text-muted">Customer will select</span>
+                                    <span class="badge bg-light text-dark border border-dark">Customer will select</span>
                                 @endif
                             </td>
                             <td>
                                 @if($so->is_submitted && $so->products->count() > 0)
                                     @php $priceRange = $so->products->pluck('pivot.price'); @endphp
-                                    <span class="badge bg-info">
+                                    <span class="badge text-bg-dark">
                                         @if($priceRange->min() == $priceRange->max())
                                             ₱{{ number_format($priceRange->first(), 2) }}
                                         @else
@@ -92,39 +149,31 @@
                                         @endif
                                     </span>
                                 @elseif($so->is_submitted && $so->product)
-                                    <span class="badge bg-info">₱{{ number_format($so->product->price, 2) }}</span>
+                                    <span class="badge text-bg-dark">₱{{ number_format($so->product->price, 2) }}</span>
                                 @else
-                                    <span class="badge bg-light text-muted">TBD by customer</span>
+                                    <span class="badge bg-light text-dark border border-dark">TBD by customer</span>
                                 @endif
                             </td>
                             <td>
-                                <div class="input-group input-group-sm" style="max-width: 350px;">
-                                    <input type="text" class="form-control" value="{{ $so->customer_link }}" id="link-{{ $so->id }}" readonly>
-                                    <button class="btn btn-outline-secondary" type="button" onclick="copyLink({{ $so->id }})">
-                                        <i class="bi bi-clipboard"></i>
-                                    </button>
-                                </div>
+                                <button class="btn btn-sm btn-outline-dark" type="button" data-link="{{ $so->customer_link }}" onclick="copyCustomerLink(event, this)" aria-label="Copy customer link">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
                             </td>
                             <td>
                                 @if($so->is_submitted)
-                                    <span class="badge bg-success">Submitted</span>
+                                    <span class="badge text-bg-dark">Submitted</span>
                                 @else
-                                    <span class="badge bg-warning">Pending</span>
+                                    <span class="badge bg-light text-dark border border-dark">Pending</span>
                                 @endif
                             </td>
                             <td>{{ $so->created_at->format('M d, Y') }}</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewSOModal{{ $so->id }}">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </td>
                         </tr>
 
                         <!-- View SO Modal for each SO -->
                         <div class="modal fade" id="viewSOModal{{ $so->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
-                                    <div class="modal-header bg-primary text-white">
+                                    <div class="modal-header bg-dark text-white">
                                         <h5 class="modal-title">Sales Order Details</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
@@ -155,12 +204,12 @@
                                                 @if($so->is_submitted && $so->products->count() > 0)
                                                     @php $priceRange = $so->products->pluck('pivot.price'); @endphp
                                                     @if($priceRange->min() == $priceRange->max())
-                                                        <p class="fw-bold text-primary">₱{{ number_format($priceRange->first(), 2) }}</p>
+                                                        <p class="fw-bold text-dark">₱{{ number_format($priceRange->first(), 2) }}</p>
                                                     @else
-                                                        <p class="fw-bold text-primary">₱{{ number_format($priceRange->min(), 2) }} - ₱{{ number_format($priceRange->max(), 2) }}</p>
+                                                        <p class="fw-bold text-dark">₱{{ number_format($priceRange->min(), 2) }} - ₱{{ number_format($priceRange->max(), 2) }}</p>
                                                     @endif
                                                 @elseif($so->is_submitted && $so->product)
-                                                    <p class="fw-bold text-primary">₱{{ number_format($so->product->price, 2) }}</p>
+                                                    <p class="fw-bold text-dark">₱{{ number_format($so->product->price, 2) }}</p>
                                                 @else
                                                     <p class="text-muted fst-italic">Varies by product selected</p>
                                                 @endif
@@ -182,25 +231,12 @@
                                                 <p>{{ $so->created_at->format('M d, Y h:i A') }}</p>
                                             </div>
                                         </div>
-                                        <hr>
-                                        <div class="mb-3">
-                                            <h6 class="text-muted"><i class="bi bi-link-45deg"></i> Customer Link</h6>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" value="{{ $so->customer_link }}" id="modalLink-{{ $so->id }}" readonly>
-                                                <button class="btn btn-outline-secondary" type="button" onclick="copyModalLink({{ $so->id }})">
-                                                    <i class="bi bi-clipboard"></i> Copy
-                                                </button>
-                                            </div>
-                                            <small class="text-muted">Share this link with your customer to submit their order.</small>
-                                            @if(!$so->is_submitted)
-                                            <div class="alert alert-warning mt-2 mb-0">
-                                                <small><i class="bi bi-exclamation-triangle"></i> This link can only be used once.</small>
-                                            </div>
-                                            @endif
-                                        </div>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <div class="modal-footer justify-content-between">
+                                        <button class="btn btn-outline-dark" type="button" data-link="{{ $so->customer_link }}" onclick="copyCustomerLink(event, this)">
+                                            <i class="bi bi-clipboard"></i> Copy link
+                                        </button>
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
                                     </div>
                                 </div>
                             </div>
@@ -214,7 +250,7 @@
             <div class="text-center py-5">
                 <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
                 <p class="text-muted mt-3">No sales orders found.</p>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSOModal">
+                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#createSOModal">
                     Create Your First Sales Order
                 </button>
             </div>
@@ -226,12 +262,13 @@
 <div class="modal fade" id="createSOModal" tabindex="-1" aria-labelledby="createSOModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title" id="createSOModalLabel">Create New Sales Order</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('sales-orders.store') }}" method="POST">
+            <form action="{{ route('sales-orders.store') }}" method="POST" id="createSOForm">
                 @csrf
+                <input type="hidden" name="unique_link" id="unique_link" value="{{ old('unique_link') }}">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="so_name" class="form-label">Customer Name <span class="text-danger">*</span></label>
@@ -245,8 +282,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark">
                         <i class="bi bi-link-45deg"></i> Create Sales Order & Generate Link
                     </button>
                 </div>
@@ -257,35 +294,85 @@
 
 @push('scripts')
 <script>
-function copyLink(id) {
-    const input = document.getElementById('link-' + id);
-    input.select();
-    input.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(input.value);
-    
-    // Show feedback
-    const btn = event.target.closest('button');
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-check"></i>';
-    setTimeout(() => {
-        btn.innerHTML = originalHTML;
-    }, 2000);
+function generateAlphaNumeric(length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const bytes = new Uint8Array(length);
+    window.crypto.getRandomValues(bytes);
+    let output = '';
+    for (let i = 0; i < bytes.length; i++) {
+        output += chars[bytes[i] % chars.length];
+    }
+    return output;
 }
 
-function copyModalLink(id) {
-    const input = document.getElementById('modalLink-' + id);
-    input.select();
-    input.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(input.value);
-    
-    // Show feedback
-    const btn = event.target.closest('button');
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
-    setTimeout(() => {
-        btn.innerHTML = originalHTML;
-    }, 2000);
+function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.top = '-1000px';
+    textarea.style.left = '-1000px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    const ok = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    return ok ? Promise.resolve() : Promise.reject(new Error('Copy failed'));
 }
+
+function copyCustomerLink(event, button) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    const link = button.getAttribute('data-link') || '';
+    copyTextToClipboard(link);
+
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-check"></i>';
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+    }, 1500);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const createForm = document.getElementById('createSOForm');
+    if (createForm) {
+        createForm.addEventListener('submit', function() {
+            const nameInput = document.getElementById('so_name');
+            const nameValue = (nameInput?.value || '').trim();
+            if (!nameValue || nameValue.length > 255) {
+                return;
+            }
+
+            const uniqueInput = document.getElementById('unique_link');
+            if (uniqueInput && !uniqueInput.value) {
+                uniqueInput.value = generateAlphaNumeric(32);
+            }
+
+            const uniqueLink = uniqueInput?.value || '';
+            if (uniqueLink.length !== 32) {
+                return;
+            }
+
+            const customerLink = '{{ url("/order") }}/' + uniqueLink;
+            copyTextToClipboard(customerLink);
+        });
+    }
+
+    document.querySelectorAll('tr.so-row').forEach(function(row) {
+        row.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                row.click();
+            }
+        });
+    });
+});
 
 @if($errors->any())
     // Reopen modal if there are validation errors
@@ -296,4 +383,5 @@ function copyModalLink(id) {
 @endif
 </script>
 @endpush
+</div>
 @endsection

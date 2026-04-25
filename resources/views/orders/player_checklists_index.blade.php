@@ -2,15 +2,45 @@
 
 @section('title', 'Player Checklists')
 
+@push('styles')
+<style>
+    .bw-page .progress {
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .bw-page .progress-bar {
+        background: #111;
+    }
+
+    .bw-page .card {
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .table thead th {
+        color: rgba(0, 0, 0, 0.75);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom-color: rgba(0, 0, 0, 0.10);
+    }
+</style>
+@endpush
+
 @section('content')
+<div class="bw-page">
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <h1 class="h4 mb-0"><i class="bi bi-check2-square"></i> Player Checklists</h1>
-    <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
+    <a href="{{ route('orders.index') }}" class="btn btn-outline-dark">
         <i class="bi bi-bag-check"></i> Orders
     </a>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 border-0">
     <div class="card-body">
         <form method="GET" action="{{ route('orders.checklists') }}">
             <div class="row g-3">
@@ -29,9 +59,9 @@
                 <div class="col-md-3">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        <button type="submit" class="btn btn-dark"><i class="bi bi-funnel"></i> Filter</button>
                         @if(request()->hasAny(['search', 'status']))
-                            <a href="{{ route('orders.checklists') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                            <a href="{{ route('orders.checklists') }}" class="btn btn-outline-dark"><i class="bi bi-x-circle"></i> Clear</a>
                         @endif
                     </div>
                 </div>
@@ -59,7 +89,7 @@
                             <div class="fw-semibold">{{ $order->order_number }}</div>
                             <div class="text-muted small">{{ $soNumber }}</div>
                         </div>
-                        <span class="badge {{ $order->status === 'ready_for_delivery' ? 'bg-warning text-dark' : 'bg-primary' }}">
+                        <span class="badge {{ $order->status === 'ready_for_delivery' ? 'bg-light text-dark border border-dark' : 'text-bg-dark' }}">
                             {{ $order->status === 'ready_for_delivery' ? 'Ready' : 'Ongoing' }}
                         </span>
                     </div>
@@ -71,11 +101,11 @@
                         <div class="small fw-semibold">{{ $donePlayers }}/{{ $totalPlayers }} ({{ $percent }}%)</div>
                     </div>
                     <div class="progress mb-3" style="height: 10px;">
-                        <div class="progress-bar {{ $percent === 100 ? 'bg-success' : '' }}" role="progressbar" style="width: {{ $percent }}%;" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" role="progressbar" style="width: {{ $percent }}%;" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
 
                     <div class="d-grid">
-                        <a href="{{ route('orders.player-checklist', $order->id) }}" class="btn btn-outline-primary">
+                        <a href="{{ route('orders.player-checklist', $order->id) }}" class="btn btn-outline-dark">
                             <i class="bi bi-list-check"></i> Open Checklist
                         </a>
                     </div>
@@ -94,4 +124,4 @@
     @endforelse
 </div>
 @endsection
-
+</div>

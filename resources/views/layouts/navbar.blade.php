@@ -3,13 +3,25 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Dashboard') - BangKyd ERP</title>
+    <title>@yield('title', 'Dashboard') - BangKyd </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/js/app.js'])
     @endif
     <style>
+        :root {
+            --bw-bg: #f3f3f3;
+            --bw-surface: #ffffff;
+            --bw-text: #111111;
+            --bw-muted: rgba(17, 17, 17, 0.65);
+            --bw-border: rgba(0, 0, 0, 0.10);
+            --bw-sidebar: #0b0b0b;
+            --bw-sidebar-2: #141414;
+            --bw-sidebar-hover: rgba(255, 255, 255, 0.08);
+            --bw-sidebar-border: rgba(255, 255, 255, 0.14);
+        }
+
         ::after,
         ::before {
             box-sizing: border-box;
@@ -18,7 +30,8 @@
         body {
             min-height: 100vh;
             overflow-x: hidden;
-            background-color: var(--background-color, #F8F9FA);
+            background-color: var(--bw-bg);
+            color: var(--bw-text);
         }
 
         a {
@@ -43,14 +56,11 @@
             min-width: 70px;
             z-index: 1050;
             transition: all .25s ease-in-out;
-            background: linear-gradient(135deg,
-            var(--primary-color, #335DA6)  10%,
-            var(--secondary-color, #1E3C72) 40%,
-            var(--accent-color, #33336F) 80%
-            );
+            background: linear-gradient(135deg, var(--bw-sidebar) 0%, var(--bw-sidebar-2) 55%, #000 100%);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         #sidebar.expand {
@@ -68,6 +78,7 @@
         .toggle-btn i {
             font-size: 1.5rem;
             color: #FFF;
+            padding-left: 3px;
         }
 
         .sidebar-logo {
@@ -97,6 +108,8 @@
             white-space: nowrap;
             padding: 0.5rem 1.625rem;
             gap: .75rem;
+            border-radius: 12px;
+            margin: 4px 10px 4px 0px;
         }
 
         a.sidebar-link i {
@@ -112,18 +125,15 @@
         }
 
         a.sidebar-link:hover {
-            background-color: var(--background-color, #eff1f8);
-            color: var(--accent-color, #0D6EFD);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
-            clip-path: polygon(100% 100%, 98% 90%, 50% 90%, 5% 92%, 0 92%, 0 8%, 5% 8%, 50% 10%, 98% 10%, 100% 0%);
+            background-color: var(--bw-sidebar-hover);
+            color: #fff;
+            border-left-color: rgba(255, 255, 255, 0.35);
         }
 
         a.sidebar-link.active {
-            background-color: var(--background-color, #eff1f8);
-            color: var(--accent-color, #0D6EFD);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-left-color: rgba(255, 255, 255, 0.5);
         }
 
         #sidebar .dropdown-btn {
@@ -161,22 +171,24 @@
             border-left: 3px solid transparent;
             border-top: 3px solid transparent;
             border-bottom: 3px solid transparent;
+            border-radius: 12px;
+            margin: 4px 10px 4px 0px;
         }
 
         .dropdown-btn:hover {
-            background-color: var(--background-color, #eff1f8);
-            border-left: 3px solid var(--accent-color, #33336F);
-            border-top: 3px solid var(--accent-color, #33336F);
-            border-bottom: 3px solid var(--accent-color, #33336F);
-            color: var(--text-color, #4f688f);
+            background-color: var(--bw-sidebar-hover);
+            border-left: 3px solid rgba(255, 255, 255, 0.35);
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+            color: #fff;
         }
 
         .dropdown-btn.active {
-            background-color: var(--background-color, #eff1f8);
-            border-left: 3px solid var(--accent-color, #33336F);
-            border-top: 3px solid var(--accent-color, #33336F);
-            border-bottom: 3px solid var(--accent-color, #33336F);
-            color: var(--text-color, #4f688f);
+            background-color: rgba(255, 255, 255, 0.12);
+            border-left: 3px solid rgba(255, 255, 255, 0.5);
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+            color: #fff;
         }
 
         #sidebar .dropdown-btn span:first-child {
@@ -197,6 +209,7 @@
 
         .sub-menu .sidebar-link {
             padding: .325rem 1.625rem;
+            margin: 4px 10px 4px 10px;
         }
 
         .main {
@@ -205,6 +218,22 @@
             min-height: 100vh;
             transition: all 0.35s ease-in-out;
             overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--bw-border) !important;
+        }
+
+        .navbar .nav-link {
+            color: rgba(0, 0, 0, 0.75);
+        }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link:focus {
+            color: rgba(0, 0, 0, 0.95);
         }
 
         @media (max-width: 768px) {
@@ -226,8 +255,7 @@
                 </button>
                 <div class="sidebar-logo">
                     <a href="{{ route('dashboard') }}" class="d-flex align-items-center gap-2">
-                        <img src="{{ asset('img/BangKydLogo.png') }}" alt="BangKyd Logo" style="height: 40px;">
-                        <span class="text-white fw-semibold">BangKyd ERP</span>
+                        <img src="{{ asset('img/BangKydLogo.png') }}" alt="BangKyd Logo" style="height: 90px; padding-left: 18px;">
                     </a>
                 </div>
             </div>
@@ -274,12 +302,6 @@
                                 <a href="{{ route('orders.index') }}" class="sidebar-link {{ request()->routeIs('orders.index') ? 'active' : '' }}">
                                     <i class="bi bi-grid"></i>
                                     <span class="link-text">Orders List</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('orders.checklists') }}" class="sidebar-link {{ request()->routeIs('orders.checklists') || request()->routeIs('orders.player-checklist') ? 'active' : '' }}">
-                                    <i class="bi bi-check2-square"></i>
-                                    <span class="link-text">Player Checklists</span>
                                 </a>
                             </li>
                         </div>
@@ -329,8 +351,8 @@
                             </li>
                             <li>
                                 <a href="{{ route('system-settings.index') }}" class="sidebar-link {{ request()->routeIs('system-settings.*') ? 'active' : '' }}">
-                                    <i class="bi bi-gear"></i>
-                                    <span class="link-text">System Settings</span>
+                                    <i class="bi bi-building"></i>
+                                    <span class="link-text">Business Settings</span>
                                 </a>
                             </li>
                         </div>

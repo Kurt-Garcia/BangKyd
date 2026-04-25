@@ -1,7 +1,32 @@
 @extends('layouts.navbar')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid bw-page">
+    @push('styles')
+    <style>
+        .bw-page .card {
+            border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .bw-page .form-label {
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.75);
+        }
+
+        .bw-page .form-control {
+            border-color: rgba(0, 0, 0, 0.14);
+            border-radius: 12px;
+        }
+
+        .bw-page .form-control:focus {
+            border-color: rgba(0, 0, 0, 0.65);
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+    @endpush
     <h2 class="mb-4"><i class="bi bi-key me-2"></i>Change Password</h2>
 
     <div class="row justify-content-center">
@@ -54,7 +79,7 @@
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-dark">
                                 <i class="bi bi-check-lg me-1"></i>Update Password
                             </button>
                         </div>
@@ -63,7 +88,7 @@
             </div>
 
             <div class="mt-3">
-                <div class="alert alert-info">
+                <div class="alert alert-light border border-dark">
                     <i class="bi bi-info-circle me-2"></i>
                     <strong>Password Requirements:</strong>
                     <ul class="mb-0 mt-2">

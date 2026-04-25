@@ -1,7 +1,7 @@
 @extends('layouts.navbar')
 
 @section('content')
-<div class="container-fluid" style="background: #f5f7fa; min-height: 100vh; padding: 2rem;">
+<div class="container-fluid" style="background: var(--bw-bg, #f3f3f3); min-height: 100vh; padding: 2rem;">
     <div class="row justify-content-center">
         <div class="col-12">
             <!-- Header Section -->
@@ -9,20 +9,20 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h2 class="mb-1" style="color: #2d3748; font-weight: 600;">
-                            <i class="bi bi-box-seam me-2" style="color: #667eea;"></i>Product Management
+                            <i class="bi bi-box-seam me-2" style="color: #111;"></i>Product Management
                         </h2>
                         <p class="text-muted mb-0">Manage your products and pricing</p>
                     </div>
-                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#productModal" onclick="openAddModal()" style="background: #667eea; color: white; border-radius: 10px; padding: 0.6rem 1.5rem; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);">
+                    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#productModal" onclick="openAddModal()" style="border-radius: 10px; padding: 0.6rem 1.5rem; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);">
                         <i class="bi bi-plus-circle me-1"></i>Add Product
                     </button>
                 </div>
             </div>
 
-            <div class="card border-0" style="border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <div class="card border-0" style="border-radius: 16px; border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10)); background: rgba(255, 255, 255, 0.92); box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
                 <div class="card-body p-0">
                     @if(session('success'))
-                        <div class="alert alert-success border-0 m-4" style="background: #d4edda; border-radius: 10px;" role="alert">
+                        <div class="alert alert-light border border-dark m-4" style="border-radius: 10px;" role="alert">
                             <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
@@ -50,7 +50,7 @@
                                             <strong style="color: #1e293b; font-size: 0.95rem;">{{ $product->name }}</strong>
                                         </td>
                                         <td class="py-3">
-                                            <span style="background: #ecfdf5; color: #059669; padding: 0.35rem 0.75rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem;">
+                                            <span style="background: rgba(0,0,0,0.06); color: #111; border: 1px solid rgba(0,0,0,0.12); padding: 0.35rem 0.75rem; border-radius: 8px; font-weight: 700; font-size: 0.9rem;">
                                                 ₱{{ number_format($product->price, 2) }}
                                             </span>
                                         </td>
@@ -61,19 +61,19 @@
                                         </td>
                                         <td class="py-3">
                                             @if($product->is_active)
-                                                <span style="background: #dbeafe; color: #1e40af; padding: 0.35rem 0.65rem; border-radius: 6px; font-weight: 500; font-size: 0.8rem;">
+                                                <span style="background: rgba(0,0,0,0.06); color: #111; border: 1px solid rgba(0,0,0,0.12); padding: 0.35rem 0.65rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">
                                                     <i class="bi bi-check-circle-fill me-1"></i>Active
                                                 </span>
                                             @else
-                                                <span style="background: #f1f5f9; color: #64748b; padding: 0.35rem 0.65rem; border-radius: 6px; font-weight: 500; font-size: 0.8rem;">
+                                                <span style="background: rgba(0,0,0,0.04); color: rgba(0,0,0,0.7); border: 1px solid rgba(0,0,0,0.10); padding: 0.35rem 0.65rem; border-radius: 6px; font-weight: 700; font-size: 0.8rem;">
                                                     <i class="bi bi-dash-circle-fill me-1"></i>Inactive
                                                 </span>
                                             @endif
                                         </td>
                                         <td class="text-center py-3 pe-4">
                                             <button type="button"
-                                               class="btn btn-sm me-1" 
-                                               style="background: #fef3c7; color: #92400e; border: none; border-radius: 8px; padding: 0.4rem 0.75rem;"
+                                               class="btn btn-sm btn-outline-dark me-1" 
+                                               style="border-radius: 8px; padding: 0.4rem 0.75rem;"
                                                data-bs-toggle="modal"
                                                data-bs-target="#productModal"
                                                onclick="openEditModal({{ $product->id }}, '{{ $product->name }}', {{ $product->price }}, '{{ addslashes($product->description ?? '') }}', {{ $product->is_active ? 'true' : 'false' }})"
@@ -81,8 +81,8 @@
                                                 <i class="bi bi-pencil-fill"></i>
                                             </button>
                                             <button type="button" 
-                                                    class="btn btn-sm" 
-                                                    style="background: #fee2e2; color: #991b1b; border: none; border-radius: 8px; padding: 0.4rem 0.75rem;"
+                                                    class="btn btn-sm btn-outline-dark" 
+                                                    style="border-radius: 8px; padding: 0.4rem 0.75rem;"
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#deleteModal{{ $product->id }}"
                                                     title="Delete">
@@ -93,24 +93,24 @@
                                             <div class="modal fade" id="deleteModal{{ $product->id }}" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content border-0" style="border-radius: 16px; overflow: hidden;">
-                                                        <div class="modal-header" style="background: #fef2f2; border-bottom: 1px solid #fee2e2;">
-                                                            <h5 class="modal-title" style="color: #991b1b; font-weight: 600;">
+                                                        <div class="modal-header bg-dark" style="border-bottom: 1px solid rgba(255,255,255,0.14);">
+                                                            <h5 class="modal-title text-white" style="font-weight: 700;">
                                                                 <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Delete
                                                             </h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body p-4">
                                                             <p style="color: #1e293b;">Are you sure you want to delete <strong>{{ $product->name }}</strong>?</p>
-                                                            <div class="alert alert-danger border-0" style="background: #fee2e2; color: #991b1b; border-radius: 8px;">
+                                                            <div class="alert alert-light border border-dark" style="border-radius: 8px;">
                                                                 <small><i class="bi bi-info-circle me-1"></i>This action cannot be undone.</small>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer" style="border-top: 1px solid #f1f5f9;">
-                                                            <button type="button" class="btn" style="background: #f1f5f9; color: #475569; border-radius: 8px;" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="button" class="btn btn-outline-dark" style="border-radius: 8px;" data-bs-dismiss="modal">Cancel</button>
                                                             <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit" class="btn" style="background: #dc2626; color: white; border-radius: 8px;">Delete Product</button>
+                                                                <button type="submit" class="btn btn-dark" style="border-radius: 8px;">Delete Product</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -141,12 +141,12 @@
     <div class="modal fade" id="productModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0" style="border-radius: 16px; overflow: hidden;">
-                <div class="modal-header" style="background: white; border-bottom: 1px solid #f1f5f9;">
-                    <h5 class="modal-title" id="modalTitle" style="color: #1e293b; font-weight: 600;">
-                        <i class="bi bi-plus-circle me-2" id="modalIcon" style="color: #667eea;"></i>
+                <div class="modal-header bg-dark" style="border-bottom: 1px solid rgba(255,255,255,0.14);">
+                    <h5 class="modal-title text-white" id="modalTitle" style="font-weight: 700;">
+                        <i class="bi bi-plus-circle me-2" id="modalIcon" style="color: #fff;"></i>
                         <span id="modalTitleText">Add New Product</span>
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="productForm" method="POST">
                     @csrf
@@ -205,7 +205,7 @@
                                        name="is_active"
                                        value="1">
                                 <label class="form-check-label ms-2" for="is_active" style="color: #475569; font-weight: 500; cursor: pointer;">
-                                    <i class="bi bi-check-circle me-1" style="color: #059669;"></i>Active Status
+                                    <i class="bi bi-check-circle me-1" style="color: #111;"></i>Active Status
                                     <small class="d-block text-muted mt-1">Make this product available for selection</small>
                                 </label>
                             </div>
@@ -213,10 +213,10 @@
                     </div>
 
                     <div class="modal-footer" style="border-top: 1px solid #f1f5f9;">
-                        <button type="button" class="btn" style="background: #f1f5f9; color: #475569; border-radius: 8px;" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-outline-dark" style="border-radius: 8px;" data-bs-dismiss="modal">
                             Cancel
                         </button>
-                        <button type="submit" class="btn" id="submitBtn" style="background: #667eea; color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);">
+                        <button type="submit" class="btn btn-dark" id="submitBtn" style="border-radius: 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);">
                             <i class="bi bi-check-circle me-1"></i>
                             <span id="submitBtnText">Add Product</span>
                         </button>
@@ -238,10 +238,10 @@ function openAddModal() {
     
     document.getElementById('modalTitleText').textContent = 'Add New Product';
     document.getElementById('modalIcon').className = 'bi bi-plus-circle me-2';
-    document.getElementById('modalIcon').style.color = '#667eea';
+    document.getElementById('modalIcon').style.color = '#fff';
     document.getElementById('submitBtnText').textContent = 'Add Product';
-    document.getElementById('submitBtn').style.background = '#667eea';
-    document.getElementById('submitBtn').style.boxShadow = '0 4px 6px rgba(102, 126, 234, 0.2)';
+    document.getElementById('submitBtn').className = 'btn btn-dark';
+    document.getElementById('submitBtn').style.boxShadow = '0 10px 24px rgba(0, 0, 0, 0.18)';
     
     document.getElementById('productForm').action = '{{ route("products.store") }}';
     document.getElementById('method').value = 'POST';
@@ -260,10 +260,10 @@ function openEditModal(id, name, price, description, isActive) {
     
     document.getElementById('modalTitleText').textContent = 'Edit Product';
     document.getElementById('modalIcon').className = 'bi bi-pencil me-2';
-    document.getElementById('modalIcon').style.color = '#f59e0b';
+    document.getElementById('modalIcon').style.color = '#fff';
     document.getElementById('submitBtnText').textContent = 'Update Product';
-    document.getElementById('submitBtn').style.background = '#f59e0b';
-    document.getElementById('submitBtn').style.boxShadow = '0 4px 6px rgba(245, 158, 11, 0.2)';
+    document.getElementById('submitBtn').className = 'btn btn-dark';
+    document.getElementById('submitBtn').style.boxShadow = '0 10px 24px rgba(0, 0, 0, 0.18)';
     
     document.getElementById('productForm').action = '{{ url("products") }}/' + id;
     document.getElementById('method').value = 'PUT';

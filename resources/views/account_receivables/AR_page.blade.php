@@ -2,13 +2,55 @@
 
 @section('title', 'Accounts Receivable')
 
+@push('styles')
+<style>
+    .bw-page .card,
+    .bw-page .modal-content {
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .table thead th {
+        color: rgba(0, 0, 0, 0.75);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom-color: rgba(0, 0, 0, 0.10);
+    }
+
+    .bw-page .table td {
+        border-top-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .form-label {
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.75);
+    }
+
+    .bw-page .form-control,
+    .bw-page .form-select {
+        border-color: rgba(0, 0, 0, 0.14);
+        border-radius: 12px;
+    }
+
+    .bw-page .form-control:focus,
+    .bw-page .form-select:focus {
+        border-color: rgba(0, 0, 0, 0.65);
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    }
+</style>
+@endpush
+
 @section('content')
+<div class="bw-page">
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3"><i class="bi bi-cash-coin"></i> Accounts Receivable</h1>
-    <span class="badge bg-primary">{{ $accountReceivables->count() }} Total AR</span>
+    <span class="badge text-bg-dark">{{ $accountReceivables->count() }} Total AR</span>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 border-0">
     <div class="card-body">
         <form method="GET" action="{{ route('account-receivables.index') }}">
             <div class="row g-3">
@@ -36,9 +78,9 @@
                 <div class="col-md-3">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        <button type="submit" class="btn btn-dark"><i class="bi bi-funnel"></i> Filter</button>
                         @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                            <a href="{{ route('account-receivables.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                            <a href="{{ route('account-receivables.index') }}" class="btn btn-outline-dark"><i class="bi bi-x-circle"></i> Clear</a>
                         @endif
                     </div>
                 </div>
@@ -47,11 +89,11 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card border-0">
     <div class="card-body">
         @if($accountReceivables->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>AR Number</th>
@@ -76,16 +118,16 @@
                             <td>₱{{ number_format($ar->balance, 2) }}</td>
                             <td>
                                 @if($ar->status === 'paid')
-                                    <span class="badge bg-success">Fully Paid</span>
+                                    <span class="badge text-bg-dark">Fully Paid</span>
                                 @elseif($ar->status === 'partial')
-                                    <span class="badge bg-warning">Partial</span>
+                                    <span class="badge bg-light text-dark border border-dark">Partial</span>
                                 @else
-                                    <span class="badge bg-danger">Pending</span>
+                                    <span class="badge bg-light text-dark border border-dark">Pending</span>
                                 @endif
                             </td>
                             <td>{{ $ar->confirmed_at->format('M d, Y') }}</td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewARModal{{ $ar->id }}">
+                                <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#viewARModal{{ $ar->id }}">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </td>
@@ -101,7 +143,7 @@
                         <div class="modal fade" id="viewARModal{{ $ar->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-xl">
                                 <div class="modal-content">
-                                    <div class="modal-header bg-primary text-white">
+                                    <div class="modal-header bg-dark text-white">
                                         <div>
                                             <h5 class="modal-title">{{ $ar->ar_number }} - Account Receivable Details</h5>
                                             <small>{{ $ar->submission->salesOrder->so_number }} - {{ $ar->submission->salesOrder->so_name }}</small>
@@ -120,21 +162,21 @@
                                                 <p class="mb-0">
                                                     <strong>Status:</strong>
                                                     @if($ar->status === 'paid')
-                                                        <span class="badge bg-success">Fully Paid</span>
+                                                        <span class="badge text-bg-dark">Fully Paid</span>
                                                     @elseif($ar->status === 'partial')
-                                                        <span class="badge bg-warning">Partial</span>
+                                                        <span class="badge bg-light text-dark border border-dark">Partial</span>
                                                     @else
-                                                        <span class="badge bg-danger">Pending</span>
+                                                        <span class="badge bg-light text-dark border border-dark">Pending</span>
                                                     @endif
                                                 </p>
                                             </div>
                                             <div class="col-md-6">
                                                 <h6 class="border-bottom pb-2"><i class="bi bi-cash-stack"></i> Payment Summary</h6>
-                                                <div class="card bg-light">
+                                                <div class="card bg-light border">
                                                     <div class="card-body">
-                                                        <p class="mb-2"><strong>Total Amount:</strong> <span class="text-primary fs-5">₱{{ number_format($ar->total_amount, 2) }}</span></p>
-                                                        <p class="mb-2"><strong>Paid Amount:</strong> <span class="text-success">₱{{ number_format($ar->paid_amount, 2) }}</span></p>
-                                                        <p class="mb-0"><strong>Balance:</strong> <span class="text-danger fs-5">₱{{ number_format($ar->balance, 2) }}</span></p>
+                                                        <p class="mb-2"><strong>Total Amount:</strong> <span class="text-dark fs-5">₱{{ number_format($ar->total_amount, 2) }}</span></p>
+                                                        <p class="mb-2"><strong>Paid Amount:</strong> <span class="text-dark">₱{{ number_format($ar->paid_amount, 2) }}</span></p>
+                                                        <p class="mb-0"><strong>Balance:</strong> <span class="text-dark fs-5">₱{{ number_format($ar->balance, 2) }}</span></p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -159,7 +201,7 @@
                                                             <td>{{ $payment->paid_at->format('M d, Y h:i A') }}</td>
                                                             <td>₱{{ number_format($payment->amount, 2) }}</td>
                                                             <td>
-                                                                <span class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $payment->payment_type)) }}</span>
+                                                                <span class="badge text-bg-dark">{{ ucfirst(str_replace('_', ' ', $payment->payment_type)) }}</span>
                                                             </td>
                                                             <td>{{ $payment->notes ?? '-' }}</td>
                                                         </tr>
@@ -184,7 +226,7 @@
                                                     $productName = $product ? $product->name : 'Unknown Product';
                                                 @endphp
                                                 <div class="mt-3 mb-2">
-                                                    <h6 class="text-primary"><i class="bi bi-box"></i> {{ $productName }} <span class="badge bg-secondary ms-2">{{ count($players) }} pcs</span></h6>
+                                                    <h6 class="text-dark"><i class="bi bi-box"></i> {{ $productName }} <span class="badge text-bg-dark ms-2">{{ count($players) }} pcs</span></h6>
                                                 </div>
                                                 <table class="table table-sm mb-4">
                                                     <thead class="table-light">
@@ -200,7 +242,7 @@
                                                         <tr>
                                                             <td>{{ $index + 1 }}</td>
                                                             <td><strong>{{ $player['jersey_name'] }}</strong></td>
-                                                            <td><span class="badge bg-secondary">{{ $player['jersey_number'] }}</span></td>
+                                                            <td><span class="badge text-bg-dark">{{ $player['jersey_number'] }}</span></td>
                                                             <td>{{ $player['jersey_size'] }}</td>
                                                         </tr>
                                                         @endforeach
@@ -211,11 +253,11 @@
                                     </div>
                                     <div class="modal-footer">
                                         @if($ar->balance > 0)
-                                            <button type="button" class="btn btn-success" onclick="switchToPaymentModal{{ $ar->id }}()">
+                                            <button type="button" class="btn btn-dark" onclick="switchToPaymentModal{{ $ar->id }}()">
                                                 <i class="bi bi-credit-card"></i> Record Payment
                                             </button>
                                         @endif
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
                                     </div>
                                 </div>
                             </div>
@@ -225,14 +267,14 @@
                         <div class="modal fade" id="paymentModal{{ $ar->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <div class="modal-header bg-success text-white">
+                                    <div class="modal-header bg-dark text-white">
                                         <h5 class="modal-title"><i class="bi bi-credit-card"></i> Record Payment</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <form action="{{ route('account-receivables.payment', $ar->id) }}" method="POST">
                                         @csrf
                                         <div class="modal-body">
-                                            <div class="alert alert-info">
+                                            <div class="alert alert-light border border-dark">
                                                 <strong>Balance Due:</strong> ₱{{ number_format($ar->balance, 2) }}
                                             </div>
 
@@ -252,8 +294,8 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-success">
+                                            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-dark">
                                                 <i class="bi bi-check-circle"></i> Record Payment
                                             </button>
                                         </div>
@@ -297,15 +339,15 @@
                             }
                             
                             if (amountNum > balance) {
-                                indicator.innerHTML = '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Amount exceeds balance</span>';
+                                indicator.innerHTML = '<span class="badge text-bg-dark"><i class="bi bi-x-circle"></i> Amount exceeds balance</span>';
                                 document.getElementById('amount{{ $ar->id }}').value = balance;
                                 return;
                             }
                             
                             if (amountNum === balance) {
-                                indicator.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle"></i> Full Payment</span>';
+                                indicator.innerHTML = '<span class="badge text-bg-dark"><i class="bi bi-check-circle"></i> Full Payment</span>';
                             } else if (amountNum < balance) {
-                                indicator.innerHTML = '<span class="badge bg-warning"><i class="bi bi-dash-circle"></i> Partial Payment</span>';
+                                indicator.innerHTML = '<span class="badge bg-light text-dark border border-dark"><i class="bi bi-dash-circle"></i> Partial Payment</span>';
                             }
                         }
                         </script>
@@ -320,3 +362,4 @@
     </div>
 </div>
 @endsection
+</div>

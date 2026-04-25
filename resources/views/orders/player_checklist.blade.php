@@ -2,7 +2,30 @@
 
 @section('title', 'Player Checklist')
 
+@push('styles')
+<style>
+    .bw-page .progress {
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .bw-page .progress-bar {
+        background: #111;
+    }
+
+    .bw-page .table thead th {
+        color: rgba(0, 0, 0, 0.75);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom-color: rgba(0, 0, 0, 0.10);
+    }
+</style>
+@endpush
+
 @section('content')
+<div class="bw-page">
 @php
     $percent = $totalCount > 0 ? (int) round(($doneCount / $totalCount) * 100) : 0;
     $productOptions = $productsById->map(fn ($p) => $p->name)->all();
@@ -21,7 +44,7 @@
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <h1 class="h4 mb-0"><i class="bi bi-check2-square"></i> Player Checklist</h1>
             <span class="badge bg-light text-dark border">{{ $order->order_number }}</span>
-            <span class="badge bg-primary">{{ $order->accountReceivable->submission->salesOrder->so_number }}</span>
+            <span class="badge text-bg-dark">{{ $order->accountReceivable->submission->salesOrder->so_number }}</span>
         </div>
         <div class="text-muted small mt-1">
             {{ $order->accountReceivable->submission->salesOrder->so_name }}
@@ -29,13 +52,13 @@
     </div>
 
     <div class="d-flex align-items-center gap-2">
-        <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('orders.index') }}" class="btn btn-outline-dark">
             <i class="bi bi-arrow-left"></i> Back
         </a>
-        <button type="button" class="btn btn-success" id="bulkCompleteBtn">
+        <button type="button" class="btn btn-dark" id="bulkCompleteBtn">
             <i class="bi bi-check2-all"></i> Mark All Done
         </button>
-        <button type="button" class="btn btn-outline-danger" id="bulkResetBtn">
+        <button type="button" class="btn btn-outline-dark" id="bulkResetBtn">
             <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
     </div>
@@ -97,14 +120,14 @@
                         @php
                             $rowText = strtolower(trim(($row['product_name'] ?? '') . ' ' . ($row['jersey_name'] ?? '') . ' ' . ($row['jersey_number'] ?? '') . ' ' . ($row['jersey_size'] ?? '')));
                         @endphp
-                        <tr data-player-row="1" data-product="{{ $row['product_name'] }}" data-search="{{ $rowText }}" class="{{ $row['is_done'] ? 'table-success' : '' }}">
+                        <tr data-player-row="1" data-product="{{ $row['product_name'] }}" data-search="{{ $rowText }}" class="{{ $row['is_done'] ? 'table-active' : '' }}">
                             <td>
                                 <div class="form-check m-0">
                                     <input class="form-check-input player-done-toggle" type="checkbox" data-player-index="{{ $row['index'] }}" {{ $row['is_done'] ? 'checked' : '' }}>
                                 </div>
                             </td>
                             <td class="text-muted">{{ $row['index'] + 1 }}</td>
-                            <td class="fw-semibold text-primary">{{ $row['product_name'] }}</td>
+                            <td class="fw-semibold text-dark">{{ $row['product_name'] }}</td>
                             <td class="fw-semibold">{{ $row['jersey_name'] }}</td>
                             <td><span class="badge bg-light text-dark border">{{ $row['jersey_number'] }}</span></td>
                             <td class="text-muted">{{ $row['jersey_size'] }}</td>
@@ -206,7 +229,7 @@
 
                 const row = e.target.closest('tr');
                 if (row) {
-                    row.classList.toggle('table-success', data.is_done);
+                    row.classList.toggle('table-active', data.is_done);
                 }
 
                 const finishedEl = document.querySelector(`.finished-at[data-player-index="${playerIndex}"]`);
@@ -255,7 +278,7 @@
             document.querySelectorAll('.player-done-toggle').forEach(cb => {
                 cb.checked = true;
                 const row = cb.closest('tr');
-                if (row) row.classList.add('table-success');
+                if (row) row.classList.add('table-active');
             });
             document.querySelectorAll('.finished-at').forEach(el => {
                 el.textContent = nowLabel;
@@ -276,7 +299,7 @@
             document.querySelectorAll('.player-done-toggle').forEach(cb => {
                 cb.checked = false;
                 const row = cb.closest('tr');
-                if (row) row.classList.remove('table-success');
+                if (row) row.classList.remove('table-active');
             });
             document.querySelectorAll('.finished-at').forEach(el => {
                 el.textContent = '-';
@@ -289,3 +312,4 @@
     });
 </script>
 @endsection
+</div>

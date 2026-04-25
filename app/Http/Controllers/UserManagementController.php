@@ -169,7 +169,7 @@ class UserManagementController extends Controller
         }
 
         $logs = $query->paginate(50);
-        $users = User::orderBy('name')->get();
+        $users = User::orderBy('username', 'asc')->get();
 
         return view('users.activity_logs', compact('logs', 'users'));
     }

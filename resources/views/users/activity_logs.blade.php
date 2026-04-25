@@ -1,7 +1,48 @@
 @extends('layouts.navbar')
 
 @section('content')
-<div class="container-fluid">
+@push('styles')
+<style>
+    .bw-page .card {
+        border: 1px solid var(--bw-border, rgba(0, 0, 0, 0.10));
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .table thead th {
+        color: rgba(0, 0, 0, 0.65);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.85rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+    }
+
+    .bw-page .table td {
+        border-top-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .bw-page .form-label {
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.75);
+    }
+
+    .bw-page .form-control,
+    .bw-page .form-select {
+        border-color: rgba(0, 0, 0, 0.14);
+        border-radius: 12px;
+    }
+
+    .bw-page .form-control:focus,
+    .bw-page .form-select:focus {
+        border-color: rgba(0, 0, 0, 0.65);
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+    }
+</style>
+@endpush
+
+<div class="container-fluid bw-page">
     <h2 class="mb-4"><i class="bi bi-clock-history me-2"></i>Activity Logs</h2>
 
     <!-- Filters -->
@@ -15,7 +56,7 @@
                             <option value="">All Users</option>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }}
+                                    {{ $user->username ?? $user->email }}
                                 </option>
                             @endforeach
                         </select>
@@ -43,11 +84,11 @@
                     </div>
 
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-dark">
                             <i class="bi bi-funnel me-1"></i>Filter
                         </button>
                         @if(request()->hasAny(['user_id', 'action', 'date_from', 'date_to']))
-                        <a href="{{ route('activity-logs') }}" class="btn btn-secondary">
+                        <a href="{{ route('activity-logs') }}" class="btn btn-outline-dark">
                             <i class="bi bi-x-circle me-1"></i>Clear
                         </a>
                         @endif
@@ -77,22 +118,22 @@
                             <td>{{ $log->created_at->format('M d, Y h:i A') }}</td>
                             <td>
                                 @if($log->user)
-                                    {{ $log->user->name }}
+                                    {{ $log->user->username ?? $log->user->email }}
                                 @else
                                     <span class="text-muted">Deleted User</span>
                                 @endif
                             </td>
                             <td>
                                 @if($log->action == 'login')
-                                    <span class="badge bg-info">Login</span>
+                                    <span class="badge text-bg-dark">Login</span>
                                 @elseif($log->action == 'create')
-                                    <span class="badge bg-success">Create</span>
+                                    <span class="badge text-bg-dark">Create</span>
                                 @elseif($log->action == 'update')
-                                    <span class="badge bg-warning">Update</span>
+                                    <span class="badge bg-light text-dark border border-dark">Update</span>
                                 @elseif($log->action == 'delete')
-                                    <span class="badge bg-danger">Delete</span>
+                                    <span class="badge bg-light text-dark border border-dark">Delete</span>
                                 @else
-                                    <span class="badge bg-secondary">{{ ucfirst($log->action) }}</span>
+                                    <span class="badge bg-light text-dark border border-dark">{{ ucfirst($log->action) }}</span>
                                 @endif
                             </td>
                             <td>{{ $log->description }}</td>

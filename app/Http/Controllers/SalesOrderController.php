@@ -52,13 +52,16 @@ class SalesOrderController extends Controller
     {
         $request->validate([
             'so_name' => 'required|string|max:255',
+            'unique_link' => 'nullable|string|size:32|regex:/^[A-Za-z0-9]+$/|unique:sales_orders,unique_link',
         ]);
+
+        $uniqueLink = $request->input('unique_link') ?: SalesOrder::generateUniqueLink();
 
         $so = SalesOrder::create([
             'so_number' => SalesOrder::generateSONumber(),
             'so_name' => $request->so_name,
             'product_id' => null, // No pre-selected products
-            'unique_link' => SalesOrder::generateUniqueLink(),
+            'unique_link' => $uniqueLink,
             'is_submitted' => false,
         ]);
 
@@ -67,8 +70,20 @@ class SalesOrderController extends Controller
 
         ActivityLog::log('create', "Created Sales Order: {$so->so_number} - {$so->so_name}", 'SalesOrder', $so->id);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'sales_order' => [
+                    'id' => $so->id,
+                    'so_number' => $so->so_number,
+                    'so_name' => $so->so_name,
+                ],
+                'customer_link' => $so->customer_link,
+            ]);
+        }
+
         return redirect()->route('sales-orders.index')
-            ->with('success', 'Sales Order created successfully! Customer can now select products via link: ' . $so->customer_link);
+            ->with('success', 'Sales Order created successfully!');
     }
 
     public function show($id)

@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     body {
-        background: #f8f9fa;
+        background: var(--dash2-bg, #f3f3f3);
     }
     
     .stat-card {
@@ -238,9 +238,9 @@
     }
 
     :root {
-        --dash2-nav-gradient: linear-gradient(135deg, #335DA6 10%, #1E3C72 40%, #33336F 80%);
-        --dash2-nav-primary: #335DA6;
-        --dash2-bg: #eef3ff;
+        --dash2-nav-gradient: linear-gradient(135deg, #111111 10%, #000000 40%, #1c1c1c 80%);
+        --dash2-nav-primary: #111111;
+        --dash2-bg: #f3f3f3;
     }
 
     body {
@@ -256,7 +256,7 @@
         background: var(--dash2-nav-gradient);
         color: #fff;
         overflow: hidden;
-        box-shadow: 0 14px 45px rgba(24, 60, 114, 0.35);
+        box-shadow: 0 14px 45px rgba(0, 0, 0, 0.28);
         position: relative;
     }
 
@@ -305,7 +305,7 @@
         border: 0;
         border-radius: 18px;
         background: rgba(255, 255, 255, 0.92);
-        box-shadow: 0 10px 30px rgba(10, 35, 80, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     .dash2-card.soft {
@@ -317,13 +317,13 @@
         border-radius: 18px;
         border: 0;
         background: rgba(255, 255, 255, 0.92);
-        box-shadow: 0 10px 30px rgba(10, 35, 80, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         transition: transform .18s ease, box-shadow .18s ease;
     }
 
     .dash2-kpi:hover {
         transform: translateY(-3px);
-        box-shadow: 0 16px 40px rgba(10, 35, 80, 0.12);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
     }
 
     .dash2-kpi-label {
@@ -358,13 +358,13 @@
         justify-content: center;
         color: #fff;
         background: var(--dash2-nav-gradient);
-        box-shadow: 0 10px 22px rgba(24, 60, 114, 0.35);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
         flex-shrink: 0;
     }
 
     .dash2-icon.soft {
-        color: #1E3C72;
-        background: rgba(51, 93, 166, 0.12);
+        color: #111111;
+        background: rgba(0, 0, 0, 0.06);
         box-shadow: none;
     }
 
@@ -409,8 +409,8 @@
         height: 160px;
         padding: 12px 10px;
         border-radius: 16px;
-        background: rgba(51, 93, 166, 0.06);
-        border: 1px solid rgba(51, 93, 166, 0.12);
+        background: rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.12);
     }
 
     .dash2-bar {
@@ -422,7 +422,7 @@
     }
 
     .dash2-bar.soft {
-        background: rgba(51, 93, 166, 0.25);
+        background: rgba(0, 0, 0, 0.22);
     }
 
     .dash2-bar-meta {
@@ -448,7 +448,7 @@
 
     .dash2-row:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(10, 35, 80, 0.10);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.10);
     }
 
     .dash2-row-title {
@@ -495,7 +495,7 @@
         text-align: center;
         padding: 8px 0;
         border-radius: 10px;
-        background: rgba(51, 93, 166, 0.06);
+        background: rgba(0, 0, 0, 0.04);
         color: rgba(20, 35, 60, 0.85);
     }
 
@@ -646,7 +646,7 @@
                 <div class="dash2-card soft p-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <div class="fw-bold text-dark">{{ $now->format('F Y') }}</div>
-                        <span class="dash2-chip" style="background: rgba(51,93,166,0.10); border-color: rgba(51,93,166,0.12); color: #1E3C72;">
+                        <span class="dash2-chip" style="background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.10); color: #111;">
                             <i class="bi bi-calendar3"></i>{{ $now->format('M') }}
                         </span>
                     </div>
@@ -822,7 +822,7 @@
                                 <span><i class="bi bi-cash me-1"></i>₱{{ number_format($submission->total_amount, 0) }}</span>
                             </div>
                         </div>
-                        <span class="dash2-pill" style="background: {{ $submission->accountReceivable ? 'rgba(16,185,129,0.92)' : 'rgba(245,158,11,0.92)' }};">
+                        <span class="dash2-pill" style="background: {{ $submission->accountReceivable ? '#111111' : 'rgba(17,17,17,0.60)' }};">
                             {{ $submission->accountReceivable ? 'Confirmed' : 'Pending' }}
                         </span>
                     </div>

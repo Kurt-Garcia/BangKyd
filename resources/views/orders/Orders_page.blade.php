@@ -4,12 +4,12 @@
 
 @section('content')
 <style>
-    @keyframes deadlineBlinkRed {
+    @keyframes deadlineBlink {
         0%, 100% { opacity: 1; box-shadow: 0 0 0 rgba(0,0,0,0); }
-        50% { opacity: 0.35; box-shadow: 0 0 0.75rem rgba(220, 53, 69, 0.55); }
+        50% { opacity: 0.35; box-shadow: 0 0 0.75rem rgba(0, 0, 0, 0.55); }
     }
     .deadline-blink {
-        animation: deadlineBlinkRed 1.8s ease-in-out infinite;
+        animation: deadlineBlink 1.8s ease-in-out infinite;
     }
     @media (prefers-reduced-motion: reduce) {
         .deadline-blink { animation: none; }
@@ -17,7 +17,7 @@
 </style>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3"><i class="bi bi-bag-check"></i> Orders</h1>
-    <span class="badge bg-primary">{{ $orders->count() }} Total Orders</span>
+    <span class="badge text-bg-dark">{{ $orders->count() }} Total Orders</span>
 </div>
 
 <div class="card mb-4">
@@ -49,9 +49,9 @@
                 <div class="col-md-3">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+                        <button type="submit" class="btn btn-dark"><i class="bi bi-funnel"></i> Filter</button>
                         @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                            <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Clear</a>
+                            <a href="{{ route('orders.index') }}" class="btn btn-outline-dark"><i class="bi bi-x-circle"></i> Clear</a>
                         @endif
                     </div>
                 </div>
@@ -63,13 +63,7 @@
 <div class="row">
     @forelse($orders as $order)
     <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm border-start border-4 
-            @if($order->status === 'ongoing') border-primary
-            @elseif($order->status === 'ready_for_delivery') border-warning
-            @elseif($order->status === 'completed') border-success
-            @else border-secondary
-            @endif
-        " style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#orderModal{{ $order->id }}">
+        <div class="card h-100 shadow-sm border-start border-4 border-dark" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#orderModal{{ $order->id }}">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -77,15 +71,15 @@
                         <p class="text-muted small mb-0">{{ $order->accountReceivable->submission->salesOrder->so_number }}</p>
                     </div>
                     @if($order->status === 'completed')
-                        <span class="badge bg-success">Completed</span>
+                        <span class="badge text-bg-dark">Completed</span>
                     @elseif($order->status === 'claimed')
-                        <span class="badge bg-secondary">Claimed</span>
+                        <span class="badge text-bg-dark">Claimed</span>
                     @elseif($order->status === 'ready_for_delivery')
-                        <span class="badge bg-warning">Ready for Delivery</span>
+                        <span class="badge bg-light text-dark border border-dark">Ready for Delivery</span>
                     @elseif($order->status === 'ongoing')
-                        <span class="badge bg-primary">Ongoing</span>
+                        <span class="badge text-bg-dark">Ongoing</span>
                     @else
-                        <span class="badge bg-light text-dark">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span>
+                        <span class="badge bg-light text-dark border border-dark">{{ ucfirst(str_replace('_', ' ', $order->status)) }}</span>
                     @endif
                 </div>
 
@@ -100,7 +94,7 @@
                     </div>
                     <div class="col-6">
                         <small class="text-muted">Total Amount</small>
-                        <p class="mb-0 fw-bold text-primary">₱{{ number_format($order->accountReceivable->total_amount, 2) }}</p>
+                        <p class="mb-0 fw-bold text-dark">₱{{ number_format($order->accountReceivable->total_amount, 2) }}</p>
                     </div>
                 </div>
 
@@ -138,32 +132,20 @@
                         $deadlineDaysLeft = now()->startOfDay()->diffInDays($deadlineDate->copy()->startOfDay(), false);
                     }
 
-                    $submissionId = $order->accountReceivable->sales_order_submission_id ?? ($order->accountReceivable->submission->id ?? null);
-                    $totalPlayers = is_array($order->accountReceivable->submission->players ?? null) ? count($order->accountReceivable->submission->players) : 0;
-                    $donePlayers = ($submissionId && isset(($checklistDoneCounts ?? [])[$submissionId])) ? (int) ($checklistDoneCounts[$submissionId] ?? 0) : 0;
-                    $checkPercent = $totalPlayers > 0 ? (int) round(($donePlayers / $totalPlayers) * 100) : 0;
                 @endphp
                 <div class="d-flex justify-content-between align-items-center">
                     <small><i class="bi bi-clock"></i> Started: {{ $order->started_at->format('M d, Y') }}</small>
                     @if($deadlineDate && $order->status !== 'completed')
                         @php
-                            $deadlineBadgeClass = 'bg-info';
+                            $deadlineBadgeClass = 'text-bg-dark';
                             if ($deadlineDaysLeft !== null && $deadlineDaysLeft < 0) {
-                                $deadlineBadgeClass = 'bg-danger';
+                                $deadlineBadgeClass = 'text-bg-dark deadline-blink';
                             } elseif ($deadlineDaysLeft !== null && $deadlineDaysLeft >= 0 && $deadlineDaysLeft <= 3) {
-                                $deadlineBadgeClass = 'bg-danger deadline-blink';
+                                $deadlineBadgeClass = 'text-bg-dark deadline-blink';
                             }
                         @endphp
                         <span class="badge {{ $deadlineBadgeClass }}"><i class="bi bi-calendar-event"></i> Deadline: {{ $deadlineDate->format('M d, Y') }}</span>
                     @endif
-                </div>
-                <div class="d-flex justify-content-between align-items-center mt-2">
-                    <small class="text-muted">
-                        <i class="bi bi-check2-square"></i> Edited: {{ $donePlayers }}/{{ $totalPlayers }} ({{ $checkPercent }}%)
-                    </small>
-                    <a href="{{ route('orders.player-checklist', $order->id) }}" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
-                        Checklist
-                    </a>
                 </div>
             </div>
         </div>
@@ -183,18 +165,13 @@
                     default => ucfirst(str_replace('_', ' ', $order->status)),
                 };
                 $statusBadgeClass = match ($order->status) {
-                    'completed' => 'text-bg-success',
-                    'claimed' => 'text-bg-secondary',
-                    'ready_for_delivery' => 'text-bg-warning',
-                    'ongoing' => 'text-bg-primary',
-                    default => 'text-bg-light',
+                    'completed' => 'text-bg-dark',
+                    'claimed' => 'text-bg-dark',
+                    'ready_for_delivery' => 'bg-light text-dark border border-dark',
+                    'ongoing' => 'text-bg-dark',
+                    default => 'bg-light text-dark border border-dark',
                 };
-                $headerBgClass = match ($order->status) {
-                    'ongoing' => 'bg-primary',
-                    'ready_for_delivery' => 'bg-warning',
-                    'completed' => 'bg-success',
-                    default => 'bg-secondary',
-                };
+                $headerBgClass = 'bg-dark';
                 $arBalance = $ar ? ($ar->balance ?? ($ar->total_amount - $ar->paid_amount)) : 0;
             @endphp
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -264,15 +241,15 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="text-muted small">Paid</div>
-                                            <div class="fs-5 fw-bold text-success">₱{{ number_format($ar->paid_amount ?? 0, 2) }}</div>
+                                            <div class="fs-5 fw-bold text-dark">₱{{ number_format($ar->paid_amount ?? 0, 2) }}</div>
                                         </div>
                                         <div class="col-12">
                                             <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light">
                                                 <div>
                                                     <div class="text-muted small">Balance</div>
-                                                    <div class="fw-bold text-danger fs-5">₱{{ number_format($arBalance, 2) }}</div>
+                                                    <div class="fw-bold text-dark fs-5">₱{{ number_format($arBalance, 2) }}</div>
                                                 </div>
-                                                <span class="badge rounded-pill {{ $isFullyPaid ? 'bg-success' : 'bg-warning text-dark' }}">{{ $isFullyPaid ? 'Fully Paid' : 'Not Fully Paid' }}</span>
+                                                <span class="badge rounded-pill {{ $isFullyPaid ? 'text-bg-dark' : 'bg-light text-dark border border-dark' }}">{{ $isFullyPaid ? 'Fully Paid' : 'Not Fully Paid' }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -348,8 +325,8 @@
                                                 $productName = optional($productsById->get($productId))->name ?? 'Unknown Product';
                                             @endphp
                                             <div class="d-flex align-items-center justify-content-between mt-3 mb-2">
-                                                <div class="fw-semibold text-primary">{{ $productName }}</div>
-                                                <span class="badge rounded-pill bg-secondary">{{ count($players) }} pcs</span>
+                                                <div class="fw-semibold text-dark">{{ $productName }}</div>
+                                                <span class="badge rounded-pill text-bg-dark">{{ count($players) }} pcs</span>
                                             </div>
                                             <table class="table table-hover align-middle mb-4">
                                                 <thead class="table-light">
@@ -379,21 +356,18 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-white">
-                    <a href="{{ route('orders.player-checklist', $order->id) }}" class="btn btn-outline-primary">
-                        <i class="bi bi-check2-square"></i> Checklist
-                    </a>
                     @if($order->status !== 'completed')
                         @if($isFullyPaid)
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeOrderModal{{ $order->id }}">
+                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#completeOrderModal{{ $order->id }}">
                                 <i class="bi bi-check-circle"></i> Done
                             </button>
                         @else
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#orderPaymentRequiredModal{{ $order->id }}">
+                            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#orderPaymentRequiredModal{{ $order->id }}">
                                 <i class="bi bi-check-circle"></i> Done
                             </button>
                         @endif
                     @endif
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -411,10 +385,10 @@
                     Mark <strong>{{ $order->order_number }}</strong> as completed?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
                     <form action="{{ route('orders.complete', $order->id) }}" method="POST" class="d-inline">
                         @csrf
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-dark">
                             Yes, Done
                         </button>
                     </form>
@@ -442,7 +416,7 @@
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">OK</button>
                 </div>
             </div>
         </div>

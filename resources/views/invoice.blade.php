@@ -7,208 +7,459 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body {
-            background: url('{{ asset('img/BG.jpg') }}') no-repeat center center fixed;
-            background-size: cover;
-            position: relative;
-            min-height: 100vh;
-            padding: 1.5rem 0;
+        :root {
+            --ink: #111111;
+            --muted: rgba(17, 17, 17, 0.65);
+            --border: rgba(0, 0, 0, 0.10);
+            --surface: rgba(255, 255, 255, 0.92);
+            --shadow: 0 18px 55px rgba(0, 0, 0, 0.12);
         }
-        
+
+        body {
+            background: url('{{ asset('img/bg.svg') }}') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #f3f3f3;
+            min-height: 100vh;
+            padding: 28px 0;
+            color: var(--ink);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.60);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .invoice-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .invoice-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .invoice-hero {
+            padding: 26px 28px 18px 28px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(255,255,255,0) 100%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid var(--border);
+            display: grid;
+            place-items: center;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.10);
+            overflow: hidden;
+        }
+
+        .brand-logo img {
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: -1;
+            object-fit: contain;
         }
-        .invoice-container {
-            max-width: 600px;
-            margin: 0 auto;
+
+        .meta-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            margin-bottom: 4px;
         }
-        .invoice-box {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            padding: 1.5rem;
-            font-size: 0.9rem;
+
+        .meta-value {
+            font-weight: 800;
+            color: var(--ink);
         }
-        .invoice-header {
-            border-bottom: 2px solid #fa709a;
-            padding-bottom: 0.75rem;
-            margin-bottom: 1.25rem;
+
+        .invoice-title {
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin: 0;
         }
-        .amount-box {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 6px;
-            margin: 0.75rem 0;
+
+        .subtle {
+            color: var(--muted);
         }
-        .total-amount {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #fa709a;
+
+        .section {
+            padding: 18px 28px;
         }
-        .down-payment {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #dc3545;
+
+        .rule {
+            height: 1px;
+            background: var(--border);
         }
+
+        .table thead th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.10em;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 14px;
+            background: rgba(0,0,0,0.02);
+        }
+
+        .table td {
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            padding: 14px 14px;
+            vertical-align: top;
+        }
+
+        .totals {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+        .totals-row:last-child {
+            border-bottom: 0;
+        }
+
+        .totals-row .label {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .totals-row .value {
+            font-weight: 800;
+            color: var(--ink);
+            white-space: nowrap;
+        }
+
+        .totals-row.total .label,
+        .totals-row.total .value {
+            font-size: 1.05rem;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.10);
+            color: var(--ink);
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .pay-card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.86);
+            padding: 16px;
+        }
+
+        .footer-bar {
+            padding: 14px 28px;
+            border-top: 1px solid var(--border);
+            background: rgba(0,0,0,0.02);
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .invoice-hero,
+            .section,
+            .footer-bar {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+        }
+
         @media print {
+            @page {
+                margin: 10mm;
+            }
+
             body {
-                background: white;
+                background: #fff;
+                padding: 0;
+                font-size: 12px;
+            }
+            .no-print,
+            .no-print * {
+                display: none !important;
+            }
+            body::before {
+                display: none;
+            }
+            .invoice-wrap {
+                max-width: none;
                 padding: 0;
             }
-            .no-print {
-                display: none;
+            .invoice-card {
+                box-shadow: none;
+                border: 0;
+                border-radius: 0;
+            }
+            .invoice-hero {
+                background: #fff;
+                padding: 14px 16px 10px 16px;
+            }
+            .section {
+                padding: 10px 16px;
+            }
+            .footer-bar {
+                padding: 10px 16px;
+            }
+            .brand-logo {
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                box-shadow: none;
+            }
+            .invoice-title {
+                font-size: 1.35rem;
+            }
+            .table thead th {
+                padding: 8px 10px;
+            }
+            .table td {
+                padding: 8px 10px;
+            }
+            .pay-card,
+            .totals,
+            .invoice-hero,
+            .footer-bar {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            .table-responsive {
+                overflow: visible !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container invoice-container">
-        <div class="invoice-box">
-            <div class="invoice-header">
-                <div class="row align-items-center">
-                    <div class="col-6">
-                        <img src="{{ asset('img/BangKydLogo.png') }}" alt="BangKyd Logo" height="80">
-                        <div class="mt-2">
-                            <p class="mb-0 small"><strong>{{ \App\Models\SystemSetting::get('business_name', 'BangKyd ERP') }}</strong></p>
-                            @if(\App\Models\SystemSetting::get('business_address'))
-                                <p class="mb-0 small">{{ \App\Models\SystemSetting::get('business_address') }}</p>
-                            @endif
-                            @if(\App\Models\SystemSetting::get('business_phone'))
-                                <p class="mb-0 small"><i class="bi bi-telephone"></i> {{ \App\Models\SystemSetting::get('business_phone') }}</p>
-                            @endif
-                            @if(\App\Models\SystemSetting::get('business_email'))
-                                <p class="mb-0 small"><i class="bi bi-envelope"></i> {{ \App\Models\SystemSetting::get('business_email') }}</p>
-                            @endif
+    @php
+        $businessName = \App\Models\SystemSetting::get('business_name', 'BangKyd ERP');
+        $businessAddress = \App\Models\SystemSetting::get('business_address');
+        $businessPhone = \App\Models\SystemSetting::get('business_phone');
+        $businessEmail = \App\Models\SystemSetting::get('business_email');
+
+        $invoiceNo = 'INV-' . str_pad((string) $submission->id, 6, '0', STR_PAD_LEFT);
+
+        $players = collect($submission->players ?? []);
+        $productIds = $players->pluck('product_id')->filter()->unique()->values();
+        $productsById = $productIds->count() > 0
+            ? \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id')
+            : collect();
+
+        $items = [];
+        if ($productIds->count() > 0) {
+            foreach ($productIds as $productId) {
+                $product = $productsById->get($productId);
+                $qty = (int) $players->where('product_id', $productId)->count();
+                $rate = (float) ($product?->price ?? 0);
+                $items[] = [
+                    'name' => $product?->name ?? 'Unknown Product',
+                    'qty' => $qty,
+                    'rate' => $rate,
+                    'amount' => $qty * $rate,
+                ];
+            }
+        } else {
+            $rate = (float) ($salesOrder->product->price ?? 0);
+            $items[] = [
+                'name' => $salesOrder->product->name ?? 'Jerseys',
+                'qty' => (int) ($submission->total_quantity ?? 0),
+                'rate' => $rate,
+                'amount' => (float) ($submission->total_amount ?? 0),
+            ];
+        }
+
+    @endphp
+
+    <div class="invoice-wrap">
+        <div class="invoice-card">
+            <div class="invoice-hero">
+                <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="brand-logo">
+                            <img src="{{ asset('img/BangKydLogo.png') }}" alt="BangKyd Logo">
                         </div>
-                    </div>
-                    <div class="col-6 text-end">
-                        <h4 class="mb-0">INVOICE</h4>
-                        <small class="text-muted">Order #{{ $submission->id }}</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="alert alert-success py-2 mb-3">
-                <small><i class="bi bi-check-circle-fill"></i> <strong>Order Submitted Successfully!</strong></small>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-6">
-                    <h6 class="mb-2">Customer Information</h6>
-                    <p class="mb-1 small"><strong>Name:</strong> {{ $salesOrder->so_name }}</p>
-                    <p class="mb-1 small"><strong>SO:</strong> {{ $salesOrder->so_number }}</p>
-                    <p class="mb-0 small"><strong>Date:</strong> {{ $submission->submitted_at->format('M d, Y') }}</p>
-                </div>
-                <div class="col-6">
-                    <h6 class="mb-2">Order Details</h6>
-                    <p class="mb-1 small"><strong>Total Jerseys:</strong> {{ $submission->total_quantity }} pcs</p>
-                    <p class="mb-1 small"><strong>Price per Jersey:</strong> ₱{{ number_format($salesOrder->product->price ?? 0, 2) }}</p>
-                    <p class="mb-0 small"><strong>Submitted:</strong> {{ $submission->submitted_at->format('M d, Y') }}</p>
-                </div>
-            </div>
-
-            <hr class="my-2">
-
-            <div class="amount-box">
-                <div class="row mb-1">
-                    <div class="col-7">
-                        <strong>Subtotal:</strong>
-                    </div>
-                    <div class="col-5 text-end">
-                        <strong>₱{{ number_format($submission->total_amount, 2) }}</strong>
-                    </div>
-                </div>
-                <hr class="my-2">
-                <div class="row mb-1">
-                    <div class="col-7">
-                        <span class="total-amount">TOTAL AMOUNT:</span>
-                    </div>
-                    <div class="col-5 text-end">
-                        <span class="total-amount">₱{{ number_format($submission->total_amount, 2) }}</span>
-                    </div>
-                </div>
-                <hr class="my-2">
-                <div class="row mb-1">
-                    <div class="col-7">
-                        <span class="down-payment">Down Payment (50%):</span>
-                        <br><small class="text-muted">Pay upon order confirmation</small>
-                    </div>
-                    <div class="col-5 text-end">
-                        <span class="down-payment">₱{{ number_format($submission->down_payment, 2) }}</span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-7">
-                        <strong class="text-success">Balance:</strong>
-                        <br><small class="text-muted">Pay when claiming order</small>
-                    </div>
-                    <div class="col-5 text-end">
-                        <strong class="text-success">₱{{ number_format($submission->balance, 2) }}</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="alert alert-info py-2 mt-3">
-                <h6 class="mb-2"><i class="bi bi-info-circle"></i> Payment Instructions</h6>
-                <div class="row">
-                    <div class="col-md-7">
-                        <ul class="mb-2 small">
-                            <li>Pay <strong>₱{{ number_format($submission->down_payment, 2) }}</strong> as down payment to confirm order</li>
-                            <li>Balance of <strong>₱{{ number_format($submission->balance, 2) }}</strong> when claiming jerseys</li>
-                            <li>Keep this invoice for your records</li>
-                        </ul>
-                        <div class="card bg-white border-0 mt-2">
-                            <div class="card-body p-2">
-                                <p class="mb-1 small"><strong><i class="bi bi-phone"></i> GCash Payment Details:</strong></p>
-                                <p class="mb-0 small"><strong>Number:</strong> {{ \App\Models\SystemSetting::get('gcash_number', '09176461305') }}</p>
-                                <p class="mb-0 small"><strong>Name:</strong> {{ \App\Models\SystemSetting::get('gcash_name', 'Kurt Gwapo') }}</p>
+                        <div>
+                            <div class="fw-bold">{{ $businessName }}</div>
+                            @if($businessAddress)
+                                <div class="small subtle">{{ $businessAddress }}</div>
+                            @endif
+                            <div class="small subtle">
+                                @if($businessEmail)
+                                    <span class="me-2"><i class="bi bi-envelope"></i> {{ $businessEmail }}</span>
+                                @endif
+                                @if($businessPhone)
+                                    <span><i class="bi bi-telephone"></i> {{ $businessPhone }}</span>
+                                @endif
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-5 text-center">
-                        <p class="small mb-1"><strong>Scan to Pay</strong></p>
-                        @php
-                            $qrPath = \App\Models\SystemSetting::get('gcash_qr_image', 'img/Sample QR.svg');
-                            $qrUrl = str_starts_with($qrPath, 'img/') ? asset($qrPath) : asset('storage/' . $qrPath);
-                        @endphp
-                        <img src="{{ $qrUrl }}" alt="GCash QR Code" class="img-fluid" style="max-width: 150px; border: 2px solid #ddd; border-radius: 8px; padding: 5px; background: white;">
+
+                    <div class="text-end ms-auto">
+                        <div class="chip mb-2"><i class="bi bi-check-circle"></i> Submitted</div>
+                        <h2 class="invoice-title">Invoice</h2>
+                        <div class="small subtle">Sales Order: {{ $salesOrder->so_number }}</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-3">
+                    <div class="col-lg-6">
+                        <div class="meta-label">Recipient</div>
+                        <div class="meta-value">{{ $salesOrder->so_name }}</div>
+                        <div class="small subtle mt-1">
+                            Total quantity: {{ $submission->total_quantity }} pcs
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="meta-label">Invoice No.</div>
+                                <div class="meta-value">{{ $invoiceNo }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="meta-label">Invoice Date</div>
+                                <div class="meta-value">{{ $submission->submitted_at->format('F d, Y') }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="meta-label">Submission ID</div>
+                                <div class="meta-value">#{{ $submission->id }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="meta-label">Deadline</div>
+                                <div class="meta-value">
+                                    {{ $submission->deadline_date ? \Illuminate\Support\Carbon::parse($submission->deadline_date)->format('F d, Y') : '-' }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="text-center mt-3 no-print">
-                <button class="btn text-white me-2" style="background: url('{{ asset('img/BG.jpg') }}') center center; background-size: cover; position: relative; overflow: hidden;" onclick="window.print()">
-                    <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4);"></span>
-                    <span style="position: relative; z-index: 1;"><i class="bi bi-printer"></i> Print</span>
-                </button>
-                <button class="btn btn-secondary" onclick="if(window.opener){window.close()}else{window.history.back()}">
-                    <i class="bi bi-x-circle"></i> Close
-                </button>
+            <div class="section">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th style="width: 110px;" class="text-end">Qty</th>
+                                <th style="width: 170px;" class="text-end">Rate</th>
+                                <th style="width: 190px;" class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($items as $item)
+                                <tr>
+                                    <td class="fw-semibold">{{ $item['name'] }}</td>
+                                    <td class="text-end">{{ number_format((int) $item['qty']) }}</td>
+                                    <td class="text-end">₱{{ number_format((float) $item['rate'], 2) }}</td>
+                                    <td class="text-end fw-bold">₱{{ number_format((float) $item['amount'], 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="text-center mt-3 pt-3 border-top">
-                <p class="text-muted mb-0"><small>Thank you for your business!</small></p>
-                <p class="text-muted mb-0"><small>For inquiries, please contact {{ \App\Models\SystemSetting::get('business_name', 'BangKyd ERP') }}</small></p>
-                @if(\App\Models\SystemSetting::get('business_phone') || \App\Models\SystemSetting::get('business_email'))
-                    <p class="text-muted mb-0"><small>
-                        @if(\App\Models\SystemSetting::get('business_phone'))
-                            {{ \App\Models\SystemSetting::get('business_phone') }}
+            <div class="rule"></div>
+
+            <div class="section">
+                <div class="row g-4 align-items-start">
+                    <div class="col-lg-7">
+                        <div class="pay-card">
+                            <div class="fw-bold mb-2"><i class="bi bi-credit-card me-1"></i> Payment Instructions</div>
+                            <div class="small subtle mb-3">
+                                For security, payment details are not displayed on this public page. Please use our official channels to confirm where to send your down payment.
+                            </div>
+
+                            <div class="small subtle mt-3">
+                                Reference your invoice number <span class="fw-semibold">{{ $invoiceNo }}</span> when contacting us.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="totals">
+                            <div class="totals-row">
+                                <div class="label">Subtotal</div>
+                                <div class="value">₱{{ number_format((float) $submission->total_amount, 2) }}</div>
+                            </div>
+                            <div class="totals-row">
+                                <div class="label">Down Payment (50%)</div>
+                                <div class="value">₱{{ number_format((float) $submission->down_payment, 2) }}</div>
+                            </div>
+                            <div class="totals-row">
+                                <div class="label">Balance</div>
+                                <div class="value">₱{{ number_format((float) $submission->balance, 2) }}</div>
+                            </div>
+                            <div class="totals-row total">
+                                <div class="label">Total</div>
+                                <div class="value">₱{{ number_format((float) $submission->total_amount, 2) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="meta-label">Notes</div>
+                    <div class="small subtle">
+                        Down payment confirms the order. Remaining balance is payable upon claiming. Please keep this invoice for your records.
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4 no-print">
+                    <button type="button" class="btn btn-dark" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                    <button type="button" class="btn btn-outline-dark" onclick="if(window.opener){window.close()}else{window.history.back()}">
+                        <i class="bi bi-x-circle me-1"></i> Close
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer-bar">
+                <div class="d-flex flex-wrap justify-content-between gap-2">
+                    <div>
+                        <span class="fw-semibold">{{ $businessName }}</span>
+                        <span class="mx-2">•</span>
+                        <span>Invoice {{ $invoiceNo }}</span>
+                    </div>
+                    <div>
+                        @if($businessEmail)
+                            <span class="me-3"><i class="bi bi-envelope"></i> {{ $businessEmail }}</span>
                         @endif
-                        @if(\App\Models\SystemSetting::get('business_phone') && \App\Models\SystemSetting::get('business_email'))
-                            |
+                        @if($businessPhone)
+                            <span><i class="bi bi-telephone"></i> {{ $businessPhone }}</span>
                         @endif
-                        @if(\App\Models\SystemSetting::get('business_email'))
-                            {{ \App\Models\SystemSetting::get('business_email') }}
-                        @endif
-                    </small></p>
-                @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
