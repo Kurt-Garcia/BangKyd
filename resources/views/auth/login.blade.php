@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login - BangKyd ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/js/app.js'])
@@ -318,68 +318,197 @@
                 <p class="logo-subtitle">Jersey Production Management</p>
             </div>
 
-            <form method="POST" action="{{ route('login.attempt') }}">
-                @csrf
-                
-                <div class="mb-4">
-                    <label for="username" class="form-label">Username</label>
-                    <div class="input-group-glass">
-                        <i class="bi bi-person-fill input-icon"></i>
-                        <input 
-                            id="username" 
-                            name="username" 
-                            type="text" 
-                            value="{{ old('username') }}" 
-                            required 
-                            autofocus 
-                            class="form-control glass-input" 
-                            placeholder="Enter your username"
-                        />
-                    </div>
-                    @error('username')
-                        <div class="error-message">
-                            <i class="bi bi-exclamation-circle me-2"></i>{{ $message }}
+            @php
+                $step = $twoFactorStep ?? null;
+                $twoFactorEmailValue = $twoFactorEmail ?? null;
+            @endphp
+
+            @if (! $step)
+                <form method="POST" action="{{ route('login.attempt') }}">
+                    @csrf
+                    
+                    <div class="mb-4">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group-glass">
+                            <i class="bi bi-person-fill input-icon"></i>
+                            <input 
+                                id="username" 
+                                name="username" 
+                                type="text" 
+                                value="{{ old('username') }}" 
+                                required 
+                                autofocus 
+                                class="form-control glass-input" 
+                                placeholder="Enter your username"
+                            />
                         </div>
-                    @enderror
-                </div>
-
-                <div class="mb-4">
-                    <label for="password" class="form-label">Password</label>
-                    <div class="input-group-glass">
-                        <i class="bi bi-lock-fill input-icon"></i>
-                        <input 
-                            id="password" 
-                            name="password" 
-                            type="password" 
-                            required 
-                            class="form-control glass-input" 
-                            placeholder="Enter your password"
-                        />
+                        @error('username')
+                            <div class="error-message">
+                                <i class="bi bi-exclamation-circle me-2"></i>{{ $message }}
+                            </div>
+                        @enderror
                     </div>
-                    @error('password')
-                        <div class="error-message">
-                            <i class="bi bi-exclamation-circle me-2"></i>{{ $message }}
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group-glass">
+                            <i class="bi bi-lock-fill input-icon"></i>
+                            <input 
+                                id="password" 
+                                name="password" 
+                                type="password" 
+                                required 
+                                class="form-control glass-input" 
+                                placeholder="Enter your password"
+                            />
                         </div>
-                    @enderror
-                </div>
-
-                <div class="mb-4">
-                    <div class="glass-checkbox">
-                        <input type="checkbox" name="remember" id="remember" />
-                        <label for="remember">Remember me for 30 days</label>
+                        @error('password')
+                            <div class="error-message">
+                                <i class="bi bi-exclamation-circle me-2"></i>{{ $message }}
+                            </div>
+                        @enderror
                     </div>
-                </div>
 
-                <button type="submit" class="glass-button">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Log In
-                </button>
-            </form>
+                    <div class="mb-4">
+                        <div class="glass-checkbox">
+                            <input type="checkbox" name="remember" id="remember" />
+                            <label for="remember">Remember me for 30 days</label>
+                        </div>
+                    </div>
 
+                    <button type="submit" class="glass-button">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Log In
+                    </button>
+                </form>
+            @endif
 
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+kbeLJwWJknhk+aoCA8DmF5asJ5AZt0pOEtpJR/YWZLxE+nobVht5cVbE+1WVP" crossorigin="anonymous"></script>
+    <div class="modal fade" id="cellphoneModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px;">
+                <div class="modal-header" style="background:#111;color:#fff;">
+                    <h5 class="modal-title">
+                        <i class="bi bi-phone me-2"></i>Verify Cellphone
+                    </h5>
+                    <form method="POST" action="{{ route('two-factor.cancel') }}" class="ms-auto">
+                        @csrf
+                        <button type="submit" class="btn-close" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                    </form>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" style="color:rgba(0,0,0,.65);">
+                        Enter your cellphone number to continue.
+                    </div>
+                    <form method="POST" action="{{ route('two-factor.cellphone.verify') }}">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="two_factor_cellphone" class="form-label">Cellphone Number</label>
+                            <input
+                                id="two_factor_cellphone"
+                                name="cellphone"
+                                type="text"
+                                class="form-control glass-input"
+                                placeholder="e.g. 0917xxxxxxx"
+                                value="{{ old('cellphone') }}"
+                                required
+                            />
+                            @error('cellphone')
+                                <div class="error-message">
+                                    <i class="bi bi-exclamation-circle me-2"></i>{{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                        <button type="submit" class="glass-button">
+                            <i class="bi bi-arrow-right-circle me-2"></i> Continue
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="otpModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px;">
+                <div class="modal-header" style="background:#111;color:#fff;">
+                    <h5 class="modal-title">
+                        <i class="bi bi-shield-lock me-2"></i>Enter OTP
+                    </h5>
+                    <form method="POST" action="{{ route('two-factor.cancel') }}" class="ms-auto">
+                        @csrf
+                        <button type="submit" class="btn-close" aria-label="Close" style="filter: brightness(0) invert(1);"></button>
+                    </form>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3" style="color:rgba(0,0,0,.65);">
+                        A 6-digit OTP has been sent to <strong>{{ $twoFactorEmailValue }}</strong>.
+                    </div>
+
+                    @if(session('otp_sent'))
+                        <div class="error-message" style="background: rgba(25,135,84,0.08); border-color: rgba(25,135,84,0.22); color: #0f5132;">
+                            <i class="bi bi-check-circle me-2"></i>OTP sent. Please check your email.
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('two-factor.otp.verify') }}" class="mb-3">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="two_factor_otp" class="form-label">OTP</label>
+                            <input
+                                id="two_factor_otp"
+                                name="otp"
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="6"
+                                class="form-control glass-input"
+                                placeholder="6-digit code"
+                                value="{{ old('otp') }}"
+                                required
+                            />
+                            @error('otp')
+                                <div class="error-message">
+                                    <i class="bi bi-exclamation-circle me-2"></i>{{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                        <button type="submit" class="glass-button">
+                            <i class="bi bi-unlock me-2"></i> Verify & Login
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{{ route('two-factor.otp.resend') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-dark w-100" style="border-radius:12px;font-weight:700;">
+                            <i class="bi bi-arrow-repeat me-2"></i> Resend OTP
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const step = @json($step);
+            if (step === 'cellphone') {
+                const modal = new bootstrap.Modal(document.getElementById('cellphoneModal'));
+                modal.show();
+                document.getElementById('cellphoneModal').addEventListener('shown.bs.modal', function () {
+                    document.getElementById('two_factor_cellphone')?.focus();
+                });
+            }
+            if (step === 'otp') {
+                const modal = new bootstrap.Modal(document.getElementById('otpModal'));
+                modal.show();
+                document.getElementById('otpModal').addEventListener('shown.bs.modal', function () {
+                    document.getElementById('two_factor_otp')?.focus();
+                });
+            }
+        });
+    </script>
 </body>
 </html>
 

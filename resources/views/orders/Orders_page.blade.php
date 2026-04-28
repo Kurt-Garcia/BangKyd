@@ -307,50 +307,110 @@
                                     </div>
                                 </div>
                             @endif
+                        </div>
+                    </div>
 
-                            <div class="card border-0 shadow-sm rounded-4">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div class="fw-semibold"><i class="bi bi-people me-2"></i>Jersey Details</div>
-                                        <span class="badge rounded-pill bg-light text-dark border">{{ $order->accountReceivable->submission->total_quantity }} pcs</span>
-                                    </div>
+                    <div class="card border-0 shadow-sm rounded-4 mt-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="fw-semibold"><i class="bi bi-people me-2"></i>Jersey Details</div>
+                                <span class="badge rounded-pill bg-light text-dark border">{{ $order->accountReceivable->submission->total_quantity }} pcs</span>
+                            </div>
+                            @php
+                                $playersByProduct = collect($order->accountReceivable->submission->players)->groupBy('product_id');
+                                $productIds = $playersByProduct->keys()->filter()->values();
+                                $productsById = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
+                            @endphp
+                            <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+                                @foreach($playersByProduct as $productId => $players)
                                     @php
-                                        $playersByProduct = collect($order->accountReceivable->submission->players)->groupBy('product_id');
-                                        $productIds = $playersByProduct->keys()->filter()->values();
-                                        $productsById = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
+                                        $productName = optional($productsById->get($productId))->name ?? 'Unknown Product';
+
+                                        $normalizeSize = fn ($size) => strtolower(trim(preg_replace('/\s+/', ' ', (string) $size)));
+                                        $sizeOrder = [
+                                            'xxs' => 0,
+                                            'xs' => 1,
+                                            'extra small' => 1,
+                                            's' => 2,
+                                            'small' => 2,
+                                            'm' => 3,
+                                            'medium' => 3,
+                                            'l' => 4,
+                                            'large' => 4,
+                                            'xl' => 5,
+                                            'extra large' => 5,
+                                            '2xl' => 6,
+                                            'xxl' => 6,
+                                            '3xl' => 7,
+                                            'xxxl' => 7,
+                                            '4xl' => 8,
+                                            '5xl' => 9,
+                                        ];
+
+                                        $formatSizeLabel = function ($size) use ($normalizeSize) {
+                                            $key = $normalizeSize($size);
+                                            return match ($key) {
+                                                'xxs' => 'XXS',
+                                                'xs', 'extra small' => 'Extra Small',
+                                                's', 'small' => 'Small',
+                                                'm', 'medium' => 'Medium',
+                                                'l', 'large' => 'Large',
+                                                'xl', 'extra large' => 'XL',
+                                                '2xl', 'xxl' => '2XL',
+                                                '3xl', 'xxxl' => '3XL',
+                                                '4xl' => '4XL',
+                                                '5xl' => '5XL',
+                                                default => (string) $size,
+                                            };
+                                        };
+
+                                        $playersBySize = collect($players)->groupBy(function ($player) {
+                                            $size = $player['jersey_size'] ?? null;
+                                            $size = is_string($size) ? trim($size) : (string) $size;
+                                            return $size !== '' ? $size : 'Unspecified';
+                                        });
+
+                                        $playersBySize = $playersBySize->sortKeysUsing(function ($a, $b) use ($sizeOrder, $normalizeSize) {
+                                            $aRank = $sizeOrder[$normalizeSize($a)] ?? 9999;
+                                            $bRank = $sizeOrder[$normalizeSize($b)] ?? 9999;
+                                            return $aRank <=> $bRank ?: strcasecmp($a, $b);
+                                        });
                                     @endphp
-                                    <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
-                                        @foreach($playersByProduct as $productId => $players)
+                                    <div class="rounded-3 px-3 py-2 mt-5 mb-3 position-relative text-center" style="background-color: #4a4a4a;">
+                                        <div class="fw-semibold text-white fs-5">{{ $productName }}</div>
+                                        <span class="badge rounded-pill bg-light text-dark border position-absolute top-50 end-0 translate-middle-y me-3">{{ count($players) }} pcs</span>
+                                    </div>
+                                    <div class="row g-3 mb-4">
+                                        @foreach($playersBySize as $size => $sizePlayers)
                                             @php
-                                                $productName = optional($productsById->get($productId))->name ?? 'Unknown Product';
+                                                $sortedSizePlayers = collect($sizePlayers)->sortBy(function ($player) {
+                                                    return strtolower(($player['jersey_name'] ?? '') . ' ' . ($player['jersey_number'] ?? ''));
+                                                })->values();
                                             @endphp
-                                            <div class="d-flex align-items-center justify-content-between mt-3 mb-2">
-                                                <div class="fw-semibold text-dark">{{ $productName }}</div>
-                                                <span class="badge rounded-pill text-bg-dark">{{ count($players) }} pcs</span>
+                                            <div class="col-12 col-md-6">
+                                                <div class="card border-0 shadow-sm rounded-4">
+                                                    <div class="card-header border-0 position-relative text-center py-3" style="background-color: #E1E1E1;">
+                                                        <div class="fw-semibold text-dark">{{ $formatSizeLabel($size) }}</div>
+                                                        <span class="badge rounded-pill bg-light text-dark border position-absolute top-50 end-0 translate-middle-y me-3">{{ $sortedSizePlayers->count() }} pcs</span>
+                                                    </div>
+                                                    <div class="card-body py-0">
+                                                        <ul class="list-group list-group-flush">
+                                                            @foreach($sortedSizePlayers as $playerIndex => $player)
+                                                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                                    <div class="d-flex align-items-center gap-2">
+                                                                        <div class="text-muted small" style="width: 24px;">{{ $playerIndex + 1 }}</div>
+                                                                        <div class="fw-semibold">{{ $player['jersey_name'] }}</div>
+                                                                    </div>
+                                                                    <span class="badge bg-light text-dark border">{{ $player['jersey_number'] }}</span>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <table class="table table-hover align-middle mb-4">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th style="width: 60px;">#</th>
-                                                        <th>Jersey Name</th>
-                                                        <th style="width: 120px;">Number</th>
-                                                        <th style="width: 120px;">Size</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($players as $index => $player)
-                                                        <tr>
-                                                            <td class="text-muted">{{ $index + 1 }}</td>
-                                                            <td class="fw-semibold">{{ $player['jersey_name'] }}</td>
-                                                            <td><span class="badge bg-light text-dark border">{{ $player['jersey_number'] }}</span></td>
-                                                            <td class="text-muted">{{ $player['jersey_size'] }}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
                                         @endforeach
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>

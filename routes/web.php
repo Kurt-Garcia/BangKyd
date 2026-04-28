@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SalesOrderSubmissionController;
+use App\Http\Controllers\ProfitLossController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,6 +14,15 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+
+    Route::get('/two-factor/cellphone', [LoginController::class, 'showTwoFactorCellphoneForm'])->name('two-factor.cellphone');
+    Route::post('/two-factor/cellphone', [LoginController::class, 'verifyTwoFactorCellphone'])->name('two-factor.cellphone.verify');
+
+    Route::get('/two-factor/otp', [LoginController::class, 'showTwoFactorOtpForm'])->name('two-factor.otp');
+    Route::post('/two-factor/otp', [LoginController::class, 'verifyTwoFactorOtp'])->name('two-factor.otp.verify');
+    Route::post('/two-factor/otp/resend', [LoginController::class, 'resendTwoFactorOtp'])->name('two-factor.otp.resend');
+
+    Route::post('/two-factor/cancel', [LoginController::class, 'cancelTwoFactor'])->name('two-factor.cancel');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -26,6 +36,8 @@ Route::get('/api/products', [\App\Http\Controllers\ProductController::class, 'ge
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/profit-loss', [ProfitLossController::class, 'index'])->name('profit-loss.index');
 
     Route::resource('sales-orders', SalesOrderController::class);
     Route::get('/receiving-report', [SalesOrderSubmissionController::class, 'index'])->name('receiving-report');

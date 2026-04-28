@@ -721,12 +721,31 @@
             console.log('Hydrated orderData from draft:', orderData);
         }
 
+        const FREEBIE_THRESHOLD_QTY = 15;
+
+        function freeQtyFor(orderedQty) {
+            const qty = Number.isFinite(orderedQty) ? orderedQty : parseInt(orderedQty, 10);
+            if (!Number.isFinite(qty) || qty <= 0) return 0;
+            if (!Number.isFinite(FREEBIE_THRESHOLD_QTY) || FREEBIE_THRESHOLD_QTY <= 0) return 0;
+            return Math.floor(qty / FREEBIE_THRESHOLD_QTY);
+        }
+
+        function billableQtyFor(orderedQty) {
+            const qty = Number.isFinite(orderedQty) ? orderedQty : parseInt(orderedQty, 10);
+            if (!Number.isFinite(qty) || qty <= 0) return 0;
+            const freeQty = freeQtyFor(qty);
+            const billableQty = qty - freeQty;
+            return billableQty > 0 ? billableQty : 0;
+        }
+
         function displayProducts() {
             const productsGrid = document.getElementById('productsGrid');
             let html = '';
             
             availableProducts.forEach(product => {
                 const playerCount = orderData[product.id] ? orderData[product.id].length : 0;
+                const freeQty = freeQtyFor(playerCount);
+                const billableQty = billableQtyFor(playerCount);
                 html += `
                     <div class="product-card ${playerCount > 0 ? 'selected' : ''}" onclick="openProductModal(${product.id})" id="product-card-${product.id}">
                         <div class="product-header">
@@ -749,6 +768,7 @@
                             ${playerCount > 0 ? 
                                 `<div class="mt-2">
                                     <small class="text-dark"><i class="bi bi-check-circle"></i> ${playerCount} player${playerCount > 1 ? 's' : ''} added</small>
+                                    ${freeQty > 0 ? `<div class="small text-muted mt-1"><i class="bi bi-gift me-1"></i>${freeQty} free • Payable ${billableQty}</div>` : ``}
                                 </div>` : 
                                 `<div class="mt-2">
                                     <small class="text-muted"><i class="bi bi-plus-circle"></i> Click to add players</small>
@@ -926,14 +946,18 @@
             
             let totalPlayers = 0;
             let totalAmount_calc = 0;
+            let totalFree = 0;
             
             // Calculate totals
             Object.keys(orderData).forEach(productId => {
                 const product = availableProducts.find(p => p.id == productId);
                 const players = orderData[productId];
                 if (product && players) {
-                    totalPlayers += players.length;
-                    totalAmount_calc += players.length * parseFloat(product.price);
+                    const qty = players.length;
+                    const billableQty = billableQtyFor(qty);
+                    totalPlayers += qty;
+                    totalFree += freeQtyFor(qty);
+                    totalAmount_calc += billableQty * parseFloat(product.price);
                 }
             });
             
@@ -944,7 +968,7 @@
                 orderSummary.style.display = 'block';
                 submitBtn.classList.remove('d-none');
                 
-                playerCountSpan.textContent = totalPlayers;
+                playerCountSpan.textContent = totalFree > 0 ? `${totalPlayers} (${totalFree} free)` : `${totalPlayers}`;
                 totalAmount.textContent = `₱${totalAmount_calc.toFixed(2)}`;
             }
         }
@@ -984,13 +1008,17 @@
                 if (!product || !players) return;
                 const qty = players.length;
                 const price = parseFloat(product.price);
-                const lineTotal = qty * price;
+                const freeQty = freeQtyFor(qty);
+                const billableQty = billableQtyFor(qty);
+                const lineTotal = billableQty * price;
                 totalPlayers += qty;
                 totalAmount_calc += lineTotal;
                 prices.push(price);
                 productLines.push({
                     name: product.name,
                     qty,
+                    freeQty,
+                    billableQty,
                     lineTotal
                 });
             });
@@ -1021,7 +1049,10 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
                         <div class="fw-semibold">${line.name}</div>
-                        <small class="text-muted">${line.qty} player${line.qty > 1 ? 's' : ''}</small>
+                        <small class="text-muted">
+                            ${line.qty} player${line.qty > 1 ? 's' : ''}
+                            ${line.freeQty > 0 ? ` • ${line.freeQty} free • Payable ${line.billableQty}` : ``}
+                        </small>
                     </div>
                     <div class="fw-bold">₱${line.lineTotal.toFixed(2)}</div>
                 </li>

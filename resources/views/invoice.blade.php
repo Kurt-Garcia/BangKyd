@@ -276,24 +276,47 @@
 
         $items = [];
         if ($productIds->count() > 0) {
+            $appliedSubtotal = (float) ($submission->total_amount ?? 0);
+            $normalSubtotal = 0.0;
+            $promoSubtotal = 0.0;
             foreach ($productIds as $productId) {
                 $product = $productsById->get($productId);
                 $qty = (int) $players->where('product_id', $productId)->count();
                 $rate = (float) ($product?->price ?? 0);
+                $normalSubtotal += $qty * $rate;
+                $promoSubtotal += \App\Models\SalesOrderSubmission::billableQtyFor($qty) * $rate;
+            }
+            $usePromo = abs($appliedSubtotal - $promoSubtotal) <= 0.01;
+
+            foreach ($productIds as $productId) {
+                $product = $productsById->get($productId);
+                $qty = (int) $players->where('product_id', $productId)->count();
+                $rate = (float) ($product?->price ?? 0);
+                $freeQty = $usePromo ? \App\Models\SalesOrderSubmission::freeQtyFor($qty) : 0;
+                $billableQty = $usePromo ? \App\Models\SalesOrderSubmission::billableQtyFor($qty) : $qty;
                 $items[] = [
                     'name' => $product?->name ?? 'Unknown Product',
-                    'qty' => $qty,
+                    'qty' => $billableQty,
+                    'ordered_qty' => $qty,
+                    'free_qty' => $freeQty,
                     'rate' => $rate,
-                    'amount' => $qty * $rate,
+                    'amount' => $billableQty * $rate,
                 ];
             }
         } else {
             $rate = (float) ($salesOrder->product->price ?? 0);
+            $orderedQty = (int) ($submission->total_quantity ?? 0);
+            $promoSubtotal = \App\Models\SalesOrderSubmission::billableQtyFor($orderedQty) * $rate;
+            $usePromo = abs(((float) ($submission->total_amount ?? 0)) - $promoSubtotal) <= 0.01;
+            $freeQty = $usePromo ? \App\Models\SalesOrderSubmission::freeQtyFor($orderedQty) : 0;
+            $billableQty = $usePromo ? \App\Models\SalesOrderSubmission::billableQtyFor($orderedQty) : $orderedQty;
             $items[] = [
                 'name' => $salesOrder->product->name ?? 'Jerseys',
-                'qty' => (int) ($submission->total_quantity ?? 0),
+                'qty' => $billableQty,
+                'ordered_qty' => $orderedQty,
+                'free_qty' => $freeQty,
                 'rate' => $rate,
-                'amount' => (float) ($submission->total_amount ?? 0),
+                'amount' => $billableQty * $rate,
             ];
         }
 
@@ -377,7 +400,12 @@
                         <tbody>
                             @foreach($items as $item)
                                 <tr>
-                                    <td class="fw-semibold">{{ $item['name'] }}</td>
+                                    <td class="fw-semibold">
+                                        <div>{{ $item['name'] }}</div>
+                                        @if(!empty($item['free_qty']))
+                                            <div class="small subtle">Ordered {{ number_format((int) ($item['ordered_qty'] ?? 0)) }} • Free {{ number_format((int) $item['free_qty']) }}</div>
+                                        @endif
+                                    </td>
                                     <td class="text-end">{{ number_format((int) $item['qty']) }}</td>
                                     <td class="text-end">₱{{ number_format((float) $item['rate'], 2) }}</td>
                                     <td class="text-end fw-bold">₱{{ number_format((float) $item['amount'], 2) }}</td>

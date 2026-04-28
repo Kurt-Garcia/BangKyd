@@ -84,7 +84,8 @@ class SalesOrderSubmissionController extends Controller
                     'price' => $product->price, // Store current price
                 ]);
                 // Add to total amount
-                $totalAmount += $quantity * $product->price;
+                $billableQty = \App\Models\SalesOrderSubmission::billableQtyFor((int) $quantity);
+                $totalAmount += $billableQty * (float) $product->price;
             }
         }
         

@@ -161,13 +161,14 @@
                             <th>Name</th>
                             <th>Username</th>
                             <th>Email</th>
+                            <th>Cellphone</th>
                             <th>Created At</th>
-                            <th>Actions</th>
+                            <th>No.</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($users as $user)
-                        <tr>
+                        <tr role="button" style="cursor: pointer;" onclick='openViewModal({{ $user->id }}, @json($user->name), @json($user->username), @json($user->email), @json($user->cellphone))'>
                             <td class="align-middle">{{ $user->id }}</td>
                             <td class="align-middle">
                                 {{ $user->name }}
@@ -177,54 +178,13 @@
                             </td>
                             <td class="align-middle">{{ $user->username }}</td>
                             <td class="align-middle">{{ $user->email }}</td>
+                            <td class="align-middle">{{ $user->cellphone }}</td>
                             <td class="align-middle">{{ $user->created_at->format('M d, Y h:i A') }}</td>
-                            <td class="align-middle">
-                                @if($user->id !== auth()->id())
-                                <button type="button" class="btn btn-sm btn-outline-dark me-1" 
-                                    onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->username }}', '{{ $user->email }}')"
-                                    style="border-radius: 8px;">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-dark" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#deleteModal{{ $user->id }}"
-                                    style="border-radius: 8px;">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-
-                                <!-- Delete Confirmation Modal -->
-                                <div class="modal fade" id="deleteModal{{ $user->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-dark">
-                                                <h5 class="modal-title text-white">
-                                                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
-                                                </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p class="mb-0">Are you sure you want to delete user <strong>{{ $user->name }}</strong>?</p>
-                                                <p class="text-muted small mt-2 mb-0">This action cannot be undone.</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-dark">Delete User</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                @else
-                                <span class="text-muted small">Cannot delete own account</span>
-                                @endif
-                            </td>
+                            <td class="align-middle">{{ $loop->iteration }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No users found</td>
+                            <td colspan="7" class="text-center text-muted py-4">No users found</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -263,6 +223,10 @@
                         <input type="email" class="form-control" id="user_email" name="email" 
                                value="{{ old('email') }}" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="user_cellphone" class="form-label">Cellphone Number</label>
+                        <input type="text" class="form-control" id="user_cellphone" name="cellphone" value="{{ old('cellphone') }}">
+                    </div>
                     <div class="mb-3" id="passwordField">
                         <label for="user_password" class="form-label">Password</label>
                         <input type="password" class="form-control" id="user_password" name="password">
@@ -275,7 +239,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal" id="cancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-dark" id="editBtn" style="display: none;" onclick="switchToEditMode()">
+                        <i class="bi bi-pencil me-2"></i>Edit User
+                    </button>
+                    <button type="button" class="btn btn-outline-dark" id="deleteBtn" style="display: none;" onclick="openDeleteModal()">
+                        <i class="bi bi-trash me-2"></i>Delete User
+                    </button>
                     <button type="submit" class="btn btn-dark btn-submit" id="submitBtn">
                         <i class="bi bi-check-lg me-2"></i><span id="submitBtnText">Create User</span>
                     </button>
@@ -285,61 +255,160 @@
     </div>
 </div>
 
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to delete user <strong id="deleteUserName"></strong>?</p>
+                <p class="text-muted small mt-2 mb-0">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteUserForm" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-dark">Delete User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+const authUserId = {{ auth()->id() }};
+let selectedUserForModal = null;
+
+function setInputsReadOnly(isReadOnly) {
+    document.getElementById('user_name').readOnly = isReadOnly;
+    document.getElementById('user_username').readOnly = isReadOnly;
+    document.getElementById('user_email').readOnly = isReadOnly;
+    document.getElementById('user_cellphone').readOnly = isReadOnly;
+}
+
+function setPasswordFieldsVisible(isVisible) {
+    document.getElementById('passwordField').style.display = isVisible ? '' : 'none';
+    document.getElementById('passwordConfirmField').style.display = isVisible ? '' : 'none';
+}
+
+function setFooterButtons({ showSubmit, showEdit, showDelete }) {
+    document.getElementById('submitBtn').style.display = showSubmit ? '' : 'none';
+    document.getElementById('editBtn').style.display = showEdit ? '' : 'none';
+    document.getElementById('deleteBtn').style.display = showDelete ? '' : 'none';
+}
+
 function openAddModal() {
-    // Reset form
     document.getElementById('userForm').reset();
+    selectedUserForModal = null;
     document.getElementById('userForm').action = "{{ route('users.store') }}";
     document.getElementById('formMethod').value = 'POST';
+    setInputsReadOnly(false);
+    setPasswordFieldsVisible(true);
+    setFooterButtons({ showSubmit: true, showEdit: false, showDelete: false });
+    document.getElementById('cancelBtn').textContent = 'Cancel';
     
-    // Update modal styling and text for add mode
     document.getElementById('modalHeader').classList.remove('edit-mode');
     document.getElementById('submitBtn').classList.remove('edit-mode');
     document.getElementById('modalIcon').className = 'bi bi-person-plus me-2';
     document.getElementById('modalTitleText').textContent = 'Add New User';
     document.getElementById('submitBtnText').textContent = 'Create User';
     
-    // Make password required for add
     document.getElementById('user_password').required = true;
     document.getElementById('user_password_confirmation').required = true;
     document.getElementById('passwordField').querySelector('.form-text').textContent = 'Must be at least 8 characters';
     
-    // Show modal
     var modal = new bootstrap.Modal(document.getElementById('userModal'));
     modal.show();
 }
 
-function openEditModal(id, name, username, email) {
-    // Fill form with user data
+function openEditModal(id, name, username, email, cellphone) {
+    selectedUserForModal = { id, name, username, email, cellphone };
     document.getElementById('user_name').value = name;
     document.getElementById('user_username').value = username;
     document.getElementById('user_email').value = email;
+    document.getElementById('user_cellphone').value = cellphone ?? '';
     document.getElementById('user_password').value = '';
     document.getElementById('user_password_confirmation').value = '';
+    setInputsReadOnly(false);
+    setPasswordFieldsVisible(true);
+    setFooterButtons({ showSubmit: true, showEdit: false, showDelete: id !== authUserId });
+    document.getElementById('cancelBtn').textContent = 'Cancel';
     
-    // Update form action and method
     document.getElementById('userForm').action = `/users/${id}`;
     document.getElementById('formMethod').value = 'PUT';
     
-    // Update modal styling and text for edit mode
     document.getElementById('modalHeader').classList.add('edit-mode');
     document.getElementById('submitBtn').classList.add('edit-mode');
     document.getElementById('modalIcon').className = 'bi bi-pencil me-2';
     document.getElementById('modalTitleText').textContent = 'Edit User';
     document.getElementById('submitBtnText').textContent = 'Update User';
     
-    // Make password optional for edit
     document.getElementById('user_password').required = false;
     document.getElementById('user_password_confirmation').required = false;
     document.getElementById('passwordField').querySelector('.form-text').textContent = 'Must be at least 8 characters. Leave blank to keep current password.';
     
-    // Show modal
     var modal = new bootstrap.Modal(document.getElementById('userModal'));
     modal.show();
 }
 
+function openViewModal(id, name, username, email, cellphone) {
+    selectedUserForModal = { id, name, username, email, cellphone };
+    document.getElementById('user_name').value = name ?? '';
+    document.getElementById('user_username').value = username ?? '';
+    document.getElementById('user_email').value = email ?? '';
+    document.getElementById('user_cellphone').value = cellphone ?? '';
+    document.getElementById('user_password').value = '';
+    document.getElementById('user_password_confirmation').value = '';
+    setInputsReadOnly(true);
+    setPasswordFieldsVisible(false);
+    setFooterButtons({ showSubmit: false, showEdit: true, showDelete: id !== authUserId });
+    document.getElementById('cancelBtn').textContent = 'Close';
+
+    document.getElementById('modalHeader').classList.remove('edit-mode');
+    document.getElementById('submitBtn').classList.remove('edit-mode');
+    document.getElementById('modalIcon').className = 'bi bi-person me-2';
+    document.getElementById('modalTitleText').textContent = 'User Details';
+
+    document.getElementById('user_password').required = false;
+    document.getElementById('user_password_confirmation').required = false;
+
+    var modal = new bootstrap.Modal(document.getElementById('userModal'));
+    modal.show();
+}
+
+function switchToEditMode() {
+    if (!selectedUserForModal) {
+        openAddModal();
+        return;
+    }
+
+    openEditModal(
+        selectedUserForModal.id,
+        selectedUserForModal.name,
+        selectedUserForModal.username,
+        selectedUserForModal.email,
+        selectedUserForModal.cellphone
+    );
+}
+
+function openDeleteModal() {
+    if (!selectedUserForModal || selectedUserForModal.id === authUserId) {
+        return;
+    }
+
+    document.getElementById('deleteUserName').textContent = selectedUserForModal.name ?? '';
+    document.getElementById('deleteUserForm').action = `/users/${selectedUserForModal.id}`;
+
+    var modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+}
+
 @if($errors->any())
-// Reopen modal if validation errors exist
 document.addEventListener('DOMContentLoaded', function() {
     openAddModal();
 });

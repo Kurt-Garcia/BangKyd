@@ -267,6 +267,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('profit-loss.index') }}" class="sidebar-link {{ request()->routeIs('profit-loss.*') ? 'active' : '' }}">
+                        <i class="bi bi-graph-up"></i>
+                        <span class="link-text">Profit & Loss</span>
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('sales-orders.index') }}" class="sidebar-link {{ request()->routeIs('sales-orders.*') ? 'active' : '' }}">
                         <i class="bi bi-cart-check"></i>
                         <span class="link-text">Sales Order</span>

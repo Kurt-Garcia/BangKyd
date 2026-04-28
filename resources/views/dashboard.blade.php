@@ -559,50 +559,206 @@
 
 <div class="row g-4 mb-4">
     <div class="col-lg-8">
-        <div class="dash2-hero">
-            <div class="dash2-hero-inner">
-                <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
-                    <div>
-                        <span class="dash2-chip mb-2">
-                            <i class="bi bi-activity"></i>
-                            <span>Last 14 days</span>
-                        </span>
-                        <h2 class="dash2-title">Revenue analytics</h2>
-                        <p class="dash2-subtitle">Sales order submissions total value and trend</p>
-                    </div>
-                    <div class="text-end">
-                        <div class="fs-3 fw-bold">₱{{ number_format($currRevenue ?? 0, 0) }}</div>
-                        <div class="small" style="opacity: .9;">
-                            <span class="me-1">
-                                <i class="bi {{ $deltaUp ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+        <div class="d-flex flex-column gap-4">
+            <div class="dash2-hero">
+                <div class="dash2-hero-inner">
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                        <div>
+                            <span class="dash2-chip mb-2">
+                                <i class="bi bi-activity"></i>
+                                <span>Last 14 days</span>
                             </span>
-                            <span>{{ number_format(abs($delta), 1) }}%</span>
-                            <span class="opacity-75 ms-1">vs previous period</span>
+                            <h2 class="dash2-title">Revenue analytics</h2>
+                            <p class="dash2-subtitle">Sales order submissions total value and trend</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="fs-3 fw-bold">₱{{ number_format($currRevenue ?? 0, 0) }}</div>
+                            <div class="small" style="opacity: .9;">
+                                <span class="me-1">
+                                    <i class="bi {{ $deltaUp ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+                                </span>
+                                <span>{{ number_format(abs($delta), 1) }}%</span>
+                                <span class="opacity-75 ms-1">vs previous period</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 dash2-mini-chart">
+                        <svg viewBox="0 0 {{ $svgW }} {{ $svgH }}" width="100%" height="160" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="dash2RevFill" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="rgba(255,255,255,0.38)"/>
+                                    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                                </linearGradient>
+                            </defs>
+                            @if($fillPath)
+                                <path d="{{ $fillPath }}" fill="url(#dash2RevFill)"></path>
+                            @endif
+                            @if($linePath)
+                                <path d="{{ $linePath }}" fill="none" stroke="rgba(255,255,255,0.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                            @endif
+                        </svg>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        <span class="dash2-chip"><i class="bi bi-cart-check"></i><span>{{ $totalSalesOrders }} sales orders</span></span>
+                        <span class="dash2-chip"><i class="bi bi-bag-check"></i><span>{{ $totalOrders }} production orders</span></span>
+                        <span class="dash2-chip"><i class="bi bi-exclamation-circle"></i><span>{{ $unconfirmedSubmissions }} unconfirmed</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="dash2-kpi p-4 h-100">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <div class="dash2-kpi-label">Sales Orders</div>
+                                <p class="dash2-kpi-value">{{ $totalSalesOrders }}</p>
+                                <p class="dash2-kpi-sub">{{ $pendingSalesOrders }} pending submissions</p>
+                            </div>
+                            <div class="dash2-icon"><i class="bi bi-cart-check"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dash2-kpi p-4 h-100">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <div class="dash2-kpi-label">In Production</div>
+                                <p class="dash2-kpi-value">{{ $ongoingOrders }}</p>
+                                <p class="dash2-kpi-sub">{{ $readyForDelivery }} ready for delivery</p>
+                            </div>
+                            <div class="dash2-icon"><i class="bi bi-gear-wide-connected"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dash2-kpi p-4 h-100">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <div class="dash2-kpi-label">AR Outstanding</div>
+                                <p class="dash2-kpi-value">₱{{ number_format($totalOutstanding, 0) }}</p>
+                                <p class="dash2-kpi-sub">{{ $pendingPayments + $partialPayments }} accounts</p>
+                            </div>
+                            <div class="dash2-icon"><i class="bi bi-cash-coin"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dash2-kpi p-4 h-100">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <div class="dash2-kpi-label">Net Profit Potential</div>
+                                <p class="dash2-kpi-value">₱{{ number_format($totalReceived - $totalAPPaid, 0) }}</p>
+                                <p class="dash2-kpi-sub">After partner costs</p>
+                            </div>
+                            <div class="dash2-icon"><i class="bi bi-currency-dollar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="dash2-card p-4 h-100">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="dash2-kpi-label">Orders Status</div>
+                                <div class="dash2-kpi-sub">Distribution across production</div>
+                            </div>
+                            <div class="dash2-icon soft"><i class="bi bi-bar-chart"></i></div>
+                        </div>
+
+                        <div class="dash2-bars mb-2">
+                            <div class="dash2-bar" style="height: {{ ($ongoingOrders / $orderMax) * 100 }}%"></div>
+                            <div class="dash2-bar soft" style="height: {{ ($readyForDelivery / $orderMax) * 100 }}%"></div>
+                            <div class="dash2-bar" style="height: {{ ($completedOrders / $orderMax) * 100 }}%"></div>
+                        </div>
+
+                        <div class="dash2-bar-meta">
+                            <span>Ongoing</span><strong>{{ $ongoingOrders }}</strong>
+                        </div>
+                        <div class="dash2-bar-meta">
+                            <span>Ready</span><strong>{{ $readyForDelivery }}</strong>
+                        </div>
+                        <div class="dash2-bar-meta">
+                            <span>Completed</span><strong>{{ $completedOrders }}</strong>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="dash2-kpi-label mb-2">Payables</div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small text-muted">Outstanding</span>
+                                <span class="fw-semibold">₱{{ number_format($totalAPOutstanding, 0) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted">Paid</span>
+                                <span class="fw-semibold">₱{{ number_format($totalAPPaid, 0) }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-3 dash2-mini-chart">
-                    <svg viewBox="0 0 {{ $svgW }} {{ $svgH }}" width="100%" height="160" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="dash2RevFill" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="rgba(255,255,255,0.38)"/>
-                                <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-                            </linearGradient>
-                        </defs>
-                        @if($fillPath)
-                            <path d="{{ $fillPath }}" fill="url(#dash2RevFill)"></path>
-                        @endif
-                        @if($linePath)
-                            <path d="{{ $linePath }}" fill="none" stroke="rgba(255,255,255,0.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
-                        @endif
-                    </svg>
+                <div class="col-lg-4">
+                    <div class="dash2-card p-4 h-100">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="dash2-kpi-label">Orders in Production</div>
+                                <div class="dash2-kpi-sub">Most recent ongoing jobs</div>
+                            </div>
+                            <div class="dash2-icon soft"><i class="bi bi-clock-history"></i></div>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            @forelse($ordersInProduction as $order)
+                                <div class="dash2-row">
+                                    <div>
+                                        <p class="dash2-row-title">{{ $order->order_number }}</p>
+                                        <p class="dash2-row-sub">{{ $order->accountReceivable->submission->salesOrder->so_name }}</p>
+                                        <div class="small text-muted mt-1">
+                                            <i class="bi bi-box me-1"></i>{{ $order->accountReceivable->submission->total_quantity }} jerseys
+                                        </div>
+                                    </div>
+                                    <span class="dash2-pill" style="background-image: var(--dash2-nav-gradient);">Ongoing</span>
+                                </div>
+                            @empty
+                                <div class="text-muted">No orders in production.</div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2 mt-3">
-                    <span class="dash2-chip"><i class="bi bi-cart-check"></i><span>{{ $totalSalesOrders }} sales orders</span></span>
-                    <span class="dash2-chip"><i class="bi bi-bag-check"></i><span>{{ $totalOrders }} production orders</span></span>
-                    <span class="dash2-chip"><i class="bi bi-exclamation-circle"></i><span>{{ $unconfirmedSubmissions }} unconfirmed</span></span>
+                <div class="col-lg-4">
+                    <div class="dash2-card p-4 h-100">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div>
+                                <div class="dash2-kpi-label">Recent Submissions</div>
+                                <div class="dash2-kpi-sub">Latest customer submissions</div>
+                            </div>
+                            <div class="dash2-icon soft"><i class="bi bi-inboxes"></i></div>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            @forelse($recentSubmissions->take(5) as $submission)
+                                <div class="dash2-row">
+                                    <div>
+                                        <p class="dash2-row-title">{{ $submission->salesOrder->so_number }}</p>
+                                        <p class="dash2-row-sub">{{ $submission->salesOrder->so_name }}</p>
+                                        <div class="small text-muted mt-1 d-flex flex-wrap gap-2">
+                                            <span><i class="bi bi-box me-1"></i>{{ $submission->total_quantity }} jerseys</span>
+                                            <span><i class="bi bi-cash me-1"></i>₱{{ number_format($submission->total_amount, 0) }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="dash2-pill" style="background: {{ $submission->accountReceivable ? '#111111' : 'rgba(17,17,17,0.60)' }};">
+                                        {{ $submission->accountReceivable ? 'Confirmed' : 'Pending' }}
+                                    </span>
+                                </div>
+                            @empty
+                                <div class="text-muted">No recent submissions.</div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -675,160 +831,6 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="dash2-kpi p-4 h-100">
-            <div class="d-flex align-items-start justify-content-between">
-                <div>
-                    <div class="dash2-kpi-label">Sales Orders</div>
-                    <p class="dash2-kpi-value">{{ $totalSalesOrders }}</p>
-                    <p class="dash2-kpi-sub">{{ $pendingSalesOrders }} pending submissions</p>
-                </div>
-                <div class="dash2-icon"><i class="bi bi-cart-check"></i></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="dash2-kpi p-4 h-100">
-            <div class="d-flex align-items-start justify-content-between">
-                <div>
-                    <div class="dash2-kpi-label">In Production</div>
-                    <p class="dash2-kpi-value">{{ $ongoingOrders }}</p>
-                    <p class="dash2-kpi-sub">{{ $readyForDelivery }} ready for delivery</p>
-                </div>
-                <div class="dash2-icon"><i class="bi bi-gear-wide-connected"></i></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="dash2-kpi p-4 h-100">
-            <div class="d-flex align-items-start justify-content-between">
-                <div>
-                    <div class="dash2-kpi-label">AR Outstanding</div>
-                    <p class="dash2-kpi-value">₱{{ number_format($totalOutstanding, 0) }}</p>
-                    <p class="dash2-kpi-sub">{{ $pendingPayments + $partialPayments }} accounts</p>
-                </div>
-                <div class="dash2-icon"><i class="bi bi-cash-coin"></i></div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="dash2-kpi p-4 h-100">
-            <div class="d-flex align-items-start justify-content-between">
-                <div>
-                    <div class="dash2-kpi-label">Net Profit Potential</div>
-                    <p class="dash2-kpi-value">₱{{ number_format($totalReceived - $totalAPPaid, 0) }}</p>
-                    <p class="dash2-kpi-sub">After partner costs</p>
-                </div>
-                <div class="dash2-icon"><i class="bi bi-currency-dollar"></i></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-4 mb-4">
-    <div class="col-lg-4">
-        <div class="dash2-card p-4 h-100">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                    <div class="dash2-kpi-label">Orders Status</div>
-                    <div class="dash2-kpi-sub">Distribution across production</div>
-                </div>
-                <div class="dash2-icon soft"><i class="bi bi-bar-chart"></i></div>
-            </div>
-
-            <div class="dash2-bars mb-2">
-                <div class="dash2-bar" style="height: {{ ($ongoingOrders / $orderMax) * 100 }}%"></div>
-                <div class="dash2-bar soft" style="height: {{ ($readyForDelivery / $orderMax) * 100 }}%"></div>
-                <div class="dash2-bar" style="height: {{ ($completedOrders / $orderMax) * 100 }}%"></div>
-            </div>
-
-            <div class="dash2-bar-meta">
-                <span>Ongoing</span><strong>{{ $ongoingOrders }}</strong>
-            </div>
-            <div class="dash2-bar-meta">
-                <span>Ready</span><strong>{{ $readyForDelivery }}</strong>
-            </div>
-            <div class="dash2-bar-meta">
-                <span>Completed</span><strong>{{ $completedOrders }}</strong>
-            </div>
-
-            <div class="mt-4">
-                <div class="dash2-kpi-label mb-2">Payables</div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="small text-muted">Outstanding</span>
-                    <span class="fw-semibold">₱{{ number_format($totalAPOutstanding, 0) }}</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="small text-muted">Paid</span>
-                    <span class="fw-semibold">₱{{ number_format($totalAPPaid, 0) }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="dash2-card p-4 h-100">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                    <div class="dash2-kpi-label">Orders in Production</div>
-                    <div class="dash2-kpi-sub">Most recent ongoing jobs</div>
-                </div>
-                <div class="dash2-icon soft"><i class="bi bi-clock-history"></i></div>
-            </div>
-
-            <div class="d-grid gap-3">
-                @forelse($ordersInProduction as $order)
-                    <div class="dash2-row">
-                        <div>
-                            <p class="dash2-row-title">{{ $order->order_number }}</p>
-                            <p class="dash2-row-sub">{{ $order->accountReceivable->submission->salesOrder->so_name }}</p>
-                            <div class="small text-muted mt-1">
-                                <i class="bi bi-box me-1"></i>{{ $order->accountReceivable->submission->total_quantity }} jerseys
-                            </div>
-                        </div>
-                        <span class="dash2-pill" style="background-image: var(--dash2-nav-gradient);">Ongoing</span>
-                    </div>
-                @empty
-                    <div class="text-muted">No orders in production.</div>
-                @endforelse
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="dash2-card p-4 h-100">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div>
-                    <div class="dash2-kpi-label">Recent Submissions</div>
-                    <div class="dash2-kpi-sub">Latest customer submissions</div>
-                </div>
-                <div class="dash2-icon soft"><i class="bi bi-inboxes"></i></div>
-            </div>
-
-            <div class="d-grid gap-3">
-                @forelse($recentSubmissions->take(5) as $submission)
-                    <div class="dash2-row">
-                        <div>
-                            <p class="dash2-row-title">{{ $submission->salesOrder->so_number }}</p>
-                            <p class="dash2-row-sub">{{ $submission->salesOrder->so_name }}</p>
-                            <div class="small text-muted mt-1 d-flex flex-wrap gap-2">
-                                <span><i class="bi bi-box me-1"></i>{{ $submission->total_quantity }} jerseys</span>
-                                <span><i class="bi bi-cash me-1"></i>₱{{ number_format($submission->total_amount, 0) }}</span>
-                            </div>
-                        </div>
-                        <span class="dash2-pill" style="background: {{ $submission->accountReceivable ? '#111111' : 'rgba(17,17,17,0.60)' }};">
-                            {{ $submission->accountReceivable ? 'Confirmed' : 'Pending' }}
-                        </span>
-                    </div>
-                @empty
-                    <div class="text-muted">No recent submissions.</div>
-                @endforelse
             </div>
         </div>
     </div>

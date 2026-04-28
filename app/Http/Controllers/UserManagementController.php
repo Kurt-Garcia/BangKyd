@@ -37,6 +37,7 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|email|unique:users',
+            'cellphone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+()\\-\\s]{7,30}$/'],
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
@@ -44,6 +45,7 @@ class UserManagementController extends Controller
             'name' => $validated['name'],
             'username' => $validated['username'],
             'email' => $validated['email'],
+            'cellphone' => $validated['cellphone'] ?? null,
             'password' => Hash::make($validated['password']),
         ]);
 
@@ -71,12 +73,14 @@ class UserManagementController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $id,
             'email' => 'required|email|unique:users,email,' . $id,
+            'cellphone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+()\\-\\s]{7,30}$/'],
             'password' => ['nullable', 'confirmed', Password::min(8)],
         ]);
 
         $user->name = $validated['name'];
         $user->username = $validated['username'];
         $user->email = $validated['email'];
+        $user->cellphone = $validated['cellphone'] ?? null;
         
         // Only update password if provided
         if ($request->filled('password')) {
